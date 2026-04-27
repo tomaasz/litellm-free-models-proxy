@@ -1,0 +1,63 @@
+name: New provider suggestion
+description: Suggest a provider that offers free access to AI models
+title: "New provider: [Provider Name]"
+labels: ["new-provider"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Provider name
+      placeholder: e.g. Fireworks AI
+    validations:
+      required: true
+
+  - type: input
+    id: website
+    attributes:
+      label: Website / sign-up URL
+      placeholder: https://
+    validations:
+      required: true
+
+  - type: input
+    id: api_base
+    attributes:
+      label: API base URL
+      description: Base URL for the OpenAI-compatible API (if available)
+      placeholder: https://api.example.com/v1
+
+  - type: input
+    id: models_endpoint
+    attributes:
+      label: Models list endpoint
+      description: Full URL to list available models (GET request)
+      placeholder: https://api.example.com/v1/models
+
+  - type: textarea
+    id: free_tier
+    attributes:
+      label: Free tier details
+      description: What's included for free? Rate limits, token limits, model restrictions?
+      placeholder: |
+        - All models free with rate limits (X req/min)
+        - OR: Free until you exceed Y tokens/day
+        - OR: Specific models are free (list them)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: detect_free
+    attributes:
+      label: How to detect free models via API
+      options:
+        - All models on this provider are free
+        - Free models have a specific suffix/prefix (e.g. -Free, -free)
+        - Free models are marked in the API response (pricing field, tag, etc.)
+        - Need to cross-reference an external list
+        - Unknown / other
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Auth method, special headers, quirks, links to docs…
