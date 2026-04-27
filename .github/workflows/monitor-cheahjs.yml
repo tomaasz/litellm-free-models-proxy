@@ -1,0 +1,108 @@
+name: Monitor cheahjs/free-llm-api-resources
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"   # every Monday at 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for changes
+        id: check
+        run: |
+          python3 - <<'PYEOF'
+          import urllib.request, re, json, os, sys
+
+          README_URL = (
+              "https://raw.githubusercontent.com/cheahjs/free-llm-api-resources"
+              "/refs/heads/main/README.md"
+          )
+
+          # Providers we already support
+          KNOWN = {
+              "openrouter", "groq", "cerebras", "sambanova", "together",
+              "cohere", "gemini", "google", "nvidia", "huggingface",
+              "mistral", "github", "cloudflare",
+          }
+
+          with urllib.request.urlopen(README_URL, timeout=20) as r:
+              readme = r.read().decode()
+
+          # Extract all ### headings (each is a provider section)
+          headings = re.findall(r"^### \[?([^\]\n#]+)", readme, re.MULTILINE)
+          headings = [h.strip() for h in headings if h.strip()]
+
+          new_providers = []
+          for h in headings:
+              key = h.lower().replace(" ", "").replace("-", "").replace("_", "")
+              if not any(k in key or key in k for k in KNOWN):
+                  new_providers.append(h)
+
+          # Also detect removed providers (rough check)
+          snapshot_path = ".cheahjs_snapshot"
+          try:
+              with open(snapshot_path) as f:
+                  old_headings = set(json.load(f))
+          except Exception:
+              old_headings = set()
+
+          current_headings = set(headings)
+          removed = old_headings - current_headings if old_headings else set()
+          added_all = current_headings - old_headings if old_headings else set()
+
+          with open(snapshot_path, "w") as f:
+              json.dump(sorted(current_headings), f)
+
+          lines = []
+          if new_providers:
+              lines.append("## New providers not yet in our project")
+              for p in sorted(new_providers):
+                  lines.append(f"- **{p}**")
+              lines.append("")
+          if added_all:
+              lines.append("## Sections added to cheahjs README")
+              for p in sorted(added_all):
+                  lines.append(f"- {p}")
+              lines.append("")
+          if removed:
+              lines.append("## Sections removed from cheahjs README")
+              for p in sorted(removed):
+                  lines.append(f"- {p}")
+              lines.append("")
+
+          if lines:
+              body = "\n".join(lines)
+              body += "\n\nSource: https://github.com/cheahjs/free-llm-api-resources"
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write("has_changes=true\n")
+              with open("/tmp/issue_body.md", "w") as f:
+                  f.write(body)
+              print("Changes detected:\n" + body)
+          else:
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write("has_changes=false\n")
+              print("No changes detected.")
+          PYEOF
+
+      - name: Create issue if changes found
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BODY=$(cat /tmp/issue_body.md)
+          DATE=$(date -u '+%Y-%m-%d')
+          gh issue create \
+            --title "cheahjs update detected — ${DATE}" \
+            --body "$BODY" \
+            --label "new-provider"
