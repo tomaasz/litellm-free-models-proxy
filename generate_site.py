@@ -21,8 +21,11 @@ CHEAHJS_URL = (
 
 # ── HTTP ──────────────────────────────────────────────────────────────────────
 
+_HEADERS = {"User-Agent": "litellm-free-models-proxy/1.0"}
+
+
 def _get(url, headers=None, timeout=20):
-    req = urllib.request.Request(url, headers=headers or {})
+    req = urllib.request.Request(url, headers={**_HEADERS, **(headers or {})})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             body = r.read().decode()
@@ -75,7 +78,7 @@ def fetch_sambanova(key):
 
 
 def fetch_together(key):
-    data = _get("https://api.together.xyz/v1/models",
+    data = _get("https://api.together.ai/v1/models",
                 headers={"Authorization": f"Bearer {key}"})
     items = data if isinstance(data, list) else data.get("data", [])
     out = []

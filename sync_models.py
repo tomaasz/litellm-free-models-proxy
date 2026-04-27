@@ -44,8 +44,11 @@ CHEAHJS_README_URL = (
 
 # ── HTTP helpers (stdlib only) ────────────────────────────────────────────────
 
+_HEADERS = {"User-Agent": "litellm-free-models-proxy/1.0"}
+
+
 def _http_get(url, headers=None, timeout=20):
-    req = urllib.request.Request(url, headers=headers or {})
+    req = urllib.request.Request(url, headers={**_HEADERS, **(headers or {})})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read().decode()
 
@@ -247,7 +250,7 @@ def fetch_together(api_key):
     """Free models: -Free/-free suffix or pricing == 0."""
     try:
         data = _json_get(
-            "https://api.together.xyz/v1/models",
+            "https://api.together.ai/v1/models",
             headers={"Authorization": f"Bearer {api_key}"},
         )
         items = data if isinstance(data, list) else data.get("data", [])
