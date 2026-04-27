@@ -35,6 +35,9 @@ jobs:
           NVIDIA_NIM_API_KEY:  ${{ secrets.NVIDIA_NIM_API_KEY }}
           HF_TOKEN:            ${{ secrets.HF_TOKEN }}
           MISTRAL_API_KEY:     ${{ secrets.MISTRAL_API_KEY }}
+          GH_MODELS_TOKEN:     ${{ secrets.GH_MODELS_TOKEN }}
+          CLOUDFLARE_API_KEY:  ${{ secrets.CLOUDFLARE_API_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: python generate_site.py
 
       - name: Commit generated site
