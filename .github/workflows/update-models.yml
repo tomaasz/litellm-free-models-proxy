@@ -2,11 +2,13 @@ name: Update free models list
 
 on:
   schedule:
-    - cron: "0 6 * * *"
-  workflow_dispatch:
+    - cron: "0 */8 * * *"   # every 8 hours (00:00, 08:00, 16:00 UTC)
+  workflow_dispatch:        # allow manual trigger from GitHub UI
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   generate:
@@ -29,6 +31,7 @@ jobs:
           GEMINI_API_KEY:      ${{ secrets.GEMINI_API_KEY }}
           NVIDIA_NIM_API_KEY:  ${{ secrets.NVIDIA_NIM_API_KEY }}
           HF_TOKEN:            ${{ secrets.HF_TOKEN }}
+          MISTRAL_API_KEY:     ${{ secrets.MISTRAL_API_KEY }}
         run: python generate_site.py
 
       - name: Commit generated site
