@@ -1,0 +1,52 @@
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:main-v1.83.14.rc.1
+    container_name: litellm
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4000:4000"
+      - "100.87.39.48:4000:4000"
+    env_file:
+      - .env
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    command:
+      - "--config"
+      - "/app/config.yaml"
+      - "--port"
+      - "4000"
+      - "--num_workers"
+      - "2"
+    networks:
+      - postgres_default
+      - langfuse_default
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:4000/health/liveliness', timeout=3).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  model-sync:
+    image: python:3.12-slim
+    container_name: litellm-model-sync
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      LITELLM_BASE_URL: http://litellm:4000
+      SYNC_INTERVAL_HOURS: "24"
+      STARTUP_DELAY_SECONDS: "60"
+    volumes:
+      - ./sync_models.py:/app/sync_models.py:ro
+    command: python /app/sync_models.py
+    networks:
+      - postgres_default
+    depends_on:
+      - litellm
+
+networks:
+  postgres_default:
+    external: true
+  langfuse_default:
+    external: true

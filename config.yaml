@@ -1,0 +1,840 @@
+model_list:
+- model_name: smart
+  litellm_params:
+    model: cerebras/qwen-3-235b-a22b-instruct-2507
+    api_key: os.environ/CEREBRAS_API_KEY
+    rpm: 30
+- model_name: smart
+  litellm_params:
+    model: groq/llama-3.3-70b-versatile
+    api_key: os.environ/GROQ_API_KEY
+    rpm: 30
+- model_name: smart
+  litellm_params:
+    model: groq/llama-3.3-70b-versatile
+    api_key: os.environ/GROQ_API_KEY_2
+    rpm: 30
+- model_name: smart
+  litellm_params:
+    model: groq/openai/gpt-oss-120b
+    api_key: os.environ/GROQ_API_KEY
+    rpm: 30
+- model_name: smart
+  litellm_params:
+    model: groq/openai/gpt-oss-120b
+    api_key: os.environ/GROQ_API_KEY_2
+    rpm: 30
+- model_name: smart
+  litellm_params:
+    model: openrouter/nvidia/nemotron-3-super-120b-a12b:free
+    api_key: os.environ/OPENROUTER_API_KEY
+    rpm: 20
+- model_name: smart
+  litellm_params:
+    model: openrouter/openai/gpt-oss-120b:free
+    api_key: os.environ/OPENROUTER_API_KEY
+    rpm: 20
+- model_name: smart
+  litellm_params:
+    model: openrouter/meta-llama/llama-3.3-70b-instruct:free
+    api_key: os.environ/OPENROUTER_API_KEY
+    rpm: 20
+- model_name: smart
+  litellm_params:
+    model: sambanova/DeepSeek-V3.2
+    api_key: os.environ/SAMBANOVA_API_KEY
+    rpm: 30
+- model_name: smart
+  litellm_params:
+    model: sambanova/gpt-oss-120b
+    api_key: os.environ/SAMBANOVA_API_KEY
+    rpm: 30
+- model_name: smart
+  litellm_params:
+    model: sambanova/Llama-4-Maverick-17B-128E-Instruct
+    api_key: os.environ/SAMBANOVA_API_KEY
+    rpm: 30
+- model_name: smart
+  litellm_params:
+    model: nvidia_nim/meta/llama-3.1-405b-instruct
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: smart
+  litellm_params:
+    model: nvidia_nim/mistralai/mistral-large-3-675b-instruct-2512
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: smart
+  litellm_params:
+    model: nvidia_nim/deepseek-ai/deepseek-v3.2
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: smart
+  litellm_params:
+    model: nvidia_nim/moonshotai/kimi-k2.5
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: fast
+  litellm_params:
+    model: cerebras/llama3.1-8b
+    api_key: os.environ/CEREBRAS_API_KEY
+    rpm: 30
+- model_name: fast
+  litellm_params:
+    model: groq/llama-3.1-8b-instant
+    api_key: os.environ/GROQ_API_KEY
+    rpm: 30
+- model_name: fast
+  litellm_params:
+    model: groq/llama-3.1-8b-instant
+    api_key: os.environ/GROQ_API_KEY_2
+    rpm: 30
+- model_name: fast
+  litellm_params:
+    model: groq/openai/gpt-oss-20b
+    api_key: os.environ/GROQ_API_KEY
+    rpm: 30
+- model_name: fast
+  litellm_params:
+    model: groq/openai/gpt-oss-20b
+    api_key: os.environ/GROQ_API_KEY_2
+    rpm: 30
+- model_name: fast
+  litellm_params:
+    model: sambanova/Meta-Llama-3.3-70B-Instruct
+    api_key: os.environ/SAMBANOVA_API_KEY
+    rpm: 30
+- model_name: fast
+  litellm_params:
+    model: nvidia_nim/meta/llama-3.1-8b-instruct
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: fast
+  litellm_params:
+    model: nvidia_nim/nvidia/llama-3.1-nemotron-70b-instruct
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: reasoning
+  litellm_params:
+    model: cerebras/qwen-3-235b-a22b-instruct-2507
+    api_key: os.environ/CEREBRAS_API_KEY
+    rpm: 30
+- model_name: reasoning
+  litellm_params:
+    model: openrouter/openai/gpt-oss-120b:free
+    api_key: os.environ/OPENROUTER_API_KEY
+    rpm: 20
+- model_name: reasoning
+  litellm_params:
+    model: groq/qwen/qwen3-32b
+    api_key: os.environ/GROQ_API_KEY
+    rpm: 30
+- model_name: reasoning
+  litellm_params:
+    model: groq/qwen/qwen3-32b
+    api_key: os.environ/GROQ_API_KEY_2
+    rpm: 30
+- model_name: reasoning
+  litellm_params:
+    model: openrouter/nvidia/nemotron-3-super-120b-a12b:free
+    api_key: os.environ/OPENROUTER_API_KEY
+    rpm: 20
+- model_name: reasoning
+  litellm_params:
+    model: sambanova/DeepSeek-V3.2
+    api_key: os.environ/SAMBANOVA_API_KEY
+    rpm: 30
+- model_name: reasoning
+  litellm_params:
+    model: nvidia_nim/nvidia/llama-3.1-nemotron-ultra-253b-v1
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: reasoning
+  litellm_params:
+    model: nvidia_nim/moonshotai/kimi-k2-thinking
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: reasoning
+  litellm_params:
+    model: nvidia_nim/deepseek-ai/deepseek-v3.2
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: coder
+  litellm_params:
+    model: openrouter/qwen/qwen3-coder:free
+    api_key: os.environ/OPENROUTER_API_KEY
+    rpm: 20
+- model_name: coder
+  litellm_params:
+    model: groq/qwen/qwen3-32b
+    api_key: os.environ/GROQ_API_KEY
+    rpm: 30
+- model_name: coder
+  litellm_params:
+    model: groq/qwen/qwen3-32b
+    api_key: os.environ/GROQ_API_KEY_2
+    rpm: 30
+- model_name: coder
+  litellm_params:
+    model: cerebras/qwen-3-235b-a22b-instruct-2507
+    api_key: os.environ/CEREBRAS_API_KEY
+    rpm: 30
+- model_name: coder
+  litellm_params:
+    model: openrouter/qwen/qwen3-next-80b-a3b-instruct:free
+    api_key: os.environ/OPENROUTER_API_KEY
+    rpm: 20
+- model_name: coder
+  litellm_params:
+    model: openrouter/openai/gpt-oss-120b:free
+    api_key: os.environ/OPENROUTER_API_KEY
+    rpm: 20
+- model_name: coder
+  litellm_params:
+    model: sambanova/DeepSeek-V3.2
+    api_key: os.environ/SAMBANOVA_API_KEY
+    rpm: 30
+- model_name: coder
+  litellm_params:
+    model: nvidia_nim/mistralai/devstral-2-123b-instruct-2512
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: coder
+  litellm_params:
+    model: nvidia_nim/deepseek-ai/deepseek-v3.2
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: long
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY
+    rpm: 15
+- model_name: long
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_2
+    rpm: 15
+- model_name: long
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_3
+    rpm: 15
+- model_name: long
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_7
+    rpm: 15
+- model_name: long
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_8
+    rpm: 15
+- model_name: vision
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY
+    rpm: 15
+- model_name: vision
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_2
+    rpm: 15
+- model_name: vision
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_3
+    rpm: 15
+- model_name: vision
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_7
+    rpm: 15
+- model_name: vision
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_8
+    rpm: 15
+- model_name: vision
+  litellm_params:
+    model: openrouter/nvidia/nemotron-nano-12b-v2-vl:free
+    api_key: os.environ/OPENROUTER_API_KEY
+    rpm: 20
+- model_name: vision
+  litellm_params:
+    model: sambanova/Llama-4-Maverick-17B-128E-Instruct
+    api_key: os.environ/SAMBANOVA_API_KEY
+    rpm: 30
+- model_name: vision
+  litellm_params:
+    model: nvidia_nim/meta/llama-3.2-90b-vision-instruct
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: vision
+  litellm_params:
+    model: nvidia_nim/microsoft/phi-4-multimodal-instruct
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: vision
+  litellm_params:
+    model: nvidia_nim/meta/llama-4-maverick-17b-128e-instruct
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+    rpm: 20
+- model_name: cerebras/qwen-235b
+  litellm_params:
+    model: cerebras/qwen-3-235b-a22b-instruct-2507
+    api_key: os.environ/CEREBRAS_API_KEY
+- model_name: groq/llama-3.3-70b
+  litellm_params:
+    model: groq/llama-3.3-70b-versatile
+    api_key: os.environ/GROQ_API_KEY
+- model_name: groq/llama-3.3-70b
+  litellm_params:
+    model: groq/llama-3.3-70b-versatile
+    api_key: os.environ/GROQ_API_KEY_2
+- model_name: groq/gpt-oss-120b
+  litellm_params:
+    model: groq/openai/gpt-oss-120b
+    api_key: os.environ/GROQ_API_KEY
+- model_name: groq/gpt-oss-120b
+  litellm_params:
+    model: groq/openai/gpt-oss-120b
+    api_key: os.environ/GROQ_API_KEY_2
+- model_name: groq/qwen3-32b
+  litellm_params:
+    model: groq/qwen/qwen3-32b
+    api_key: os.environ/GROQ_API_KEY
+- model_name: groq/qwen3-32b
+  litellm_params:
+    model: groq/qwen/qwen3-32b
+    api_key: os.environ/GROQ_API_KEY_2
+- model_name: groq/llama4-scout
+  litellm_params:
+    model: groq/meta-llama/llama-4-scout-17b-16e-instruct
+    api_key: os.environ/GROQ_API_KEY
+- model_name: groq/llama4-scout
+  litellm_params:
+    model: groq/meta-llama/llama-4-scout-17b-16e-instruct
+    api_key: os.environ/GROQ_API_KEY_2
+- model_name: or/qwen3-coder
+  litellm_params:
+    model: openrouter/qwen/qwen3-coder:free
+    api_key: os.environ/OPENROUTER_API_KEY
+- model_name: or/nemotron-120b
+  litellm_params:
+    model: openrouter/nvidia/nemotron-3-super-120b-a12b:free
+    api_key: os.environ/OPENROUTER_API_KEY
+- model_name: or/glm-4.5-air
+  litellm_params:
+    model: openrouter/z-ai/glm-4.5-air:free
+    api_key: os.environ/OPENROUTER_API_KEY
+- model_name: sn/deepseek-v32
+  litellm_params:
+    model: sambanova/DeepSeek-V3.2
+    api_key: os.environ/SAMBANOVA_API_KEY
+- model_name: sn/llama-3.3-70b
+  litellm_params:
+    model: sambanova/Meta-Llama-3.3-70B-Instruct
+    api_key: os.environ/SAMBANOVA_API_KEY
+- model_name: sn/llama-4-maverick
+  litellm_params:
+    model: sambanova/Llama-4-Maverick-17B-128E-Instruct
+    api_key: os.environ/SAMBANOVA_API_KEY
+- model_name: sn/gpt-oss-120b
+  litellm_params:
+    model: sambanova/gpt-oss-120b
+    api_key: os.environ/SAMBANOVA_API_KEY
+- model_name: nv/llama-3.1-405b
+  litellm_params:
+    model: nvidia_nim/meta/llama-3.1-405b-instruct
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+- model_name: nv/mistral-large-3
+  litellm_params:
+    model: nvidia_nim/mistralai/mistral-large-3-675b-instruct-2512
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+- model_name: nv/nemotron-ultra
+  litellm_params:
+    model: nvidia_nim/nvidia/llama-3.1-nemotron-ultra-253b-v1
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+- model_name: nv/devstral-123b
+  litellm_params:
+    model: nvidia_nim/mistralai/devstral-2-123b-instruct-2512
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+- model_name: nv/kimi-k2-thinking
+  litellm_params:
+    model: nvidia_nim/moonshotai/kimi-k2-thinking
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+- model_name: nv/deepseek-v3.2
+  litellm_params:
+    model: nvidia_nim/deepseek-ai/deepseek-v3.2
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+- model_name: nv/kimi-k2.5
+  litellm_params:
+    model: nvidia_nim/moonshotai/kimi-k2.5
+    api_key: os.environ/NVIDIA_NIM_API_KEY
+- model_name: gh/gpt-5
+  litellm_params:
+    model: openai/openai/gpt-5
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/gpt-5-mini
+  litellm_params:
+    model: openai/openai/gpt-5-mini
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/gpt-5-nano
+  litellm_params:
+    model: openai/openai/gpt-5-nano
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/gpt-4.1
+  litellm_params:
+    model: openai/openai/gpt-4.1
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/gpt-4.1-mini
+  litellm_params:
+    model: openai/openai/gpt-4.1-mini
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/gpt-4o
+  litellm_params:
+    model: openai/openai/gpt-4o
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/gpt-4o-mini
+  litellm_params:
+    model: openai/openai/gpt-4o-mini
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/o3
+  litellm_params:
+    model: openai/openai/o3
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/o3-mini
+  litellm_params:
+    model: openai/openai/o3-mini
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/o4-mini
+  litellm_params:
+    model: openai/openai/o4-mini
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/o1
+  litellm_params:
+    model: openai/openai/o1
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/grok-3
+  litellm_params:
+    model: openai/xai/grok-3
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/grok-3-mini
+  litellm_params:
+    model: openai/xai/grok-3-mini
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/deepseek-r1
+  litellm_params:
+    model: openai/deepseek/deepseek-r1
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/deepseek-v3
+  litellm_params:
+    model: openai/deepseek/deepseek-v3-0324
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/codestral-2501
+  litellm_params:
+    model: openai/mistral-ai/codestral-2501
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/mistral-medium
+  litellm_params:
+    model: openai/mistral-ai/mistral-medium-2505
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/phi-4
+  litellm_params:
+    model: openai/microsoft/phi-4
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/cohere-command-a
+  litellm_params:
+    model: openai/cohere/cohere-command-a
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/llama-3.1-405b
+  litellm_params:
+    model: openai/meta/meta-llama-3.1-405b-instruct
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: gh/mai-ds-r1
+  litellm_params:
+    model: openai/microsoft/mai-ds-r1
+    api_base: https://models.github.ai/inference
+    api_key: os.environ/GITHUB_API_KEY
+- model_name: oa/gpt-5-nano
+  litellm_params:
+    model: openai/gpt-5-nano
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 5
+- model_name: oa/gpt-5-mini
+  litellm_params:
+    model: openai/gpt-5-mini
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 5
+- model_name: oa/gpt-5
+  litellm_params:
+    model: openai/gpt-5
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 3
+- model_name: oa/gpt-4.1-nano
+  litellm_params:
+    model: openai/gpt-4.1-nano
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 5
+- model_name: oa/gpt-4.1-mini
+  litellm_params:
+    model: openai/gpt-4.1-mini
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 5
+- model_name: oa/gpt-4.1
+  litellm_params:
+    model: openai/gpt-4.1
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 3
+- model_name: oa/gpt-4o-mini
+  litellm_params:
+    model: openai/gpt-4o-mini
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 5
+- model_name: oa/gpt-4o
+  litellm_params:
+    model: openai/gpt-4o
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 3
+- model_name: oa/o4-mini
+  litellm_params:
+    model: openai/o4-mini
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 3
+- model_name: oa/o3-mini
+  litellm_params:
+    model: openai/o3-mini
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 3
+- model_name: oa/gpt-5.4
+  litellm_params:
+    model: openai/gpt-5.4
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 3
+- model_name: oa/gpt-5.4-mini
+  litellm_params:
+    model: openai/gpt-5.4-mini
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 5
+- model_name: oa/gpt-5.2
+  litellm_params:
+    model: openai/gpt-5.2
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 3
+- model_name: oa/gpt-5.1
+  litellm_params:
+    model: openai/gpt-5.1
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 3
+- model_name: oa/gpt-5.1-codex
+  litellm_params:
+    model: openai/gpt-5.1-codex
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 3
+- model_name: oa/gpt-5.1-codex-mini
+  litellm_params:
+    model: openai/gpt-5.1-codex-mini
+    api_key: os.environ/OPENAI_API_KEY
+    rpm: 5
+- model_name: smart
+  litellm_params:
+    model: openai/swiss-ai/apertus-70b-instruct
+    api_base: https://api.publicai.co/v1
+    api_key: os.environ/PUBLICAI_API_KEY
+    rpm: 15
+- model_name: fast
+  litellm_params:
+    model: openai/swiss-ai/apertus-8b-instruct
+    api_base: https://api.publicai.co/v1
+    api_key: os.environ/PUBLICAI_API_KEY
+    rpm: 20
+- model_name: pai/apertus-70b
+  litellm_params:
+    model: openai/swiss-ai/apertus-70b-instruct
+    api_base: https://api.publicai.co/v1
+    api_key: os.environ/PUBLICAI_API_KEY
+- model_name: pai/apertus-8b
+  litellm_params:
+    model: openai/swiss-ai/apertus-8b-instruct
+    api_base: https://api.publicai.co/v1
+    api_key: os.environ/PUBLICAI_API_KEY
+- model_name: pai/sea-lion-gemma-27b
+  litellm_params:
+    model: openai/aisingapore/Gemma-SEA-LION-v4-27B-IT
+    api_base: https://api.publicai.co/v1
+    api_key: os.environ/PUBLICAI_API_KEY
+- model_name: pai/sea-lion-qwen-32b
+  litellm_params:
+    model: openai/aisingapore/Qwen-SEA-LION-v4-32B-IT
+    api_base: https://api.publicai.co/v1
+    api_key: os.environ/PUBLICAI_API_KEY
+- model_name: pai/eurollm-22b
+  litellm_params:
+    model: openai/utter-project/EuroLLM-22B-Instruct-2512
+    api_base: https://api.publicai.co/v1
+    api_key: os.environ/PUBLICAI_API_KEY
+- model_name: pai/olmo-32b
+  litellm_params:
+    model: openai/allenai/Olmo-3.1-32B-Instruct
+    api_base: https://api.publicai.co/v1
+    api_key: os.environ/PUBLICAI_API_KEY
+- model_name: pai/olmo-32b-think
+  litellm_params:
+    model: openai/allenai/Olmo-3.1-32B-Think
+    api_base: https://api.publicai.co/v1
+    api_key: os.environ/PUBLICAI_API_KEY
+- model_name: pai/mistral-small-3.1
+  litellm_params:
+    model: openai/mistralai/mistral-small-3-1
+    api_base: https://api.publicai.co/v1
+    api_key: os.environ/PUBLICAI_API_KEY
+- model_name: smart
+  litellm_params:
+    model: together_ai/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free
+    api_key: os.environ/TOGETHER_API_KEY
+    rpm: 15
+- model_name: t/llama-3.3-70b-free
+  litellm_params:
+    model: together_ai/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free
+    api_key: os.environ/TOGETHER_API_KEY
+- model_name: smart
+  litellm_params:
+    model: cohere/command-a-03-2025
+    api_key: os.environ/COHERE_API_KEY
+    rpm: 20
+- model_name: fast
+  litellm_params:
+    model: cohere/command-r7b-12-2024
+    api_key: os.environ/COHERE_API_KEY
+    rpm: 20
+- model_name: co/command-a
+  litellm_params:
+    model: cohere/command-a-03-2025
+    api_key: os.environ/COHERE_API_KEY
+- model_name: co/command-r-plus
+  litellm_params:
+    model: cohere/command-r-plus-08-2024
+    api_key: os.environ/COHERE_API_KEY
+- model_name: co/command-r
+  litellm_params:
+    model: cohere/command-r-08-2024
+    api_key: os.environ/COHERE_API_KEY
+- model_name: co/command-r7b
+  litellm_params:
+    model: cohere/command-r7b-12-2024
+    api_key: os.environ/COHERE_API_KEY
+- model_name: ppl/sonar
+  litellm_params:
+    model: perplexity/sonar
+    api_key: os.environ/PERPLEXITY_API_KEY
+- model_name: ppl/sonar-pro
+  litellm_params:
+    model: perplexity/sonar-pro
+    api_key: os.environ/PERPLEXITY_API_KEY
+- model_name: ppl/sonar-reasoning
+  litellm_params:
+    model: perplexity/sonar-reasoning
+    api_key: os.environ/PERPLEXITY_API_KEY
+- model_name: ppl/sonar-reasoning-pro
+  litellm_params:
+    model: perplexity/sonar-reasoning-pro
+    api_key: os.environ/PERPLEXITY_API_KEY
+- model_name: ppl/sonar-deep-research
+  litellm_params:
+    model: perplexity/sonar-deep-research
+    api_key: os.environ/PERPLEXITY_API_KEY
+- model_name: coder
+  litellm_params:
+    model: openai/codestral-latest
+    api_base: https://codestral.mistral.ai/v1
+    api_key: os.environ/CODESTRAL_API_KEY
+    rpm: 30
+- model_name: mistral/codestral
+  litellm_params:
+    model: openai/codestral-latest
+    api_base: https://codestral.mistral.ai/v1
+    api_key: os.environ/CODESTRAL_API_KEY
+- model_name: hf/llama-3.3-70b
+  litellm_params:
+    model: openai/meta-llama/Llama-3.3-70B-Instruct
+    api_base: https://router.huggingface.co/v1
+    api_key: os.environ/HF_TOKEN
+    rpm: 10
+- model_name: hf/deepseek-v3
+  litellm_params:
+    model: openai/deepseek-ai/DeepSeek-V3-0324
+    api_base: https://router.huggingface.co/v1
+    api_key: os.environ/HF_TOKEN
+    rpm: 10
+- model_name: hf/qwen-72b
+  litellm_params:
+    model: openai/Qwen/Qwen2.5-72B-Instruct
+    api_base: https://router.huggingface.co/v1
+    api_key: os.environ/HF_TOKEN
+    rpm: 10
+- model_name: hf/qwen-coder-32b
+  litellm_params:
+    model: openai/Qwen/Qwen2.5-Coder-32B-Instruct
+    api_base: https://router.huggingface.co/v1
+    api_key: os.environ/HF_TOKEN
+    rpm: 10
+- model_name: gemini/flash
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY
+    rpm: 15
+- model_name: gemini/flash
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_2
+    rpm: 15
+- model_name: gemini/flash
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_3
+    rpm: 15
+- model_name: gemini/flash
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_7
+    rpm: 15
+- model_name: gemini/flash
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY_8
+    rpm: 15
+- model_name: gemini/pro
+  litellm_params:
+    model: gemini/gemini-2.5-pro
+    api_key: os.environ/GEMINI_API_KEY
+    rpm: 5
+- model_name: gemini/pro
+  litellm_params:
+    model: gemini/gemini-2.5-pro
+    api_key: os.environ/GEMINI_API_KEY_2
+    rpm: 5
+- model_name: gemini/pro
+  litellm_params:
+    model: gemini/gemini-2.5-pro
+    api_key: os.environ/GEMINI_API_KEY_3
+    rpm: 5
+- model_name: gemini/pro
+  litellm_params:
+    model: gemini/gemini-2.5-pro
+    api_key: os.environ/GEMINI_API_KEY_7
+    rpm: 5
+- model_name: gemini/pro
+  litellm_params:
+    model: gemini/gemini-2.5-pro
+    api_key: os.environ/GEMINI_API_KEY_8
+    rpm: 5
+- model_name: inbox-zero-main
+  litellm_params:
+    model: os.environ/INBOX_ZERO_MAIN_MODEL
+    api_key: os.environ/OPENROUTER_API_KEY
+- model_name: inbox-zero-economy
+  litellm_params:
+    model: os.environ/INBOX_ZERO_ECONOMY_MODEL
+    api_key: os.environ/GEMINI_API_KEY
+- model_name: inbox-zero-chat
+  litellm_params:
+    model: os.environ/INBOX_ZERO_CHAT_MODEL
+    api_key: os.environ/OPENROUTER_API_KEY
+- model_name: inbox-zero-draft
+  litellm_params:
+    model: os.environ/INBOX_ZERO_DRAFT_MODEL
+    api_key: os.environ/GEMINI_API_KEY
+- model_name: inbox-zero-nano
+  litellm_params:
+    model: os.environ/INBOX_ZERO_NANO_MODEL
+    api_key: os.environ/OPENROUTER_API_KEY
+- model_name: inbox-zero-main-fallback
+  litellm_params:
+    model: os.environ/INBOX_ZERO_MAIN_FALLBACK_MODEL
+    api_key: os.environ/OPENAI_API_KEY
+- model_name: whisper-1
+  litellm_params:
+    model: groq/whisper-large-v3
+    api_key: os.environ/GROQ_API_KEY
+- model_name: whisper-1
+  litellm_params:
+    model: groq/whisper-large-v3
+    api_key: os.environ/GROQ_API_KEY_2
+- model_name: gpt-3.5-turbo
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY
+- model_name: gpt-4
+  litellm_params:
+    model: gemini/gemini-2.5-pro
+    api_key: os.environ/GEMINI_API_KEY
+- model_name: gpt-4-turbo
+  litellm_params:
+    model: gemini/gemini-2.5-pro
+    api_key: os.environ/GEMINI_API_KEY
+- model_name: gpt-4o
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY
+- model_name: gpt-4o-mini
+  litellm_params:
+    model: gemini/gemini-2.5-flash
+    api_key: os.environ/GEMINI_API_KEY
+litellm_settings:
+  drop_params: true
+  set_verbose: false
+  num_retries: 2
+  request_timeout: 120
+  telemetry: false
+  success_callback:
+  - postgres
+  failure_callback:
+  - postgres
+  callbacks:
+  - langfuse_otel
+router_settings:
+  routing_strategy: simple-shuffle
+  num_retries: 3
+  timeout: 60
+  cooldown_time: 60
+  allowed_fails: 2
+  retry_after: 5
+  fallbacks:
+  - inbox-zero-main:
+    - inbox-zero-main-fallback
+    - inbox-zero-economy
+  - inbox-zero-chat:
+    - inbox-zero-main
+    - inbox-zero-economy
+  - inbox-zero-draft:
+    - inbox-zero-economy
+    - inbox-zero-main-fallback
+  - inbox-zero-nano:
+    - inbox-zero-economy
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL
+  store_model_in_db: true
+  disable_spend_logs: false
+  ui_username: os.environ/UI_USERNAME
+  ui_password: os.environ/UI_PASSWORD
