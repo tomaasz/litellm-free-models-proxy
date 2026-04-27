@@ -131,7 +131,7 @@ llm = ChatOpenAI(base_url="http://localhost:4000", api_key="sk-...", model="smar
 
 | Variable | Default | Description |
 |---|---|---|
-| `SYNC_INTERVAL_HOURS` | `24` | How often to check for new models |
+| `SYNC_INTERVAL_HOURS` | `8` | How often to check for new models |
 | `STARTUP_DELAY_SECONDS` | `60` | Wait for LiteLLM to be ready before first sync |
 | `LITELLM_BASE_URL` | `http://litellm:4000` | LiteLLM internal URL |
 

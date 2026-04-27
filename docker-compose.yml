@@ -35,7 +35,7 @@ services:
       - .env
     environment:
       LITELLM_BASE_URL: http://litellm:4000
-      SYNC_INTERVAL_HOURS: "24"
+      SYNC_INTERVAL_HOURS: "8"
       STARTUP_DELAY_SECONDS: "60"
     volumes:
       - ./sync_models.py:/app/sync_models.py:ro
