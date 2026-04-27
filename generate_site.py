@@ -165,7 +165,8 @@ def fetch_cloudflare(key):
     return [
         {"id": m["name"], "name": m["name"], "context": None, "limits": "10k neurons/day"}
         for m in data.get("result", [])
-        if "text-generation" in str(m.get("task", {}).get("name", "")).lower()
+        if "text" in str(m.get("task", {}).get("name", "")).lower()
+        and "gen" in str(m.get("task", {}).get("name", "")).lower()
     ]
 
 

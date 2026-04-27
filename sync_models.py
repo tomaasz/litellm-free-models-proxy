@@ -424,7 +424,8 @@ def fetch_cloudflare(api_key):
         ids = [
             m["name"]
             for m in data.get("result", [])
-            if "text-generation" in str(m.get("task", {}).get("name", "")).lower()
+            if "text" in str(m.get("task", {}).get("name", "")).lower()
+            and "gen" in str(m.get("task", {}).get("name", "")).lower()
         ]
         log.info(f"[Cloudflare] {len(ids)} models")
         return ids
