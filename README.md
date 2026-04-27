@@ -25,6 +25,8 @@ Self-hosted [LiteLLM](https://github.com/BerriAI/litellm) proxy that automatical
 | **NVIDIA NIM** | 40 RPM free credits | All models from `/v1/models` |
 | **HuggingFace** | Free credits/month via HF Router | All text models from HF Router |
 | **Mistral** | Free Experiment plan | All models from `/v1/models` |
+| **GitHub Models** | Rate-limited free tier (higher with Copilot) | All chat models from Azure inference endpoint |
+| **Cloudflare Workers AI** | 10,000 neurons/day | Text-generation models from Workers AI catalog |
 
 The sync script also cross-references [cheahjs/free-llm-api-resources](https://github.com/cheahjs/free-llm-api-resources) — a community-maintained list of providers offering free API access — to catch models that providers' own APIs don't mark as free explicitly.
 
@@ -39,12 +41,84 @@ docker compose up -d
 
 The proxy listens on port `4000`. Access the UI at `http://localhost:4000/ui`.
 
+## How to use
+
+Once the proxy is running, connect to it like any OpenAI-compatible API — just point `base_url` at your instance and use your LiteLLM master key.
+
+### Python
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:4000",
+    api_key="sk-your-litellm-master-key",  # LITELLM_MASTER_KEY from .env
+)
+
+response = client.chat.completions.create(
+    model="smart",   # routing group — picks the best available free model
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.choices[0].message.content)
+```
+
+### curl
+
+```bash
+curl http://localhost:4000/chat/completions \
+  -H "Authorization: Bearer sk-your-litellm-master-key" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "smart", "messages": [{"role": "user", "content": "Hello!"}]}'
+```
+
+### Available routing groups
+
+These are defined in `config.yaml` and always route to a pool of free models:
+
+| Group | Description |
+|---|---|
+| `smart` | Best reasoning/quality available |
+| `fast` | Low-latency, smaller models |
+| `reasoning` | Models optimized for step-by-step reasoning |
+| `coder` | Code-focused models |
+| `long` | Large context window models |
+| `vision` | Multimodal (text + image) models |
+
+### Direct provider routing
+
+You can also call a specific provider or model directly:
+
+```
+or/llama-3.3-70b           # OpenRouter
+groq/llama-3.3-70b-versatile
+gemini/gemini-2.0-flash
+co/command-a
+gh/meta-llama-3.1-8b-instruct   # GitHub Models
+cf/llama-3.1-8b-instruct        # Cloudflare Workers AI
+```
+
+### Using with other tools
+
+Any tool that supports an OpenAI-compatible API works out of the box:
+
+```bash
+# OpenAI CLI
+openai --base-url http://localhost:4000 --api-key sk-... chat ...
+
+# LangChain
+from langchain_openai import ChatOpenAI
+llm = ChatOpenAI(base_url="http://localhost:4000", api_key="sk-...", model="smart")
+
+# Cursor / VS Code Copilot / Continue.dev
+# → set API base to http://localhost:4000, key to your LITELLM_MASTER_KEY
+```
+
 ## Services
 
 | Service | Purpose |
 |---|---|
 | `litellm` | The proxy itself |
-| `model-sync` | Auto-discovery service, runs every 24h |
+| `model-sync` | Auto-discovery service, runs every 8h |
 | `postgres` | Persistence for model configs and usage logs |
 
 > `postgres` is expected as an external Docker network (`postgres_default`). Adjust `docker-compose.yml` if you run Postgres differently.
@@ -53,7 +127,7 @@ The proxy listens on port `4000`. Access the UI at `http://localhost:4000/ui`.
 
 `config.yaml` defines the initial model list and routing groups (`smart`, `fast`, `reasoning`, `coder`, `long`, `vision`). The auto-sync adds named model routes (e.g. `or/llama-3.3-70b`, `groq/qwen3-32b`) but never modifies routing groups — those require human judgment.
 
-## Environment variables for sync
+## Environment variables
 
 | Variable | Default | Description |
 |---|---|---|

@@ -138,6 +138,37 @@ def fetch_huggingface(key):
             if not any(x in m.get("id","").lower() for x in ("embed","vision","tts","stt"))]
 
 
+def fetch_github(key):
+    data = _get("https://models.inference.ai.azure.com/models",
+                headers={"Authorization": f"Bearer {key}"})
+    items = data if isinstance(data, list) else data.get("data", [])
+    return [
+        {"id": m.get("id") or m.get("name", ""),
+         "name": m.get("friendly_name") or m.get("display_name") or m.get("name", ""),
+         "context": None,
+         "limits": "rate-limited (free / higher with Copilot)"}
+        for m in items
+        if not any(x in (m.get("id") or m.get("name", "")).lower()
+                   for x in ("embed", "tts", "whisper", "dall-e", "image"))
+        and (m.get("id") or m.get("name", ""))
+    ]
+
+
+def fetch_cloudflare(key):
+    account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
+    if not account_id:
+        raise RuntimeError("CLOUDFLARE_ACCOUNT_ID not set")
+    data = _get(
+        f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/models/search?per_page=100",
+        headers={"Authorization": f"Bearer {key}"},
+    )
+    return [
+        {"id": m["name"], "name": m["name"], "context": None, "limits": "10k neurons/day"}
+        for m in data.get("result", [])
+        if "text-generation" in str(m.get("task", {}).get("name", "")).lower()
+    ]
+
+
 def fetch_mistral(key):
     data = _get("https://api.mistral.ai/v1/models",
                 headers={"Authorization": f"Bearer {key}"})
@@ -169,6 +200,8 @@ PROVIDERS = [
     {"key": "nvidia",       "label": "NVIDIA NIM",   "env": "NVIDIA_NIM_API_KEY",  "fetch": fetch_nvidia,     "color": "#22c55e", "url": "https://build.nvidia.com"},
     {"key": "huggingface",  "label": "HuggingFace",  "env": "HF_TOKEN",            "fetch": fetch_huggingface,"color": "#f97316", "url": "https://huggingface.co"},
     {"key": "mistral",      "label": "Mistral",      "env": "MISTRAL_API_KEY",     "fetch": fetch_mistral,    "color": "#0ea5e9", "url": "https://console.mistral.ai"},
+    {"key": "github",       "label": "GitHub Models","env": "GH_MODELS_TOKEN",      "fetch": fetch_github,     "color": "#e2e8f0", "url": "https://github.com/marketplace/models"},
+    {"key": "cloudflare",   "label": "Cloudflare AI","env": "CLOUDFLARE_API_KEY",  "fetch": fetch_cloudflare, "color": "#f6821f", "url": "https://developers.cloudflare.com/workers-ai/"},
 ]
 
 

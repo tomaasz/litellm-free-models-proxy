@@ -388,6 +388,51 @@ def fetch_mistral(api_key):
         return []
 
 
+def fetch_github(api_key):
+    """GitHub Models — free tier (rate-limited), higher limits with Copilot."""
+    try:
+        data = _json_get(
+            "https://models.inference.ai.azure.com/models",
+            headers={"Authorization": f"Bearer {api_key}"},
+        )
+        items = data if isinstance(data, list) else data.get("data", [])
+        ids = [
+            m.get("id") or m.get("name", "")
+            for m in items
+            if not any(x in (m.get("id") or m.get("name", "")).lower()
+                       for x in ("embed", "tts", "whisper", "dall-e", "image"))
+            and (m.get("id") or m.get("name", ""))
+        ]
+        log.info(f"[GitHub Models] {len(ids)} models")
+        return ids
+    except Exception as e:
+        log.error(f"[GitHub Models] {e}")
+        return []
+
+
+def fetch_cloudflare(api_key):
+    """Cloudflare Workers AI — 10k neurons/day free."""
+    account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
+    if not account_id:
+        log.warning("[Cloudflare] CLOUDFLARE_ACCOUNT_ID not set, skipping")
+        return []
+    try:
+        data = _json_get(
+            f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/models/search?per_page=100",
+            headers={"Authorization": f"Bearer {api_key}"},
+        )
+        ids = [
+            m["name"]
+            for m in data.get("result", [])
+            if "text-generation" in str(m.get("task", {}).get("name", "")).lower()
+        ]
+        log.info(f"[Cloudflare] {len(ids)} models")
+        return ids
+    except Exception as e:
+        log.error(f"[Cloudflare] {e}")
+        return []
+
+
 # ── Slug helper ───────────────────────────────────────────────────────────────
 
 def slug(model_id):
@@ -488,6 +533,24 @@ PROVIDERS = [
         "rpm": 5,
         "api_base": None,
     },
+    {
+        "name": "GitHub Models",
+        "env_key": "GH_MODELS_TOKEN",
+        "fetch": fetch_github,
+        "litellm_fmt": lambda mid: f"github/{mid}",
+        "name_fmt": lambda mid: f"gh/{slug(mid)}",
+        "rpm": 15,
+        "api_base": None,
+    },
+    {
+        "name": "Cloudflare",
+        "env_key": "CLOUDFLARE_API_KEY",
+        "fetch": fetch_cloudflare,
+        "litellm_fmt": lambda mid: f"cloudflare/{mid}",
+        "name_fmt": lambda mid: f"cf/{slug(mid)}",
+        "rpm": 20,
+        "api_base": None,  # constructed dynamically in sync() — includes account_id
+    },
 ]
 
 
@@ -515,6 +578,14 @@ def sync():
         else:
             models = provider["fetch"](api_key)
 
+        # Cloudflare api_base includes account_id — resolve at sync time
+        cf_account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
+        api_base = (
+            f"https://api.cloudflare.com/client/v4/accounts/{cf_account_id}/ai"
+            if provider["name"] == "Cloudflare" and cf_account_id
+            else provider.get("api_base")
+        )
+
         for mid in models:
             litellm_model = provider["litellm_fmt"](mid)
             if litellm_model in existing:
@@ -527,7 +598,7 @@ def sync():
                 litellm_model=litellm_model,
                 api_key_env=provider["env_key"],
                 rpm=provider["rpm"],
-                api_base=provider.get("api_base"),
+                api_base=api_base,
             )
             if ok:
                 log.info(f"  + {model_name}  ({litellm_model})")
