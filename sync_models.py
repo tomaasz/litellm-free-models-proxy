@@ -410,6 +410,25 @@ def fetch_github(api_key):
         return []
 
 
+def fetch_chutes(api_key):
+    """Chutes.ai — free OpenAI-compatible inference, rate-limited."""
+    try:
+        data = _json_get(
+            "https://llm.chutes.ai/v1/models",
+            headers={"Authorization": f"Bearer {api_key}"},
+        )
+        ids = [
+            m["id"]
+            for m in data.get("data", [])
+            if not any(x in m.get("id", "").lower() for x in ("embed", "tts", "stt", "image", "vision"))
+        ]
+        log.info(f"[Chutes] {len(ids)} models")
+        return ids
+    except Exception as e:
+        log.error(f"[Chutes] {e}")
+        return []
+
+
 def fetch_cloudflare(api_key):
     """Cloudflare Workers AI — 10k neurons/day free."""
     account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
@@ -551,6 +570,15 @@ PROVIDERS = [
         "name_fmt": lambda mid: f"cf/{slug(mid)}",
         "rpm": 20,
         "api_base": None,  # constructed dynamically in sync() — includes account_id
+    },
+    {
+        "name": "Chutes",
+        "env_key": "CHUTES_API_KEY",
+        "fetch": fetch_chutes,
+        "litellm_fmt": lambda mid: f"openai/{mid}",
+        "name_fmt": lambda mid: f"chutes/{slug(mid)}",
+        "rpm": 10,
+        "api_base": "https://llm.chutes.ai/v1",
     },
 ]
 
