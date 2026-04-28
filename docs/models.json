@@ -1,5 +1,5 @@
 {
-  "updated": "2026-04-28T00:19:24.599063+00:00",
+  "updated": "2026-04-28T00:29:53.388142+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -193,20 +193,26 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "context": 131072,
-          "limits": "varies per model"
-        },
-        {
           "id": "groq/compound",
           "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model"
         },
         {
-          "id": "openai/gpt-oss-20b",
-          "name": "openai/gpt-oss-20b",
+          "id": "canopylabs/orpheus-arabic-saudi",
+          "name": "canopylabs/orpheus-arabic-saudi",
+          "context": 4000,
+          "limits": "varies per model"
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
+          "context": 131072,
+          "limits": "varies per model"
+        },
+        {
+          "id": "llama-3.3-70b-versatile",
+          "name": "llama-3.3-70b-versatile",
           "context": 131072,
           "limits": "varies per model"
         },
@@ -229,32 +235,26 @@
           "limits": "varies per model"
         },
         {
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
+          "context": 131072,
+          "limits": "varies per model"
+        },
+        {
+          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "context": 131072,
+          "limits": "varies per model"
+        },
+        {
           "id": "llama-3.1-8b-instant",
           "name": "llama-3.1-8b-instant",
           "context": 131072,
           "limits": "varies per model"
         },
         {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
-          "context": 131072,
-          "limits": "varies per model"
-        },
-        {
-          "id": "llama-3.3-70b-versatile",
-          "name": "llama-3.3-70b-versatile",
-          "context": 131072,
-          "limits": "varies per model"
-        },
-        {
-          "id": "canopylabs/orpheus-arabic-saudi",
-          "name": "canopylabs/orpheus-arabic-saudi",
-          "context": 4000,
-          "limits": "varies per model"
-        },
-        {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "openai/gpt-oss-20b",
+          "name": "openai/gpt-oss-20b",
           "context": 131072,
           "limits": "varies per model"
         }
@@ -266,8 +266,8 @@
       "url": "https://cloud.cerebras.ai",
       "models": [
         {
-          "id": "gpt-oss-120b",
-          "name": "gpt-oss-120b",
+          "id": "qwen-3-235b-a22b-instruct-2507",
+          "name": "qwen-3-235b-a22b-instruct-2507",
           "context": null,
           "limits": "1M tokens/day"
         },
@@ -278,14 +278,14 @@
           "limits": "1M tokens/day"
         },
         {
-          "id": "llama3.1-8b",
-          "name": "llama3.1-8b",
+          "id": "gpt-oss-120b",
+          "name": "gpt-oss-120b",
           "context": null,
           "limits": "1M tokens/day"
         },
         {
-          "id": "qwen-3-235b-a22b-instruct-2507",
-          "name": "qwen-3-235b-a22b-instruct-2507",
+          "id": "llama3.1-8b",
+          "name": "llama3.1-8b",
           "context": null,
           "limits": "1M tokens/day"
         }
