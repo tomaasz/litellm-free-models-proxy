@@ -462,10 +462,9 @@ document.querySelectorAll('.model-id').forEach(el => {{
         if (match) visible++;
       }});
 
-      if (countEl) {{
-        const base = countEl.textContent.replace(/[+-]\d+/g, '').trim().split(' ')[0];
-        countEl.innerHTML = (isFiltered ? visible + '/' + total : total) + ' models' +
-          (countEl.querySelector ? '' : '');
+      const countNumEl = card.querySelector('.count-num');
+      if (countNumEl) {{
+        countNumEl.textContent = isFiltered ? visible + '/' + total : total;
       }}
       card.style.display = (rows.length === 0 || visible > 0) ? '' : 'none';
       if (visible > 0) totalVisible++;
@@ -561,7 +560,7 @@ def render_provider(p, models, error=None, delta=None):
         f'<span class="provider-dot" style="background:{color}"></span>'
         f'<span class="provider-name"><a href="{url}" target="_blank">{label}</a></span>'
         f'{key_link}'
-        f'<span class="provider-count">{count} models{delta_html}</span>'
+        f'<span class="provider-count"><span class="count-num">{count}</span> models{delta_html}</span>'
         f'{status}'
         f'{collapse_btn}'
         f'</div>'
