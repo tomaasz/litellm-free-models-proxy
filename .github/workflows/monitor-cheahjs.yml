@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 env:
@@ -49,7 +49,7 @@ jobs:
               if not any(k in key or key in k for k in KNOWN):
                   new_providers.append(h)
 
-          # Also detect removed providers (rough check)
+          # Detect added/removed sections since last run
           snapshot_path = ".cheahjs_snapshot"
           try:
               with open(snapshot_path) as f:
@@ -61,6 +61,7 @@ jobs:
           removed = old_headings - current_headings if old_headings else set()
           added_all = current_headings - old_headings if old_headings else set()
 
+          # Always persist the snapshot so next run has a baseline
           with open(snapshot_path, "w") as f:
               json.dump(sorted(current_headings), f)
 
@@ -95,14 +96,28 @@ jobs:
               print("No changes detected.")
           PYEOF
 
-      - name: Create issue if changes found
+      - name: Commit updated snapshot
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .cheahjs_snapshot
+          git diff --cached --quiet || git commit -m "chore: update cheahjs snapshot" && git push
+
+      - name: Create issue if changes found (skip if duplicate open issue exists)
         if: steps.check.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BODY=$(cat /tmp/issue_body.md)
           DATE=$(date -u '+%Y-%m-%d')
+          TITLE="cheahjs update detected — ${DATE}"
+          # Avoid duplicate issues: check for any open issue with the same title
+          EXISTING=$(gh issue list --state open --search "$TITLE" --json number --jq length)
+          if [ "$EXISTING" -gt 0 ]; then
+            echo "Open issue with this title already exists, skipping."
+            exit 0
+          fi
+          BODY=$(cat /tmp/issue_body.md)
           gh issue create \
-            --title "cheahjs update detected — ${DATE}" \
+            --title "$TITLE" \
             --body "$BODY" \
             --label "new-provider"

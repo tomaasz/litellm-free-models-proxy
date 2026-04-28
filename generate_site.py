@@ -250,6 +250,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .provider-name a {{ color: inherit; text-decoration: none; }}
   .provider-name a:hover {{ color: var(--accent); }}
   .provider-count {{ margin-left: auto; background: #0f172a; border-radius: 999px; padding: .15rem .6rem; font-size: .75rem; color: var(--muted); }}
+  .status-indicator {{ font-size: .5rem; flex-shrink: 0; }}
+  .status-ok  {{ color: #22c55e; }}
+  .status-err {{ color: #f87171; }}
   .api-key-link {{ font-size: .75rem; color: var(--muted); text-decoration: none; border: 1px solid var(--border); border-radius: .35rem; padding: .15rem .55rem; white-space: nowrap; transition: color .15s, border-color .15s; }}
   .api-key-link:hover {{ color: var(--accent); border-color: var(--accent); }}
   .collapse-btn {{ background: none; border: none; cursor: pointer; color: var(--muted); padding: .1rem .2rem; line-height: 1; display: flex; align-items: center; transition: color .15s; }}
@@ -282,6 +285,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .suggest-card .suggest-text p {{ font-size: .85rem; color: var(--muted); line-height: 1.5; }}
   .suggest-btn {{ display: inline-flex; align-items: center; gap: .5rem; background: #238636; color: #fff; border: none; border-radius: .5rem; padding: .6rem 1.2rem; font-size: .875rem; font-weight: 600; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background .15s; }}
   .suggest-btn:hover {{ background: #2ea043; }}
+  .ctx-filters {{ max-width: 960px; margin: 0 auto 1.25rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }}
+  .ctx-label {{ font-size: .8rem; color: var(--muted); }}
+  .ctx-pill {{ background: none; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); padding: .25rem .75rem; font-size: .8rem; cursor: pointer; transition: color .15s, border-color .15s, background .15s; }}
+  .ctx-pill:hover {{ color: var(--text); border-color: #64748b; }}
+  .ctx-pill.active {{ background: var(--accent); border-color: var(--accent); color: #0f172a; font-weight: 600; }}
   @media (max-width: 600px) {{
     col.col-ctx, th:nth-child(3), td:nth-child(3),
     col.col-limits, th:nth-child(4), td:nth-child(4) {{ display: none; }}
@@ -309,6 +317,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </header>
 <div class="search-wrap">
   <input type="search" id="model-search" placeholder="Search models by ID or name…" autocomplete="off" spellcheck="false">
+</div>
+<div class="ctx-filters">
+  <span class="ctx-label">Context:</span>
+  <button class="ctx-pill active" data-min="0">Any</button>
+  <button class="ctx-pill" data-min="32768">&#8805; 32k</button>
+  <button class="ctx-pill" data-min="131072">&#8805; 128k</button>
+  <button class="ctx-pill" data-min="1000000">&#8805; 1M</button>
 </div>
 <main>
 {provider_sections}
@@ -347,9 +362,11 @@ document.querySelectorAll('.model-id').forEach(el => {{
   const input = document.getElementById('model-search');
   const noResults = document.getElementById('no-results');
   const cards = Array.from(document.querySelectorAll('.provider-card[data-total]'));
+  let ctxMin = 0;
 
-  input.addEventListener('input', () => {{
+  function applyFilters() {{
     const q = input.value.toLowerCase().trim();
+    const isFiltered = q || ctxMin > 0;
     let totalVisible = 0;
 
     cards.forEach(card => {{
@@ -359,19 +376,33 @@ document.querySelectorAll('.model-id').forEach(el => {{
       let visible = 0;
 
       rows.forEach(row => {{
-        const match = !q || row.dataset.search.includes(q);
+        const searchOk = !q || row.dataset.search.includes(q);
+        const ctx = parseInt(row.dataset.ctx || '0', 10);
+        const ctxOk = ctxMin === 0 || ctx >= ctxMin;
+        const match = searchOk && ctxOk;
         row.style.display = match ? '' : 'none';
         if (match) visible++;
       }});
 
       if (countEl) {{
-        countEl.textContent = q ? visible + '/' + total + ' models' : total + ' models';
+        countEl.textContent = isFiltered ? visible + '/' + total + ' models' : total + ' models';
       }}
       card.style.display = (rows.length === 0 || visible > 0) ? '' : 'none';
       if (visible > 0) totalVisible++;
     }});
 
-    noResults.style.display = (q && totalVisible === 0) ? 'block' : 'none';
+    noResults.style.display = (isFiltered && totalVisible === 0) ? 'block' : 'none';
+  }}
+
+  input.addEventListener('input', applyFilters);
+
+  document.querySelectorAll('.ctx-pill').forEach(pill => {{
+    pill.addEventListener('click', () => {{
+      document.querySelectorAll('.ctx-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      ctxMin = parseInt(pill.dataset.min, 10);
+      applyFilters();
+    }});
   }});
 }})();
 
@@ -414,6 +445,10 @@ def render_provider(p, models, error=None):
         f'<a class="api-key-link" href="{key_url}" target="_blank" title="Get API key">Get API key</a>'
         if key_url else ""
     )
+    if error:
+        status = f'<span class="status-indicator status-err" title="Error: {escape(str(error))}">&#9679;</span>'
+    else:
+        status = '<span class="status-indicator status-ok" title="API responding">&#9679;</span>'
     collapse_btn = f'<button class="collapse-btn" aria-label="Toggle models list">{CHEVRON_SVG}</button>'
 
     header = (
@@ -422,6 +457,7 @@ def render_provider(p, models, error=None):
         f'<span class="provider-name"><a href="{url}" target="_blank">{label}</a></span>'
         f'{key_link}'
         f'<span class="provider-count">{count} models</span>'
+        f'{status}'
         f'{collapse_btn}'
         f'</div>'
     )
@@ -433,12 +469,13 @@ def render_provider(p, models, error=None):
     else:
         rows = ""
         for m in sorted(models, key=lambda x: x["id"]):
-            ctx = fmt_context(m.get("context"))
+            ctx_raw = int(m.get("context") or 0)
+            ctx = fmt_context(ctx_raw)
             mid = m["id"]
             name = m.get("name") or mid
             search_val = escape(f"{mid} {name}".lower())
             rows += (
-                f'<tr data-search="{search_val}">'
+                f'<tr data-search="{search_val}" data-ctx="{ctx_raw}">'
                 f'<td><span class="model-id" data-id="{escape(mid)}">{escape(mid)}</span></td>'
                 f'<td class="model-name">{escape(name)}</td>'
                 f'<td class="ctx">{escape(ctx)}</td>'
