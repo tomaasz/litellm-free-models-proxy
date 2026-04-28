@@ -190,6 +190,50 @@ def fetch_cheahjs():
         return ""
 
 
+# ── Model utilities ───────────────────────────────────────────────────────────
+
+_QUALITY_RE = re.compile(
+    r'[-_](instruct|chat|it|free|versatile|preview|latest|exp|experimental'
+    r'|hf|awq|gptq|gguf|fp16|bf16|int4|int8)$',
+    re.IGNORECASE,
+)
+_DATE_RE = re.compile(r'-\d{8}$')
+_FREE_RE  = re.compile(r':free$')
+
+
+def canonical_name(model_id):
+    """Normalize a model ID to a provider-agnostic key for cross-provider grouping."""
+    s = model_id.split('/')[-1].lower()
+    s = _FREE_RE.sub('', s)
+    for _ in range(5):
+        ns = _QUALITY_RE.sub('', s)
+        ns = _DATE_RE.sub('', ns)
+        if ns == s:
+            break
+        s = ns
+    return re.sub(r'[-_.]', '-', s).strip('-')
+
+
+_TAG_RULES = [
+    (["coder", "-code-", "starcoder", "codestral", "deepseek-coder"], "coding",    "#a78bfa"),
+    (["reason", "think",  "qwq",   "deepseek-r", "-r1", "r1-"],       "reasoning", "#f59e0b"),
+    (["vision", "-vl",    "llava",  "pixtral",    "qvq",  "visual"],   "vision",    "#06b6d4"),
+    (["flash",  "turbo",  "lite",   "mini",       "small","haiku",
+      "nano",   "fast"],                                                "fast",      "#10b981"),
+]
+
+
+def get_tags(model_id, context=None):
+    tags = []
+    mid = model_id.lower()
+    for keywords, label, color in _TAG_RULES:
+        if any(kw in mid for kw in keywords):
+            tags.append((label, color))
+    if context and int(context) >= 128_000:
+        tags.append(("128k+", "#38bdf8"))
+    return tags
+
+
 PROVIDERS = [
     {"key": "openrouter",  "label": "OpenRouter",   "env": "OPENROUTER_API_KEY", "fetch": fetch_openrouter, "color": "#6366f1", "url": "https://openrouter.ai",                       "key_url": "https://openrouter.ai/keys"},
     {"key": "groq",        "label": "Groq",         "env": "GROQ_API_KEY",       "fetch": fetch_groq,       "color": "#f59e0b", "url": "https://console.groq.com",                    "key_url": "https://console.groq.com/keys"},
@@ -250,9 +294,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .provider-name a {{ color: inherit; text-decoration: none; }}
   .provider-name a:hover {{ color: var(--accent); }}
   .provider-count {{ margin-left: auto; background: #0f172a; border-radius: 999px; padding: .15rem .6rem; font-size: .75rem; color: var(--muted); }}
+  .delta-add {{ color: #22c55e; font-size: .7rem; margin-left: .3rem; }}
+  .delta-rem {{ color: #f87171; font-size: .7rem; margin-left: .15rem; }}
   .status-indicator {{ font-size: .5rem; flex-shrink: 0; }}
   .status-ok  {{ color: #22c55e; }}
   .status-err {{ color: #f87171; }}
+  .tag-chip {{ display: inline-block; border-radius: 999px; padding: .05rem .45rem; font-size: .68rem; font-weight: 500; margin-right: .2rem; margin-bottom: .1rem; white-space: nowrap; }}
+  .view-tabs {{ max-width: 960px; margin: 0 auto 1.25rem; display: flex; gap: .5rem; }}
+  .vtab {{ background: none; border: 1px solid var(--border); border-radius: .4rem; color: var(--muted); padding: .35rem .9rem; font-size: .85rem; cursor: pointer; transition: all .15s; }}
+  .vtab:hover {{ color: var(--text); border-color: #64748b; }}
+  .vtab.active {{ background: var(--surface); border-color: var(--accent); color: var(--accent); font-weight: 600; }}
+  .cross-group {{ background: var(--surface); border: 1px solid var(--border); border-radius: .75rem; overflow: hidden; margin-bottom: 1.5rem; }}
+  .cross-group-header {{ padding: .7rem 1.25rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: .95rem; display: flex; align-items: center; gap: .6rem; }}
+  .cross-group-count {{ font-size: .75rem; color: var(--muted); font-weight: 400; }}
+  .provider-chip {{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; }}
   .api-key-link {{ font-size: .75rem; color: var(--muted); text-decoration: none; border: 1px solid var(--border); border-radius: .35rem; padding: .15rem .55rem; white-space: nowrap; transition: color .15s, border-color .15s; }}
   .api-key-link:hover {{ color: var(--accent); border-color: var(--accent); }}
   .collapse-btn {{ background: none; border: none; cursor: pointer; color: var(--muted); padding: .1rem .2rem; line-height: 1; display: flex; align-items: center; transition: color .15s; }}
@@ -264,10 +319,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .provider-card.collapsed .provider-body {{ display: none; }}
   .provider-error {{ padding: 1rem 1.25rem; color: #f87171; font-size: .85rem; }}
   table {{ width: 100%; border-collapse: collapse; font-size: .85rem; table-layout: fixed; }}
-  col.col-id      {{ width: 38%; }}
-  col.col-name    {{ width: 28%; }}
-  col.col-ctx     {{ width: 10%; }}
-  col.col-limits  {{ width: 24%; }}
+  col.col-id      {{ width: 32%; }}
+  col.col-name    {{ width: 20%; }}
+  col.col-ctx     {{ width:  8%; }}
+  col.col-tags    {{ width: 18%; }}
+  col.col-limits  {{ width: 22%; }}
   th {{ text-align: left; padding: .5rem 1.25rem; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); overflow: hidden; }}
   td {{ padding: .45rem 1.25rem; border-bottom: 1px solid #1e293b; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
   tr:last-child td {{ border-bottom: none; }}
@@ -285,14 +341,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .suggest-card .suggest-text p {{ font-size: .85rem; color: var(--muted); line-height: 1.5; }}
   .suggest-btn {{ display: inline-flex; align-items: center; gap: .5rem; background: #238636; color: #fff; border: none; border-radius: .5rem; padding: .6rem 1.2rem; font-size: .875rem; font-weight: 600; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background .15s; }}
   .suggest-btn:hover {{ background: #2ea043; }}
-  .ctx-filters {{ max-width: 960px; margin: 0 auto 1.25rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }}
-  .ctx-label {{ font-size: .8rem; color: var(--muted); }}
-  .ctx-pill {{ background: none; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); padding: .25rem .75rem; font-size: .8rem; cursor: pointer; transition: color .15s, border-color .15s, background .15s; }}
-  .ctx-pill:hover {{ color: var(--text); border-color: #64748b; }}
+  .ctx-filters, .tag-filters {{ max-width: 960px; margin: 0 auto 1rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }}
+  .ctx-label {{ font-size: .8rem; color: var(--muted); white-space: nowrap; }}
+  .ctx-pill, .tag-pill {{ background: none; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); padding: .25rem .75rem; font-size: .8rem; cursor: pointer; transition: color .15s, border-color .15s, background .15s; }}
+  .ctx-pill:hover, .tag-pill:hover {{ color: var(--text); border-color: #64748b; }}
   .ctx-pill.active {{ background: var(--accent); border-color: var(--accent); color: #0f172a; font-weight: 600; }}
+  .tag-pill.active {{ background: var(--tc,var(--accent)); border-color: var(--tc,var(--accent)); color: #0f172a; font-weight: 600; }}
   @media (max-width: 600px) {{
     col.col-ctx, th:nth-child(3), td:nth-child(3),
-    col.col-limits, th:nth-child(4), td:nth-child(4) {{ display: none; }}
+    col.col-tags, th:nth-child(4), td:nth-child(4),
+    col.col-limits, th:nth-child(5), td:nth-child(5) {{ display: none; }}
     col.col-id   {{ width: 50%; }}
     col.col-name {{ width: 50%; }}
     .suggest-card {{ flex-direction: column; align-items: flex-start; }}
@@ -325,9 +383,27 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <button class="ctx-pill" data-min="131072">&#8805; 128k</button>
   <button class="ctx-pill" data-min="1000000">&#8805; 1M</button>
 </div>
+<div class="tag-filters">
+  <span class="ctx-label">Tags:</span>
+  <button class="tag-pill active" data-tag="">All</button>
+  <button class="tag-pill" data-tag="coding"    style="--tc:#a78bfa">coding</button>
+  <button class="tag-pill" data-tag="reasoning" style="--tc:#f59e0b">reasoning</button>
+  <button class="tag-pill" data-tag="vision"    style="--tc:#06b6d4">vision</button>
+  <button class="tag-pill" data-tag="fast"      style="--tc:#10b981">fast</button>
+  <button class="tag-pill" data-tag="128k+"     style="--tc:#38bdf8">128k+</button>
+</div>
+<div class="view-tabs">
+  <button class="vtab active" data-target="view-provider">By Provider</button>
+  <button class="vtab" data-target="view-model">By Model</button>
+</div>
 <main>
+<div id="view-provider">
 {provider_sections}
 <p class="no-results" id="no-results">No models match your search.</p>
+</div>
+<div id="view-model" style="display:none">
+{cross_provider_section}
+</div>
 <div class="suggest-card">
   <div class="suggest-text">
     <h2>Know a provider we're missing?</h2>
@@ -363,10 +439,11 @@ document.querySelectorAll('.model-id').forEach(el => {{
   const noResults = document.getElementById('no-results');
   const cards = Array.from(document.querySelectorAll('.provider-card[data-total]'));
   let ctxMin = 0;
+  let tagFilter = '';
 
   function applyFilters() {{
     const q = input.value.toLowerCase().trim();
-    const isFiltered = q || ctxMin > 0;
+    const isFiltered = q || ctxMin > 0 || tagFilter;
     let totalVisible = 0;
 
     cards.forEach(card => {{
@@ -379,13 +456,16 @@ document.querySelectorAll('.model-id').forEach(el => {{
         const searchOk = !q || row.dataset.search.includes(q);
         const ctx = parseInt(row.dataset.ctx || '0', 10);
         const ctxOk = ctxMin === 0 || ctx >= ctxMin;
-        const match = searchOk && ctxOk;
+        const tagOk = !tagFilter || (row.dataset.tags || '').split(' ').includes(tagFilter);
+        const match = searchOk && ctxOk && tagOk;
         row.style.display = match ? '' : 'none';
         if (match) visible++;
       }});
 
       if (countEl) {{
-        countEl.textContent = isFiltered ? visible + '/' + total + ' models' : total + ' models';
+        const base = countEl.textContent.replace(/[+-]\d+/g, '').trim().split(' ')[0];
+        countEl.innerHTML = (isFiltered ? visible + '/' + total : total) + ' models' +
+          (countEl.querySelector ? '' : '');
       }}
       card.style.display = (rows.length === 0 || visible > 0) ? '' : 'none';
       if (visible > 0) totalVisible++;
@@ -404,11 +484,30 @@ document.querySelectorAll('.model-id').forEach(el => {{
       applyFilters();
     }});
   }});
+
+  document.querySelectorAll('.tag-pill').forEach(pill => {{
+    pill.addEventListener('click', () => {{
+      document.querySelectorAll('.tag-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      tagFilter = pill.dataset.tag;
+      applyFilters();
+    }});
+  }});
 }})();
 
 document.querySelectorAll('.collapse-btn').forEach(btn => {{
   btn.addEventListener('click', () => {{
     btn.closest('.provider-card').classList.toggle('collapsed');
+  }});
+}});
+
+document.querySelectorAll('.vtab').forEach(btn => {{
+  btn.addEventListener('click', () => {{
+    document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const t = btn.dataset.target;
+    document.getElementById('view-provider').style.display = t === 'view-provider' ? '' : 'none';
+    document.getElementById('view-model').style.display   = t === 'view-model'    ? '' : 'none';
   }});
 }});
 </script>
@@ -434,7 +533,7 @@ CHEVRON_SVG = (
 )
 
 
-def render_provider(p, models, error=None):
+def render_provider(p, models, error=None, delta=None):
     color = p["color"]
     label = escape(p["label"])
     url = p["url"]
@@ -445,6 +544,12 @@ def render_provider(p, models, error=None):
         f'<a class="api-key-link" href="{key_url}" target="_blank" title="Get API key">Get API key</a>'
         if key_url else ""
     )
+    delta_html = ""
+    if delta:
+        if delta.get("added"):
+            delta_html += f'<span class="delta-add">+{delta["added"]}</span>'
+        if delta.get("removed"):
+            delta_html += f'<span class="delta-rem">-{delta["removed"]}</span>'
     if error:
         status = f'<span class="status-indicator status-err" title="Error: {escape(str(error))}">&#9679;</span>'
     else:
@@ -456,7 +561,7 @@ def render_provider(p, models, error=None):
         f'<span class="provider-dot" style="background:{color}"></span>'
         f'<span class="provider-name"><a href="{url}" target="_blank">{label}</a></span>'
         f'{key_link}'
-        f'<span class="provider-count">{count} models</span>'
+        f'<span class="provider-count">{count} models{delta_html}</span>'
         f'{status}'
         f'{collapse_btn}'
         f'</div>'
@@ -474,29 +579,88 @@ def render_provider(p, models, error=None):
             mid = m["id"]
             name = m.get("name") or mid
             search_val = escape(f"{mid} {name}".lower())
+            tag_list = get_tags(mid, m.get("context"))
+            tags_html = "".join(
+                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
+                for l, c in tag_list
+            )
+            tag_labels = escape(" ".join(l for l, _ in tag_list))
             rows += (
-                f'<tr data-search="{search_val}" data-ctx="{ctx_raw}">'
+                f'<tr data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<td><span class="model-id" data-id="{escape(mid)}">{escape(mid)}</span></td>'
                 f'<td class="model-name">{escape(name)}</td>'
                 f'<td class="ctx">{escape(ctx)}</td>'
+                f'<td>{tags_html}</td>'
                 f'<td class="limits">{escape(m.get("limits") or "")}</td>'
                 f"</tr>"
             )
         colgroup = (
             '<colgroup>'
-            '<col class="col-id"><col class="col-name">'
-            '<col class="col-ctx"><col class="col-limits">'
+            '<col class="col-id"><col class="col-name"><col class="col-ctx">'
+            '<col class="col-tags"><col class="col-limits">'
             '</colgroup>'
         )
         inner = (
             '<table>' + colgroup + '<thead><tr>'
             '<th>Model ID <span class="copy-tip">(click to copy)</span></th>'
-            '<th>Name</th><th>Context</th><th>Limits</th>'
+            '<th>Name</th><th>Context</th><th>Tags</th><th>Limits</th>'
             '</tr></thead><tbody>' + rows + '</tbody></table>'
         )
 
     body = f'<div class="provider-body">{inner}</div>'
     return f'<div class="provider-card" data-total="{count}">{header}{body}</div>'
+
+
+def render_cross_provider(groups, provider_map):
+    """Render the By Model view. groups = [(canonical, [model_entries])]"""
+    if not groups:
+        return '<p style="color:var(--muted);text-align:center;padding:2rem">No cross-provider models detected.</p>'
+    html = ""
+    for cname, entries in groups:
+        providers_in_group = sorted({e["provider"] for e in entries})
+        provider_dots = "".join(
+            f'<span class="provider-chip" style="background:{provider_map[pr]["color"]}" title="{escape(pr)}"></span>'
+            for pr in providers_in_group if pr in provider_map
+        )
+        header = (
+            f'<div class="cross-group-header">'
+            f'{provider_dots}'
+            f'<span>{escape(cname)}</span>'
+            f'<span class="cross-group-count">{len(providers_in_group)} providers · {len(entries)} variants</span>'
+            f'</div>'
+        )
+        rows = ""
+        for e in sorted(entries, key=lambda x: x["provider"]):
+            pcolor = provider_map.get(e["provider"], {}).get("color", "#94a3b8")
+            ctx_raw = int(e.get("context") or 0)
+            ctx = fmt_context(ctx_raw)
+            tag_list = get_tags(e["model_id"], e.get("context"))
+            tags_html = "".join(
+                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
+                for l, c in tag_list
+            )
+            rows += (
+                f'<tr>'
+                f'<td><span class="provider-chip" style="background:{pcolor}"></span> {escape(e["provider"])}</td>'
+                f'<td><span class="model-id" data-id="{escape(e["model_id"])}">{escape(e["model_id"])}</span></td>'
+                f'<td class="ctx">{escape(ctx)}</td>'
+                f'<td>{tags_html}</td>'
+                f'<td class="limits">{escape(e.get("limits") or "")}</td>'
+                f'</tr>'
+            )
+        colgroup = (
+            '<colgroup>'
+            '<col style="width:18%"><col style="width:34%">'
+            '<col style="width:8%"><col style="width:16%"><col style="width:24%">'
+            '</colgroup>'
+        )
+        table = (
+            '<table>' + colgroup + '<thead><tr>'
+            '<th>Provider</th><th>Model ID</th><th>Context</th><th>Tags</th><th>Limits</th>'
+            '</tr></thead><tbody>' + rows + '</tbody></table>'
+        )
+        html += f'<div class="cross-group">{header}{table}</div>'
+    return html
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -523,6 +687,16 @@ def main():
             results[p["key"]] = []
             print(f"ERROR: {e}")
 
+    # Read previous models.json for delta computation
+    old_models_path = OUT_DIR / "models.json"
+    old_model_ids = {}  # provider_key → set of model IDs
+    try:
+        old_json = json.loads(old_models_path.read_text())
+        for pk, pdata in old_json.get("providers", {}).items():
+            old_model_ids[pk] = {m["id"] for m in pdata.get("models", [])}
+    except Exception:
+        pass
+
     # Build JSON output
     json_out = {
         "updated": datetime.now(timezone.utc).isoformat(),
@@ -538,8 +712,42 @@ def main():
             "error": str(errors[p["key"]]) if p["key"] in errors else None,
         }
 
-    (OUT_DIR / "models.json").write_text(json.dumps(json_out, indent=2, ensure_ascii=False))
+    old_models_path.write_text(json.dumps(json_out, indent=2, ensure_ascii=False))
     print(f"Written docs/models.json")
+
+    # Compute per-provider deltas
+    deltas = {}
+    for p in PROVIDERS:
+        pk = p["key"]
+        if pk not in results or pk not in old_model_ids:
+            continue
+        current_ids = {m["id"] for m in results[pk]}
+        old_ids = old_model_ids[pk]
+        added = len(current_ids - old_ids)
+        removed = len(old_ids - current_ids)
+        if added or removed:
+            deltas[pk] = {"added": added, "removed": removed}
+
+    # Compute cross-provider model groups
+    from collections import defaultdict
+    provider_map = {p["label"]: p for p in PROVIDERS}
+    groups_raw = defaultdict(list)
+    for p in PROVIDERS:
+        for m in results.get(p["key"], []):
+            key = canonical_name(m["id"])
+            if key:
+                groups_raw[key].append({
+                    "provider": p["label"],
+                    "model_id": m["id"],
+                    "context": m.get("context"),
+                    "limits": m.get("limits", ""),
+                })
+    cross_groups = [
+        (cname, entries)
+        for cname, entries in sorted(groups_raw.items())
+        if len({e["provider"] for e in entries}) >= 2
+    ]
+    cross_groups.sort(key=lambda x: -len({e["provider"] for e in x[1]}))
 
     # Build HTML
     total_models = sum(len(v) for v in results.values())
@@ -550,16 +758,24 @@ def main():
     for p in PROVIDERS:
         if p["key"] not in results and p["key"] not in errors:
             continue
-        sections += render_provider(p, results.get(p["key"], []), errors.get(p["key"]))
+        sections += render_provider(
+            p,
+            results.get(p["key"], []),
+            errors.get(p["key"]),
+            delta=deltas.get(p["key"]),
+        )
+
+    cross_html = render_cross_provider(cross_groups, provider_map)
 
     html = HTML_TEMPLATE.format(
         updated=updated,
         total_models=total_models,
         total_providers=total_providers,
         provider_sections=sections,
+        cross_provider_section=cross_html,
     )
     (OUT_DIR / "index.html").write_text(html, encoding="utf-8")
-    print(f"Written docs/index.html  ({total_models} models, {total_providers} providers)")
+    print(f"Written docs/index.html  ({total_models} models, {total_providers} providers, {len(cross_groups)} cross-provider groups)")
 
 
 if __name__ == "__main__":
