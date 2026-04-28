@@ -180,15 +180,6 @@ def fetch_mistral(key):
             and not any(x in m.get("id","").lower() for x in ("embed","moderation"))]
 
 
-def fetch_chutes(key):
-    data = _get("https://llm.chutes.ai/v1/models",
-                headers={"Authorization": f"Bearer {key}"})
-    return [{"id": m["id"], "name": m["id"],
-             "context": None, "limits": "free · rate-limited"}
-            for m in data.get("data", [])
-            if not any(x in m.get("id","").lower() for x in ("embed","tts","stt","image","vision"))]
-
-
 # ── Community cross-reference ─────────────────────────────────────────────────
 
 def fetch_cheahjs():
@@ -200,19 +191,18 @@ def fetch_cheahjs():
 
 
 PROVIDERS = [
-    {"key": "openrouter",   "label": "OpenRouter",   "env": "OPENROUTER_API_KEY",  "fetch": fetch_openrouter, "color": "#6366f1", "url": "https://openrouter.ai"},
-    {"key": "groq",         "label": "Groq",         "env": "GROQ_API_KEY",        "fetch": fetch_groq,       "color": "#f59e0b", "url": "https://console.groq.com"},
-    {"key": "cerebras",     "label": "Cerebras",     "env": "CEREBRAS_API_KEY",    "fetch": fetch_cerebras,   "color": "#10b981", "url": "https://cloud.cerebras.ai"},
-    {"key": "gemini",       "label": "Gemini",       "env": "GEMINI_API_KEY",      "fetch": fetch_gemini,     "color": "#3b82f6", "url": "https://aistudio.google.com"},
-    {"key": "sambanova",    "label": "SambaNova",    "env": "SAMBANOVA_API_KEY",   "fetch": fetch_sambanova,  "color": "#8b5cf6", "url": "https://cloud.sambanova.ai"},
-    {"key": "cohere",       "label": "Cohere",       "env": "COHERE_API_KEY",      "fetch": fetch_cohere,     "color": "#ec4899", "url": "https://cohere.com"},
-    {"key": "together",     "label": "Together AI",  "env": "TOGETHER_API_KEY",    "fetch": fetch_together,   "color": "#14b8a6", "url": "https://api.together.ai"},
-    {"key": "nvidia",       "label": "NVIDIA NIM",   "env": "NVIDIA_NIM_API_KEY",  "fetch": fetch_nvidia,     "color": "#22c55e", "url": "https://build.nvidia.com"},
-    {"key": "huggingface",  "label": "HuggingFace",  "env": "HF_TOKEN",            "fetch": fetch_huggingface,"color": "#f97316", "url": "https://huggingface.co"},
-    {"key": "mistral",      "label": "Mistral",      "env": "MISTRAL_API_KEY",     "fetch": fetch_mistral,    "color": "#0ea5e9", "url": "https://console.mistral.ai"},
-    {"key": "github",       "label": "GitHub Models","env": "GH_MODELS_TOKEN",      "fetch": fetch_github,     "color": "#e2e8f0", "url": "https://github.com/marketplace/models"},
-    {"key": "cloudflare",   "label": "Cloudflare AI","env": "CLOUDFLARE_API_KEY",  "fetch": fetch_cloudflare, "color": "#f6821f", "url": "https://developers.cloudflare.com/workers-ai/"},
-    {"key": "chutes",       "label": "Chutes",       "env": "CHUTES_API_KEY",      "fetch": fetch_chutes,     "color": "#06b6d4", "url": "https://chutes.ai"},
+    {"key": "openrouter",  "label": "OpenRouter",   "env": "OPENROUTER_API_KEY", "fetch": fetch_openrouter, "color": "#6366f1", "url": "https://openrouter.ai",                       "key_url": "https://openrouter.ai/keys"},
+    {"key": "groq",        "label": "Groq",         "env": "GROQ_API_KEY",       "fetch": fetch_groq,       "color": "#f59e0b", "url": "https://console.groq.com",                    "key_url": "https://console.groq.com/keys"},
+    {"key": "cerebras",    "label": "Cerebras",     "env": "CEREBRAS_API_KEY",   "fetch": fetch_cerebras,   "color": "#10b981", "url": "https://cloud.cerebras.ai",                   "key_url": "https://cloud.cerebras.ai/platform"},
+    {"key": "gemini",      "label": "Gemini",       "env": "GEMINI_API_KEY",     "fetch": fetch_gemini,     "color": "#3b82f6", "url": "https://aistudio.google.com",                 "key_url": "https://aistudio.google.com/apikey"},
+    {"key": "sambanova",   "label": "SambaNova",    "env": "SAMBANOVA_API_KEY",  "fetch": fetch_sambanova,  "color": "#8b5cf6", "url": "https://cloud.sambanova.ai",                  "key_url": "https://cloud.sambanova.ai/"},
+    {"key": "cohere",      "label": "Cohere",       "env": "COHERE_API_KEY",     "fetch": fetch_cohere,     "color": "#ec4899", "url": "https://cohere.com",                          "key_url": "https://dashboard.cohere.com/api-keys"},
+    {"key": "together",    "label": "Together AI",  "env": "TOGETHER_API_KEY",   "fetch": fetch_together,   "color": "#14b8a6", "url": "https://api.together.ai",                     "key_url": "https://api.together.ai/settings/api-keys"},
+    {"key": "nvidia",      "label": "NVIDIA NIM",   "env": "NVIDIA_NIM_API_KEY", "fetch": fetch_nvidia,     "color": "#22c55e", "url": "https://build.nvidia.com",                    "key_url": "https://build.nvidia.com/"},
+    {"key": "huggingface", "label": "HuggingFace",  "env": "HF_TOKEN",           "fetch": fetch_huggingface,"color": "#f97316", "url": "https://huggingface.co",                      "key_url": "https://huggingface.co/settings/tokens"},
+    {"key": "mistral",     "label": "Mistral",      "env": "MISTRAL_API_KEY",    "fetch": fetch_mistral,    "color": "#0ea5e9", "url": "https://console.mistral.ai",                  "key_url": "https://console.mistral.ai/api-keys/"},
+    {"key": "github",      "label": "GitHub Models","env": "GH_MODELS_TOKEN",    "fetch": fetch_github,     "color": "#e2e8f0", "url": "https://github.com/marketplace/models",       "key_url": "https://github.com/settings/tokens"},
+    {"key": "cloudflare",  "label": "Cloudflare AI","env": "CLOUDFLARE_API_KEY", "fetch": fetch_cloudflare, "color": "#f6821f", "url": "https://developers.cloudflare.com/workers-ai/","key_url": "https://dash.cloudflare.com/profile/api-tokens"},
 ]
 
 
@@ -260,6 +250,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .provider-name a {{ color: inherit; text-decoration: none; }}
   .provider-name a:hover {{ color: var(--accent); }}
   .provider-count {{ margin-left: auto; background: #0f172a; border-radius: 999px; padding: .15rem .6rem; font-size: .75rem; color: var(--muted); }}
+  .api-key-link {{ font-size: .75rem; color: var(--muted); text-decoration: none; border: 1px solid var(--border); border-radius: .35rem; padding: .15rem .55rem; white-space: nowrap; transition: color .15s, border-color .15s; }}
+  .api-key-link:hover {{ color: var(--accent); border-color: var(--accent); }}
+  .collapse-btn {{ background: none; border: none; cursor: pointer; color: var(--muted); padding: .1rem .2rem; line-height: 1; display: flex; align-items: center; transition: color .15s; }}
+  .collapse-btn:hover {{ color: var(--text); }}
+  .collapse-btn .chevron {{ transition: transform .2s; }}
+  .provider-card.collapsed .chevron {{ transform: rotate(-90deg); }}
+  .provider-card.collapsed .provider-header {{ border-bottom: none; }}
+  .provider-body {{ }}
+  .provider-card.collapsed .provider-body {{ display: none; }}
   .provider-error {{ padding: 1rem 1.25rem; color: #f87171; font-size: .85rem; }}
   table {{ width: 100%; border-collapse: collapse; font-size: .85rem; table-layout: fixed; }}
   col.col-id      {{ width: 38%; }}
@@ -375,6 +374,12 @@ document.querySelectorAll('.model-id').forEach(el => {{
     noResults.style.display = (q && totalVisible === 0) ? 'block' : 'none';
   }});
 }})();
+
+document.querySelectorAll('.collapse-btn').forEach(btn => {{
+  btn.addEventListener('click', () => {{
+    btn.closest('.provider-card').classList.toggle('collapsed');
+  }});
+}});
 </script>
 </body>
 </html>"""
@@ -391,24 +396,40 @@ def fmt_context(ctx):
     return str(ctx)
 
 
+CHEVRON_SVG = (
+    '<svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" '
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+    '<polyline points="6 9 12 15 18 9"/></svg>'
+)
+
+
 def render_provider(p, models, error=None):
     color = p["color"]
     label = escape(p["label"])
     url = p["url"]
+    key_url = p.get("key_url", "")
     count = len(models) if models else 0
+
+    key_link = (
+        f'<a class="api-key-link" href="{key_url}" target="_blank" title="Get API key">Get API key</a>'
+        if key_url else ""
+    )
+    collapse_btn = f'<button class="collapse-btn" aria-label="Toggle models list">{CHEVRON_SVG}</button>'
 
     header = (
         f'<div class="provider-header">'
         f'<span class="provider-dot" style="background:{color}"></span>'
         f'<span class="provider-name"><a href="{url}" target="_blank">{label}</a></span>'
+        f'{key_link}'
         f'<span class="provider-count">{count} models</span>'
+        f'{collapse_btn}'
         f'</div>'
     )
 
     if error:
-        body = f'<div class="provider-error">⚠ Could not fetch models: {escape(str(error))}</div>'
+        inner = f'<div class="provider-error">⚠ Could not fetch models: {escape(str(error))}</div>'
     elif not models:
-        body = '<div class="provider-error">No free models found.</div>'
+        inner = '<div class="provider-error">No free models found.</div>'
     else:
         rows = ""
         for m in sorted(models, key=lambda x: x["id"]):
@@ -430,13 +451,14 @@ def render_provider(p, models, error=None):
             '<col class="col-ctx"><col class="col-limits">'
             '</colgroup>'
         )
-        body = (
+        inner = (
             '<table>' + colgroup + '<thead><tr>'
             '<th>Model ID <span class="copy-tip">(click to copy)</span></th>'
             '<th>Name</th><th>Context</th><th>Limits</th>'
             '</tr></thead><tbody>' + rows + '</tbody></table>'
         )
 
+    body = f'<div class="provider-body">{inner}</div>'
     return f'<div class="provider-card" data-total="{count}">{header}{body}</div>'
 
 
