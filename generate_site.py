@@ -231,7 +231,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, sans-serif; padding: 2rem 1rem; }}
-  header {{ max-width: 960px; margin: 0 auto 2rem; }}
+  header {{ max-width: 960px; margin: 0 auto 1.5rem; }}
   h1 {{ font-size: 1.75rem; font-weight: 700; color: #fff; }}
   .subtitle {{ color: var(--muted); margin-top: .4rem; font-size: .95rem; }}
   .subtitle a {{ color: var(--accent); text-decoration: none; }}
@@ -240,6 +240,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .stats {{ display: flex; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }}
   .stat {{ background: var(--surface); border: 1px solid var(--border); border-radius: .5rem; padding: .5rem 1rem; font-size: .85rem; }}
   .stat strong {{ color: #fff; font-size: 1.3rem; display: block; }}
+  .search-wrap {{ max-width: 960px; margin: 0 auto 1.5rem; }}
+  .search-wrap input {{
+    width: 100%; padding: .65rem 1rem .65rem 2.5rem; font-size: .95rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: .5rem;
+    color: var(--text); outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: .75rem center;
+    transition: border-color .15s;
+  }}
+  .search-wrap input:focus {{ border-color: var(--accent); }}
+  .search-wrap input::placeholder {{ color: var(--muted); }}
+  .no-results {{ display: none; text-align: center; padding: 2rem; color: var(--muted); font-size: .9rem; }}
   main {{ max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }}
   .provider-card {{ background: var(--surface); border: 1px solid var(--border); border-radius: .75rem; overflow: hidden; }}
   .provider-header {{ display: flex; align-items: center; gap: .75rem; padding: .85rem 1.25rem; border-bottom: 1px solid var(--border); }}
@@ -249,14 +261,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .provider-name a:hover {{ color: var(--accent); }}
   .provider-count {{ margin-left: auto; background: #0f172a; border-radius: 999px; padding: .15rem .6rem; font-size: .75rem; color: var(--muted); }}
   .provider-error {{ padding: 1rem 1.25rem; color: #f87171; font-size: .85rem; }}
-  table {{ width: 100%; border-collapse: collapse; font-size: .85rem; }}
-  th {{ text-align: left; padding: .5rem 1.25rem; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); }}
-  td {{ padding: .45rem 1.25rem; border-bottom: 1px solid #1e293b; vertical-align: middle; }}
+  table {{ width: 100%; border-collapse: collapse; font-size: .85rem; table-layout: fixed; }}
+  col.col-id      {{ width: 38%; }}
+  col.col-name    {{ width: 28%; }}
+  col.col-ctx     {{ width: 10%; }}
+  col.col-limits  {{ width: 24%; }}
+  th {{ text-align: left; padding: .5rem 1.25rem; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); overflow: hidden; }}
+  td {{ padding: .45rem 1.25rem; border-bottom: 1px solid #1e293b; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
   tr:last-child td {{ border-bottom: none; }}
   tr:hover td {{ background: rgba(255,255,255,.03); }}
-  .model-id {{ font-family: ui-monospace, monospace; font-size: .82rem; color: var(--accent); cursor: pointer; }}
+  .model-id {{ font-family: ui-monospace, monospace; font-size: .82rem; color: var(--accent); cursor: pointer; display: block; overflow: hidden; text-overflow: ellipsis; }}
   .model-id:hover {{ text-decoration: underline; }}
-  .model-name {{ color: var(--text); }}
+  .model-name {{ color: var(--text); overflow: hidden; text-overflow: ellipsis; }}
   .ctx {{ color: var(--muted); font-size: .78rem; }}
   .limits {{ color: var(--muted); font-size: .78rem; }}
   .copy-tip {{ font-size: .7rem; color: #475569; margin-left: .4rem; }}
@@ -268,8 +284,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .suggest-btn {{ display: inline-flex; align-items: center; gap: .5rem; background: #238636; color: #fff; border: none; border-radius: .5rem; padding: .6rem 1.2rem; font-size: .875rem; font-weight: 600; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background .15s; }}
   .suggest-btn:hover {{ background: #2ea043; }}
   @media (max-width: 600px) {{
-    td:nth-child(3), th:nth-child(3),
-    td:nth-child(4), th:nth-child(4) {{ display: none; }}
+    col.col-ctx, th:nth-child(3), td:nth-child(3),
+    col.col-limits, th:nth-child(4), td:nth-child(4) {{ display: none; }}
+    col.col-id   {{ width: 50%; }}
+    col.col-name {{ width: 50%; }}
     .suggest-card {{ flex-direction: column; align-items: flex-start; }}
   }}
 </style>
@@ -290,8 +308,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div class="stat"><strong>{total_providers}</strong>providers</div>
   </div>
 </header>
+<div class="search-wrap">
+  <input type="search" id="model-search" placeholder="Search models by ID or name…" autocomplete="off" spellcheck="false">
+</div>
 <main>
 {provider_sections}
+<p class="no-results" id="no-results">No models match your search.</p>
 <div class="suggest-card">
   <div class="suggest-text">
     <h2>Know a provider we're missing?</h2>
@@ -314,13 +336,45 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 document.querySelectorAll('.model-id').forEach(el => {{
   el.title = 'Click to copy';
   el.addEventListener('click', () => {{
-    navigator.clipboard.writeText(el.textContent.trim()).then(() => {{
+    navigator.clipboard.writeText(el.dataset.id || el.textContent.trim()).then(() => {{
       const orig = el.textContent;
       el.textContent = '✓ copied';
       setTimeout(() => el.textContent = orig, 1200);
     }});
   }});
 }});
+
+(function() {{
+  const input = document.getElementById('model-search');
+  const noResults = document.getElementById('no-results');
+  const cards = Array.from(document.querySelectorAll('.provider-card[data-total]'));
+
+  input.addEventListener('input', () => {{
+    const q = input.value.toLowerCase().trim();
+    let totalVisible = 0;
+
+    cards.forEach(card => {{
+      const rows = card.querySelectorAll('tbody tr');
+      const countEl = card.querySelector('.provider-count');
+      const total = parseInt(card.dataset.total, 10);
+      let visible = 0;
+
+      rows.forEach(row => {{
+        const match = !q || row.dataset.search.includes(q);
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
+      }});
+
+      if (countEl) {{
+        countEl.textContent = q ? visible + '/' + total + ' models' : total + ' models';
+      }}
+      card.style.display = (rows.length === 0 || visible > 0) ? '' : 'none';
+      if (visible > 0) totalVisible++;
+    }});
+
+    noResults.style.display = (q && totalVisible === 0) ? 'block' : 'none';
+  }});
+}})();
 </script>
 </body>
 </html>"""
@@ -359,22 +413,31 @@ def render_provider(p, models, error=None):
         rows = ""
         for m in sorted(models, key=lambda x: x["id"]):
             ctx = fmt_context(m.get("context"))
+            mid = m["id"]
+            name = m.get("name") or mid
+            search_val = escape(f"{mid} {name}".lower())
             rows += (
-                f"<tr>"
-                f'<td><span class="model-id">{escape(m["id"])}</span></td>'
-                f'<td class="model-name">{escape(m.get("name") or m["id"])}</td>'
+                f'<tr data-search="{search_val}">'
+                f'<td><span class="model-id" data-id="{escape(mid)}">{escape(mid)}</span></td>'
+                f'<td class="model-name">{escape(name)}</td>'
                 f'<td class="ctx">{escape(ctx)}</td>'
                 f'<td class="limits">{escape(m.get("limits") or "")}</td>'
                 f"</tr>"
             )
+        colgroup = (
+            '<colgroup>'
+            '<col class="col-id"><col class="col-name">'
+            '<col class="col-ctx"><col class="col-limits">'
+            '</colgroup>'
+        )
         body = (
-            '<table><thead><tr>'
+            '<table>' + colgroup + '<thead><tr>'
             '<th>Model ID <span class="copy-tip">(click to copy)</span></th>'
             '<th>Name</th><th>Context</th><th>Limits</th>'
             '</tr></thead><tbody>' + rows + '</tbody></table>'
         )
 
-    return f'<div class="provider-card">{header}{body}</div>'
+    return f'<div class="provider-card" data-total="{count}">{header}{body}</div>'
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
