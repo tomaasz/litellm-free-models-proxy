@@ -34,6 +34,7 @@ LITELLM_BASE = os.environ.get("LITELLM_BASE_URL", "http://litellm:4000")
 LITELLM_KEY = os.environ.get("LITELLM_MASTER_KEY", "")
 SYNC_INTERVAL_H = int(os.environ.get("SYNC_INTERVAL_HOURS", "24"))
 STARTUP_DELAY_S = int(os.environ.get("STARTUP_DELAY_SECONDS", "60"))
+CLEANUP_STALE = os.environ.get("CLEANUP_STALE_MODELS", "").lower() in ("1", "true", "yes")
 
 # Community-maintained list of free LLM APIs (auto-generated, updated frequently).
 CHEAHJS_README_URL = (
@@ -82,17 +83,31 @@ def _get_litellm(path):
 # ── LiteLLM state ─────────────────────────────────────────────────────────────
 
 def get_existing_litellm_models():
-    """Return set of litellm_params.model strings already registered."""
+    """Return dict: litellm_model → {"id": ..., "api_key": ...}"""
     try:
         data = _get_litellm("/model/info")
-        return {
-            entry.get("litellm_params", {}).get("model", "")
-            for entry in data.get("data", [])
-            if entry.get("litellm_params", {}).get("model")
-        }
+        result = {}
+        for entry in data.get("data", []):
+            lp = entry.get("litellm_params", {})
+            model_str = lp.get("model", "")
+            if model_str:
+                result[model_str] = {
+                    "id": entry.get("model_info", {}).get("id", ""),
+                    "api_key": lp.get("api_key", ""),
+                }
+        return result
     except Exception as e:
         log.error(f"Failed to fetch existing models: {e}")
-        return set()
+        return {}
+
+
+def delete_model(model_id):
+    try:
+        _post_litellm("/model/delete", {"id": model_id})
+        return True
+    except Exception as e:
+        log.error(f"  Failed to delete model {model_id}: {e}")
+        return False
 
 
 def add_model(model_name, litellm_model, api_key_env, rpm=None, api_base=None):
@@ -410,25 +425,6 @@ def fetch_github(api_key):
         return []
 
 
-def fetch_chutes(api_key):
-    """Chutes.ai — free OpenAI-compatible inference, rate-limited."""
-    try:
-        data = _json_get(
-            "https://llm.chutes.ai/v1/models",
-            headers={"Authorization": f"Bearer {api_key}"},
-        )
-        ids = [
-            m["id"]
-            for m in data.get("data", [])
-            if not any(x in m.get("id", "").lower() for x in ("embed", "tts", "stt", "image", "vision"))
-        ]
-        log.info(f"[Chutes] {len(ids)} models")
-        return ids
-    except Exception as e:
-        log.error(f"[Chutes] {e}")
-        return []
-
-
 def fetch_cloudflare(api_key):
     """Cloudflare Workers AI — 10k neurons/day free."""
     account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
@@ -571,15 +567,6 @@ PROVIDERS = [
         "rpm": 20,
         "api_base": None,  # constructed dynamically in sync() — includes account_id
     },
-    {
-        "name": "Chutes",
-        "env_key": "CHUTES_API_KEY",
-        "fetch": fetch_chutes,
-        "litellm_fmt": lambda mid: f"openai/{mid}",
-        "name_fmt": lambda mid: f"chutes/{slug(mid)}",
-        "rpm": 10,
-        "api_base": "https://llm.chutes.ai/v1",
-    },
 ]
 
 
@@ -587,27 +574,27 @@ PROVIDERS = [
 
 def sync():
     log.info("=== Model sync started ===")
+    if CLEANUP_STALE:
+        log.info("Stale model cleanup enabled (CLEANUP_STALE_MODELS=true)")
 
-    # Fetch community cross-reference first (best-effort)
     community = fetch_community_free_models()
 
-    existing = get_existing_litellm_models()
-    log.info(f"Currently {len(existing)} litellm model entries registered")
+    existing = get_existing_litellm_models()  # dict: litellm_model → {"id", "api_key"}
+    existing_set = set(existing.keys())
+    log.info(f"Currently {len(existing_set)} litellm model entries registered")
 
-    added = skipped = errors = 0
+    added = skipped = errors = deleted = 0
 
     for provider in PROVIDERS:
         api_key = os.environ.get(provider["env_key"], "")
         if not api_key:
             continue
 
-        # Cohere needs community data passed in
         if provider["name"] == "Cohere":
             models = fetch_cohere(api_key, community.get("cohere"))
         else:
             models = provider["fetch"](api_key)
 
-        # Cloudflare api_base includes account_id — resolve at sync time
         cf_account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
         api_base = (
             f"https://api.cloudflare.com/client/v4/accounts/{cf_account_id}/ai"
@@ -615,9 +602,21 @@ def sync():
             else provider.get("api_base")
         )
 
+        # Remove models that are no longer offered by this provider
+        if CLEANUP_STALE and models is not None:
+            expected_key = f"os.environ/{provider['env_key']}"
+            current = {provider["litellm_fmt"](mid) for mid in models}
+            for model_str, info in list(existing.items()):
+                if info["api_key"] == expected_key and model_str not in current:
+                    log.info(f"  - Removing stale: {model_str}")
+                    if delete_model(info["id"]):
+                        del existing[model_str]
+                        existing_set.discard(model_str)
+                        deleted += 1
+
         for mid in models:
             litellm_model = provider["litellm_fmt"](mid)
-            if litellm_model in existing:
+            if litellm_model in existing_set:
                 skipped += 1
                 continue
 
@@ -631,12 +630,15 @@ def sync():
             )
             if ok:
                 log.info(f"  + {model_name}  ({litellm_model})")
-                existing.add(litellm_model)
+                existing_set.add(litellm_model)
                 added += 1
             else:
                 errors += 1
 
-    log.info(f"=== Done: +{added} added, {skipped} already existed, {errors} errors ===")
+    log.info(
+        f"=== Done: +{added} added, -{deleted} removed, "
+        f"{skipped} already existed, {errors} errors ==="
+    )
 
 
 def wait_for_litellm():
