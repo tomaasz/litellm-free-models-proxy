@@ -176,7 +176,7 @@ def fetch_community_free_models():
         line = line.strip().lstrip("- ")
         if line and not line.startswith("[") and not line.startswith("#") \
                 and not line.startswith("*") and not line.startswith("<"):
-            if "/" not in line and len(line) < 60:
+            if "/" not in line and len(line) < 60 and " " not in line:
                 result["cohere"].add(line)
 
     # OpenRouter section has links like (https://openrouter.ai/provider/model:free)
