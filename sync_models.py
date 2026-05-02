@@ -13,6 +13,8 @@ Sources:
 Does NOT touch routing groups (smart/fast/etc.) — only adds named routes
 like or/llama-3.3-70b, groq/llama-3.3-70b-versatile, etc.
 """
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 
 import os
 import re
@@ -69,15 +71,26 @@ def _post_litellm(path, payload):
         },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=15) as r:
-        return json.loads(r.read().decode())
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return json.loads(r.read().decode())
+        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+            if attempt == 2:
+                raise
+            time.sleep(2 ** attempt)
 
 
 def _get_litellm(path):
-    return _json_get(
-        f"{LITELLM_BASE}{path}",
-        headers={"Authorization": f"Bearer {LITELLM_KEY}"},
-    )
+    url = f"{LITELLM_BASE}{path}"
+    headers = {"Authorization": f"Bearer {LITELLM_KEY}"}
+    for attempt in range(3):
+        try:
+            return _json_get(url, headers=headers)
+        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+            if attempt == 2:
+                raise
+            time.sleep(2 ** attempt)
 
 
 # ── LiteLLM state ─────────────────────────────────────────────────────────────
@@ -606,14 +619,25 @@ def sync():
         if CLEANUP_STALE and models is not None:
             expected_key = f"os.environ/{provider['env_key']}"
             current = {provider["litellm_fmt"](mid) for mid in models}
+            to_delete = []
             for model_str, info in list(existing.items()):
                 if info["api_key"] == expected_key and model_str not in current:
                     log.info(f"  - Removing stale: {model_str}")
-                    if delete_model(info["id"]):
-                        del existing[model_str]
-                        existing_set.discard(model_str)
-                        deleted += 1
+                    to_delete.append((model_str, info["id"]))
+            if to_delete:
+                with ThreadPoolExecutor(max_workers=10) as executor:
+                    futures = {executor.submit(delete_model, info_id): model_str for model_str, info_id in to_delete}
+                    for future in as_completed(futures):
+                        model_str = futures[future]
+                        try:
+                            if future.result():
+                                del existing[model_str]
+                                existing_set.discard(model_str)
+                                deleted += 1
+                        except Exception as e:
+                            log.error(f"  Failed to delete stale model {model_str}: {e}")
 
+        to_add = []
         for mid in models:
             litellm_model = provider["litellm_fmt"](mid)
             if litellm_model in existing_set:
@@ -621,19 +645,27 @@ def sync():
                 continue
 
             model_name = provider["name_fmt"](mid)
-            ok = add_model(
-                model_name=model_name,
-                litellm_model=litellm_model,
-                api_key_env=provider["env_key"],
-                rpm=provider["rpm"],
-                api_base=api_base,
-            )
-            if ok:
-                log.info(f"  + {model_name}  ({litellm_model})")
-                existing_set.add(litellm_model)
-                added += 1
-            else:
-                errors += 1
+            to_add.append((model_name, litellm_model, provider["env_key"], provider.get("rpm"), api_base))
+
+        if to_add:
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                future_to_model = {
+                    executor.submit(add_model, mn, lm, env, rpm, ab): (mn, lm)
+                    for mn, lm, env, rpm, ab in to_add
+                }
+                for future in as_completed(future_to_model):
+                    mn, lm = future_to_model[future]
+                    try:
+                        ok = future.result()
+                        if ok:
+                            log.info(f"  + {mn}  ({lm})")
+                            existing_set.add(lm)
+                            added += 1
+                        else:
+                            errors += 1
+                    except Exception as exc:
+                        log.error(f"  Failed to add {mn} ({lm}): {exc}")
+                        errors += 1
 
     log.info(
         f"=== Done: +{added} added, -{deleted} removed, "
