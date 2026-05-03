@@ -57,7 +57,8 @@ def fetch_groq(key):
     return [
         {"id": m["id"], "name": m["id"], "context": m.get("context_window"), "limits": "varies per model"}
         for m in data.get("data", [])
-        if not any(x in m.get("id","").lower() for x in ("whisper","tts","embed","guard"))
+        for mid in (m.get("id","").lower(),)
+        if not any(x in mid for x in ("whisper","tts","embed","guard"))
     ]
 
 
@@ -126,7 +127,8 @@ def fetch_nvidia(key):
     return [{"id": m["id"], "name": m["id"],
              "context": None, "limits": "40 req/min"}
             for m in data.get("data", [])
-            if not any(x in m.get("id","").lower() for x in ("embed","rerank","tts"))]
+            for mid in (m.get("id","").lower(),)
+            if not any(x in mid for x in ("embed","rerank","tts"))]
 
 
 def fetch_huggingface(key):
@@ -135,7 +137,8 @@ def fetch_huggingface(key):
     return [{"id": m["id"], "name": m["id"],
              "context": None, "limits": "free credits/month"}
             for m in data.get("data", [])
-            if not any(x in m.get("id","").lower() for x in ("embed","vision","tts","stt"))]
+            for mid in (m.get("id","").lower(),)
+            if not any(x in mid for x in ("embed","vision","tts","stt"))]
 
 
 def fetch_github(key):
@@ -148,8 +151,8 @@ def fetch_github(key):
          "context": None,
          "limits": "rate-limited (free / higher with Copilot)"}
         for m in items
-        if not any(x in (m.get("id") or m.get("name", "")).lower()
-                   for x in ("embed", "tts", "whisper", "dall-e", "image"))
+        for mid in ((m.get("id") or m.get("name", "")).lower(),)
+        if not any(x in mid for x in ("embed", "tts", "whisper", "dall-e", "image"))
         and (m.get("id") or m.get("name", ""))
     ]
 
@@ -176,8 +179,9 @@ def fetch_mistral(key):
     return [{"id": m["id"], "name": m.get("name", m["id"]),
              "context": None, "limits": "1 req/s · 1B tok/month"}
             for m in data.get("data", [])
+            for mid in (m.get("id","").lower(),)
             if m.get("object") == "model"
-            and not any(x in m.get("id","").lower() for x in ("embed","moderation"))]
+            and not any(x in mid for x in ("embed","moderation"))]
 
 
 # ── Community cross-reference ─────────────────────────────────────────────────

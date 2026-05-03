@@ -223,7 +223,8 @@ def fetch_groq(api_key):
         ids = [
             m["id"]
             for m in data.get("data", [])
-            if not any(x in m.get("id", "").lower() for x in ("whisper", "tts", "embed", "guard"))
+            for mid in (m.get("id", "").lower(),)
+            if not any(x in mid for x in ("whisper", "tts", "embed", "guard"))
         ]
         log.info(f"[Groq] {len(ids)} models")
         return ids
@@ -351,7 +352,8 @@ def fetch_nvidia(api_key):
         ids = [
             m["id"]
             for m in data.get("data", [])
-            if not any(x in m.get("id", "").lower() for x in ("embed", "rerank", "tts"))
+            for mid in (m.get("id", "").lower(),)
+            if not any(x in mid for x in ("embed", "rerank", "tts"))
         ]
         log.info(f"[NVIDIA NIM] {len(ids)} models")
         return ids
@@ -369,7 +371,8 @@ def fetch_huggingface(api_key):
         ids = [
             m["id"]
             for m in data.get("data", [])
-            if not any(x in m.get("id", "").lower() for x in ("embed", "vision", "tts", "stt"))
+            for mid in (m.get("id", "").lower(),)
+            if not any(x in mid for x in ("embed", "vision", "tts", "stt"))
         ]
         log.info(f"[HuggingFace] {len(ids)} models")
         return ids
@@ -393,8 +396,9 @@ def fetch_mistral(api_key):
         ids = [
             m["id"]
             for m in data.get("data", [])
+            for mid in (m.get("id", "").lower(),)
             if m.get("object") == "model"
-            and not any(x in m.get("id", "").lower() for x in ("embed", "moderation"))
+            and not any(x in mid for x in ("embed", "moderation"))
         ]
         log.info(f"[Mistral] {len(ids)} models")
         return ids
@@ -414,8 +418,8 @@ def fetch_github(api_key):
         ids = [
             m.get("id") or m.get("name", "")
             for m in items
-            if not any(x in (m.get("id") or m.get("name", "")).lower()
-                       for x in ("embed", "tts", "whisper", "dall-e", "image"))
+            for mid in ((m.get("id") or m.get("name", "")).lower(),)
+            if not any(x in mid for x in ("embed", "tts", "whisper", "dall-e", "image"))
             and (m.get("id") or m.get("name", ""))
         ]
         log.info(f"[GitHub Models] {len(ids)} models")
