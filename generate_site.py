@@ -670,12 +670,14 @@ def main():
 
     results = {}  # provider_key → list of model dicts
     errors = {}
+    keys_configured = False
 
     for p in PROVIDERS:
         key = os.environ.get(p["env"], "")
         if not key:
             print(f"  [{p['label']}] no API key, skipping")
             continue
+        keys_configured = True
         print(f"  [{p['label']}] fetching...", end=" ", flush=True)
         try:
             models = p["fetch"](key)
@@ -685,6 +687,10 @@ def main():
             errors[p["key"]] = e
             results[p["key"]] = []
             print(f"ERROR: {e}")
+
+    if not keys_configured:
+        print("No API keys configured. Exiting early to avoid overwriting existing data.")
+        return
 
     # Read previous models.json for delta computation
     old_models_path = OUT_DIR / "models.json"
