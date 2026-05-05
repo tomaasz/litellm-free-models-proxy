@@ -21,6 +21,8 @@ import logging
 import urllib.request
 import urllib.error
 import json
+import concurrent.futures
+import random
 from html.parser import HTMLParser
 
 logging.basicConfig(
@@ -34,7 +36,11 @@ LITELLM_BASE = os.environ.get("LITELLM_BASE_URL", "http://litellm:4000")
 LITELLM_KEY = os.environ.get("LITELLM_MASTER_KEY", "")
 SYNC_INTERVAL_H = int(os.environ.get("SYNC_INTERVAL_HOURS", "24"))
 STARTUP_DELAY_S = int(os.environ.get("STARTUP_DELAY_SECONDS", "60"))
-CLEANUP_STALE = os.environ.get("CLEANUP_STALE_MODELS", "").lower() in ("1", "true", "yes")
+CLEANUP_STALE = os.environ.get("CLEANUP_STALE_MODELS", "").lower() in (
+    "1",
+    "true",
+    "yes",
+)
 
 # Community-maintained list of free LLM APIs (auto-generated, updated frequently).
 CHEAHJS_README_URL = (
@@ -82,6 +88,7 @@ def _get_litellm(path):
 
 # ── LiteLLM state ─────────────────────────────────────────────────────────────
 
+
 def get_existing_litellm_models():
     """Return dict: litellm_model → {"id": ..., "api_key": ...}"""
     try:
@@ -101,43 +108,72 @@ def get_existing_litellm_models():
         return {}
 
 
-def delete_model(model_id):
-    try:
-        _post_litellm("/model/delete", {"id": model_id})
-        return True
-    except Exception as e:
-        log.error(f"  Failed to delete model {model_id}: {e}")
-        return False
+def delete_model(model_id, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            _post_litellm("/model/delete", {"id": model_id})
+            return True
+        except Exception as e:
+            if attempt < max_retries - 1:
+                sleep_time = (2**attempt) + random.uniform(0, 1)
+                log.warning(
+                    f"  Retrying delete for model {model_id} in {sleep_time:.2f}s... ({e})"
+                )
+                time.sleep(sleep_time)
+            else:
+                log.error(
+                    f"  Failed to delete model {model_id} after {max_retries} attempts: {e}"
+                )
+    return False
 
 
-def add_model(model_name, litellm_model, api_key_env, rpm=None, api_base=None):
+def add_model(
+    model_name, litellm_model, api_key_env, rpm=None, api_base=None, max_retries=3
+):
     params = {"model": litellm_model, "api_key": f"os.environ/{api_key_env}"}
     if rpm:
         params["rpm"] = rpm
     if api_base:
         params["api_base"] = api_base
-    try:
-        _post_litellm("/model/new", {"model_name": model_name, "litellm_params": params})
-        return True
-    except Exception as e:
-        log.error(f"  Failed to add {model_name} ({litellm_model}): {e}")
-        return False
+    for attempt in range(max_retries):
+        try:
+            _post_litellm(
+                "/model/new", {"model_name": model_name, "litellm_params": params}
+            )
+            return True
+        except Exception as e:
+            if attempt < max_retries - 1:
+                sleep_time = (2**attempt) + random.uniform(0, 1)
+                log.warning(
+                    f"  Retrying add for {model_name} in {sleep_time:.2f}s... ({e})"
+                )
+                time.sleep(sleep_time)
+            else:
+                log.error(
+                    f"  Failed to add {model_name} ({litellm_model}) after {max_retries} attempts: {e}"
+                )
+    return False
 
 
 # ── cheahjs/free-llm-api-resources cross-reference ───────────────────────────
 
+
 class _TableTextParser(HTMLParser):
     """Extracts <td> text content from an HTML table."""
+
     def __init__(self):
         super().__init__()
         self.in_td = False
         self.cells = []
+
     def handle_starttag(self, tag, attrs):
         if tag == "td":
             self.in_td = True
+
     def handle_endtag(self, tag):
         if tag == "td":
             self.in_td = False
+
     def handle_data(self, data):
         if self.in_td:
             self.cells.append(data.strip())
@@ -150,7 +186,7 @@ def _extract_section(readme, heading):
     if not m:
         return ""
     start = m.start()
-    next_section = re.search(r"\n### ", readme[start + 1:])
+    next_section = re.search(r"\n### ", readme[start + 1 :])
     end = start + 1 + next_section.start() if next_section else len(readme)
     return readme[start:end]
 
@@ -174,8 +210,13 @@ def fetch_community_free_models():
     cohere_section = _extract_section(readme, "Cohere")
     for line in cohere_section.splitlines():
         line = line.strip().lstrip("- ")
-        if line and not line.startswith("[") and not line.startswith("#") \
-                and not line.startswith("*") and not line.startswith("<"):
+        if (
+            line
+            and not line.startswith("[")
+            and not line.startswith("#")
+            and not line.startswith("*")
+            and not line.startswith("<")
+        ):
             if "/" not in line and len(line) < 60:
                 result["cohere"].add(line)
 
@@ -192,6 +233,7 @@ def fetch_community_free_models():
 
 
 # ── Provider fetchers ──────────────────────────────────────────────────────────
+
 
 def fetch_openrouter(api_key):
     """Free models: pricing.prompt == '0' AND pricing.completion == '0'."""
@@ -223,7 +265,10 @@ def fetch_groq(api_key):
         ids = [
             m["id"]
             for m in data.get("data", [])
-            if not any(x in m.get("id", "").lower() for x in ("whisper", "tts", "embed", "guard"))
+            if not any(
+                x in m.get("id", "").lower()
+                for x in ("whisper", "tts", "embed", "guard")
+            )
         ]
         log.info(f"[Groq] {len(ids)} models")
         return ids
@@ -273,8 +318,11 @@ def fetch_together(api_key):
         for m in items:
             mid = m.get("id", "")
             p = m.get("pricing", {})
-            if (p.get("input", 1) == 0 and p.get("output", 1) == 0) \
-                    or "-Free" in mid or "-free" in mid:
+            if (
+                (p.get("input", 1) == 0 and p.get("output", 1) == 0)
+                or "-Free" in mid
+                or "-free" in mid
+            ):
                 free.append(mid)
         log.info(f"[Together] {len(free)} free models")
         return free
@@ -306,7 +354,9 @@ def fetch_cohere(api_key, community_ids=None):
     except Exception as e:
         log.error(f"[Cohere] API error: {e}")
         if community_ids:
-            log.info(f"[Cohere] Falling back to community list ({len(community_ids)} models)")
+            log.info(
+                f"[Cohere] Falling back to community list ({len(community_ids)} models)"
+            )
             return list(community_ids)
         return []
 
@@ -323,13 +373,17 @@ def fetch_gemini(api_key):
         )
         free = []
         for m in data.get("models", []):
-            name = m.get("name", "").replace("models/", "")  # "models/gemini-2.5-flash" → "gemini-2.5-flash"
+            name = m.get("name", "").replace(
+                "models/", ""
+            )  # "models/gemini-2.5-flash" → "gemini-2.5-flash"
             methods = m.get("supportedGenerationMethods", [])
             if "generateContent" not in methods:
                 continue
             nl = name.lower()
             # Exclude non-free variants
-            if any(x in nl for x in ("-pro", "-ultra", "embedding", "-tts", "robotics")):
+            if any(
+                x in nl for x in ("-pro", "-ultra", "embedding", "-tts", "robotics")
+            ):
                 continue
             # Include flash, lite, and gemma (open) models
             if any(x in nl for x in ("flash", "gemma")):
@@ -369,7 +423,9 @@ def fetch_huggingface(api_key):
         ids = [
             m["id"]
             for m in data.get("data", [])
-            if not any(x in m.get("id", "").lower() for x in ("embed", "vision", "tts", "stt"))
+            if not any(
+                x in m.get("id", "").lower() for x in ("embed", "vision", "tts", "stt")
+            )
         ]
         log.info(f"[HuggingFace] {len(ids)} models")
         return ids
@@ -414,8 +470,10 @@ def fetch_github(api_key):
         ids = [
             m.get("id") or m.get("name", "")
             for m in items
-            if not any(x in (m.get("id") or m.get("name", "")).lower()
-                       for x in ("embed", "tts", "whisper", "dall-e", "image"))
+            if not any(
+                x in (m.get("id") or m.get("name", "")).lower()
+                for x in ("embed", "tts", "whisper", "dall-e", "image")
+            )
             and (m.get("id") or m.get("name", ""))
         ]
         log.info(f"[GitHub Models] {len(ids)} models")
@@ -450,6 +508,7 @@ def fetch_cloudflare(api_key):
 
 
 # ── Slug helper ───────────────────────────────────────────────────────────────
+
 
 def slug(model_id):
     return model_id.split("/")[-1].replace(":free", "").lower()
@@ -572,6 +631,7 @@ PROVIDERS = [
 
 # ── Main sync ─────────────────────────────────────────────────────────────────
 
+
 def sync():
     log.info("=== Model sync started ===")
     if CLEANUP_STALE:
@@ -602,17 +662,16 @@ def sync():
             else provider.get("api_base")
         )
 
+        models_to_delete = []
+        models_to_add = []
+
         # Remove models that are no longer offered by this provider
         if CLEANUP_STALE and models is not None:
             expected_key = f"os.environ/{provider['env_key']}"
             current = {provider["litellm_fmt"](mid) for mid in models}
             for model_str, info in list(existing.items()):
                 if info["api_key"] == expected_key and model_str not in current:
-                    log.info(f"  - Removing stale: {model_str}")
-                    if delete_model(info["id"]):
-                        del existing[model_str]
-                        existing_set.discard(model_str)
-                        deleted += 1
+                    models_to_delete.append((model_str, info["id"]))
 
         for mid in models:
             litellm_model = provider["litellm_fmt"](mid)
@@ -621,19 +680,61 @@ def sync():
                 continue
 
             model_name = provider["name_fmt"](mid)
-            ok = add_model(
-                model_name=model_name,
-                litellm_model=litellm_model,
-                api_key_env=provider["env_key"],
-                rpm=provider["rpm"],
-                api_base=api_base,
+            models_to_add.append(
+                {
+                    "model_name": model_name,
+                    "litellm_model": litellm_model,
+                    "api_key_env": provider["env_key"],
+                    "rpm": provider["rpm"],
+                    "api_base": api_base,
+                }
             )
-            if ok:
-                log.info(f"  + {model_name}  ({litellm_model})")
-                existing_set.add(litellm_model)
-                added += 1
-            else:
-                errors += 1
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            if models_to_delete:
+                delete_futures = {
+                    executor.submit(delete_model, info_id): model_str
+                    for model_str, info_id in models_to_delete
+                }
+                for future in concurrent.futures.as_completed(delete_futures):
+                    model_str = delete_futures[future]
+                    try:
+                        if future.result():
+                            log.info(f"  - Removed stale: {model_str}")
+                            del existing[model_str]
+                            existing_set.discard(model_str)
+                            deleted += 1
+                        else:
+                            errors += 1
+                    except Exception as e:
+                        log.error(f"Error during delete_model for {model_str}: {e}")
+                        errors += 1
+
+            if models_to_add:
+                add_futures = {
+                    executor.submit(
+                        add_model,
+                        model_name=kw["model_name"],
+                        litellm_model=kw["litellm_model"],
+                        api_key_env=kw["api_key_env"],
+                        rpm=kw["rpm"],
+                        api_base=kw["api_base"],
+                    ): kw
+                    for kw in models_to_add
+                }
+
+                for future in concurrent.futures.as_completed(add_futures):
+                    kw = add_futures[future]
+                    try:
+                        if future.result():
+                            log.info(f"  + {kw['model_name']}  ({kw['litellm_model']})")
+                            existing_set.add(kw["litellm_model"])
+                            added += 1
+                        else:
+                            errors += 1
+                    except Exception as e:
+                        log.error(f"Error during add_model for {kw['model_name']}: {e}")
+                        errors += 1
 
     log.info(
         f"=== Done: +{added} added, -{deleted} removed, "
