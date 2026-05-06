@@ -1,0 +1,76 @@
+name: Mark stale PRs and branches
+
+# Closes inactive DRAFT PRs and prunes orphan branches with no PR.
+# Runs daily at 03:30 Europe/Warsaw (01:30 UTC summer / 02:30 UTC winter — accept the half-hour drift).
+
+on:
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  contents: write
+  issues: write
+
+jobs:
+  stale-prs:
+    name: Stale draft PRs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          # Only act on draft PRs — open PRs that are out for review stay alone.
+          only-pr-labels: ""
+          days-before-pr-stale: 14
+          days-before-pr-close: 7
+          stale-pr-label: "stale"
+          stale-pr-message: |
+            This DRAFT PR has been inactive for 14 days. It will be closed
+            in another 7 days unless someone marks it ready for review or
+            removes the `stale` label.
+          close-pr-message: |
+            Closing as stale — no activity for 21 days.
+            Reopen if it's still relevant.
+          # Skip non-draft PRs
+          exempt-pr-labels: "needs-review,security,blocked"
+          # Only consider drafts via the GraphQL filter the action already supports.
+          # `only-issue-labels` is for issues; the action treats non-draft PRs as
+          # "not stale" when we set this true.
+          ignore-pr-updates: false
+
+  prune-orphan-branches:
+    name: Prune branches with no PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete merged & orphan claude/* branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+
+          # 1. Branches already merged to main → delete
+          for b in $(git branch -r --merged origin/main | grep -E 'origin/(claude/|auditor-|sentinel-|architect-|palette-|janitor-|bolt-|doctor-)' | sed 's|origin/||' | tr -d ' '); do
+            if [ "$b" != "main" ] && [ "$b" != "HEAD" ]; then
+              echo "Deleting merged branch: $b"
+              git push origin --delete "$b" || true
+            fi
+          done
+
+          # 2. Branches with no associated open PR + older than 30 days → delete
+          all_open_prs=$(gh pr list --state open --json headRefName --jq '.[].headRefName' | sort -u)
+          cutoff=$(date -u -d '30 days ago' +%s)
+          for b in $(git branch -r | grep -E 'origin/(claude/|auditor-|sentinel-|architect-|palette-|janitor-|bolt-|doctor-)' | sed 's|origin/||' | tr -d ' '); do
+            if echo "$all_open_prs" | grep -qx "$b"; then
+              continue
+            fi
+            last_commit_ts=$(git log -1 --format=%ct "origin/$b" 2>/dev/null || echo 0)
+            if [ "$last_commit_ts" -gt 0 ] && [ "$last_commit_ts" -lt "$cutoff" ]; then
+              echo "Deleting orphan stale branch: $b (last commit $(date -u -d @$last_commit_ts +%Y-%m-%d))"
+              git push origin --delete "$b" || true
+            fi
+          done

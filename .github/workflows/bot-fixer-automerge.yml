@@ -1,0 +1,82 @@
+name: Auto-merge small bot-fixer PRs
+
+# Bot-fixers (Auditor / Sentinel / Palette / Architect / Bolt / Janitor /
+# Doctor / Jules) open DRAFT PRs that nobody promotes by hand, and they
+# pile up. This workflow auto-promotes and auto-merges them when the
+# change is small enough that a focused glance at CI is sufficient.
+#
+# Promotion criteria:
+#   - branch name matches one of the bot prefixes below
+#   - changed files: ≤ 2
+#   - changed lines: ≤ 50 (additions + deletions)
+#   - PR not labeled needs-review / blocked / major-upgrade
+#
+# `gh pr merge --auto` waits for required checks to pass (or merges
+# immediately if no protections are configured), so we don't need a
+# workflow_run trigger here — the pull_request_target event is enough.
+#
+# Anything bigger than the threshold stays draft for human eyes.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  small-bot-fix:
+    name: Promote & merge small bot fix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Identify candidate PR
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.setOutput('skip', 'true');
+              return;
+            }
+
+            const branch = pr.head.ref;
+            const botPrefix = /^(claude\/|auditor-|sentinel-|architect-|palette-|janitor-|bolt-|doctor-|jules-)/;
+            if (!botPrefix.test(branch)) {
+              core.notice(`Branch ${branch} is not a bot-fixer branch — skip.`);
+              core.setOutput('skip', 'true');
+              return;
+            }
+
+            const labels = pr.labels.map(l => l.name);
+            if (labels.includes('needs-review') || labels.includes('blocked') || labels.includes('major-upgrade')) {
+              core.notice('PR carries human-review label — skip.');
+              core.setOutput('skip', 'true');
+              return;
+            }
+
+            const totalLines = (pr.additions || 0) + (pr.deletions || 0);
+            const filesChanged = pr.changed_files || 0;
+            if (filesChanged > 2 || totalLines > 50) {
+              core.notice(`Too large for auto-merge: ${filesChanged} files, ${totalLines} lines.`);
+              core.setOutput('skip', 'true');
+              return;
+            }
+
+            core.setOutput('skip', 'false');
+            core.setOutput('number', pr.number.toString());
+            core.setOutput('is_draft', pr.draft.toString());
+
+      - name: Mark ready and enable auto-merge
+        if: steps.pr.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          IS_DRAFT: ${{ steps.pr.outputs.is_draft }}
+        run: |
+          set -eu
+          if [ "$IS_DRAFT" = "true" ]; then
+            gh pr ready "$PR_NUMBER"
+          fi
+          gh pr merge "$PR_NUMBER" --squash --auto --delete-branch
