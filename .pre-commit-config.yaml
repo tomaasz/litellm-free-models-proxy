@@ -1,0 +1,30 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  # Reject staging of obvious junk files. .gitignore handles ignore-on-add,
+  # but accidental `git add -A` from a different cwd or a moved-from-elsewhere
+  # path can still slip through. This hook fails the commit and prints the
+  # offending paths.
+  - repo: local
+    hooks:
+      - id: reject-junk-files
+        name: Reject backup / temp / cache files
+        language: system
+        pass_filenames: true
+        entry: bash -c '
+          matched=$(printf "%s\n" "$@" |
+            grep -E "(^|/)(\.env\.bak|\.env\.bak\..*|tmp_.*\.py|.*\.bak|.*\.bak-[0-9]+|credentials\.json\.bak.*)$|(^|/)(scan_thumbs|job_logs|data/prng|\.serena|\.sisyphus)/" || true);
+          if [ -n "$matched" ]; then
+            echo "Refusing to commit junk paths:";
+            echo "$matched";
+            echo "Add them to .gitignore (already covered for known patterns) or remove from staging.";
+            exit 1;
+          fi
+          ' --
