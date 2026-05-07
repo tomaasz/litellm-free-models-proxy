@@ -68,6 +68,9 @@ jobs:
             core.setOutput('number', pr.number.toString());
             core.setOutput('is_draft', pr.draft.toString());
 
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Mark ready and enable auto-merge
         if: steps.pr.outputs.skip == 'false'
         env:
