@@ -68,9 +68,6 @@ jobs:
             core.setOutput('number', pr.number.toString());
             core.setOutput('is_draft', pr.draft.toString());
 
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Mark ready and enable auto-merge
         if: steps.pr.outputs.skip == 'false'
         env:
@@ -80,6 +77,6 @@ jobs:
         run: |
           set -eu
           if [ "$IS_DRAFT" = "true" ]; then
-            gh pr ready "$PR_NUMBER" --repo "${{ github.repository }}"
+            gh pr ready "$PR_NUMBER"
           fi
-          gh pr merge "$PR_NUMBER" --squash --auto --delete-branch --repo "${{ github.repository }}"
+          gh pr merge "$PR_NUMBER" --squash --auto --delete-branch
