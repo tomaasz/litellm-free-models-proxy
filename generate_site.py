@@ -4,10 +4,13 @@ Generates docs/index.html and docs/models.json from provider APIs.
 Runs standalone (no LiteLLM needed) — used by GitHub Actions to build the site.
 """
 
-import os, json, re, time, urllib.request, urllib.error
+import os
+import json
+import re
+import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 from html import escape
-from html.parser import HTMLParser
 from pathlib import Path
 
 OUT_DIR = Path(__file__).parent / "docs"
@@ -580,10 +583,10 @@ def render_provider(p, models, error=None, delta=None):
             search_val = escape(f"{mid} {name}".lower())
             tag_list = get_tags(mid, m.get("context"))
             tags_html = "".join(
-                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
-                for l, c in tag_list
+                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(lbl)}</span>'
+                for lbl, c in tag_list
             )
-            tag_labels = escape(" ".join(l for l, _ in tag_list))
+            tag_labels = escape(" ".join(lbl for lbl, _ in tag_list))
             rows += (
                 f'<tr data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<td><span class="model-id" data-id="{escape(mid)}">{escape(mid)}</span></td>'
@@ -635,8 +638,8 @@ def render_cross_provider(groups, provider_map):
             ctx = fmt_context(ctx_raw)
             tag_list = get_tags(e["model_id"], e.get("context"))
             tags_html = "".join(
-                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
-                for l, c in tag_list
+                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(lbl)}</span>'
+                for lbl, c in tag_list
             )
             rows += (
                 f'<tr>'
@@ -712,7 +715,7 @@ def main():
         }
 
     old_models_path.write_text(json.dumps(json_out, indent=2, ensure_ascii=False))
-    print(f"Written docs/models.json")
+    print("Written docs/models.json")
 
     # Compute per-provider deltas
     deltas = {}
