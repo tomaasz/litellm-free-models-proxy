@@ -268,6 +268,91 @@ def fetch_zai(key):
     return out
 
 
+# ── LiteLLM model metadata enrichment ────────────────────────────────────────
+# https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json
+
+LITELLM_DB_URL = ("https://raw.githubusercontent.com/BerriAI/litellm/main/"
+                  "model_prices_and_context_window.json")
+
+# Map our provider key → litellm "litellm_provider" field
+LITELLM_PROVIDER_MAP = {
+    "openrouter": "openrouter",
+    "groq": "groq",
+    "cerebras": "cerebras",
+    "sambanova": "sambanova",
+    "together": "together_ai",
+    "cohere": "cohere",
+    "gemini": "gemini",
+    "nvidia": "nvidia_nim",
+    "huggingface": "huggingface",
+    "mistral": "mistral",
+    "github": "github",
+    "cloudflare": "cloudflare",
+}
+
+CAPABILITY_FIELDS = (
+    "supports_function_calling",
+    "supports_tool_choice",
+    "supports_response_schema",
+    "supports_vision",
+    "supports_system_messages",
+    "supports_reasoning",
+    "supports_prompt_caching",
+)
+
+
+def fetch_litellm_db():
+    try:
+        d = _get(LITELLM_DB_URL)
+        return d if isinstance(d, dict) else json.loads(d)
+    except Exception as e:
+        print(f"  [litellm-db] fetch failed: {e}")
+        return {}
+
+
+def enrich_with_litellm(results, db):
+    """Add context window + capability flags from litellm's model database."""
+    if not db:
+        return
+    # Index by litellm_provider for fast lookups
+    by_prov = {}
+    for key, val in db.items():
+        if not isinstance(val, dict):
+            continue
+        p = val.get("litellm_provider")
+        if not p:
+            continue
+        by_prov.setdefault(p, {})[key] = val
+
+    enriched = 0
+    for our_key, llm_prov in LITELLM_PROVIDER_MAP.items():
+        models = results.get(our_key, [])
+        prov_db = by_prov.get(llm_prov, {})
+        if not models or not prov_db:
+            continue
+        for m in models:
+            mid = m["id"]
+            entry = (prov_db.get(f"{llm_prov}/{mid}")
+                     or prov_db.get(mid)
+                     or prov_db.get(f"{our_key}/{mid}"))
+            if not entry:
+                continue
+            ctx = (entry.get("max_input_tokens")
+                   or entry.get("max_tokens"))
+            if ctx and not m.get("context"):
+                m["context"] = ctx
+            caps = [f.removeprefix("supports_") for f in CAPABILITY_FIELDS
+                    if entry.get(f) is True]
+            if caps:
+                m["capabilities"] = caps
+            mode = entry.get("mode")
+            if mode and mode != "chat":
+                m["mode"] = mode
+            enriched += 1
+    if enriched:
+        print(f"  Enriched {enriched} models from litellm DB")
+
+
 # ── Community cross-reference ─────────────────────────────────────────────────
 
 def fetch_cheahjs():
@@ -311,7 +396,17 @@ _TAG_RULES = [
 ]
 
 
-def get_tags(model_id, context=None):
+_CAPABILITY_CHIPS = {
+    "function_calling": ("tools", "#a78bfa"),
+    "tool_choice":      ("tools", "#a78bfa"),
+    "response_schema":  ("json", "#22d3ee"),
+    "vision":           ("vision", "#f59e0b"),
+    "reasoning":        ("reasoning", "#34d399"),
+    "prompt_caching":   ("cache", "#94a3b8"),
+}
+
+
+def get_tags(model_id, context=None, capabilities=None):
     tags = []
     mid = model_id.lower()
     for keywords, label, color in _TAG_RULES:
@@ -319,6 +414,13 @@ def get_tags(model_id, context=None):
             tags.append((label, color))
     if context and int(context) >= 128_000:
         tags.append(("128k+", "#38bdf8"))
+    seen_chips = set()
+    for cap in capabilities or []:
+        chip = _CAPABILITY_CHIPS.get(cap)
+        if not chip or chip[0] in seen_chips:
+            continue
+        seen_chips.add(chip[0])
+        tags.append(chip)
     return tags
 
 
@@ -1105,7 +1207,7 @@ def render_provider(p, models, error=None, delta=None):
             mid = m["id"]
             name = m.get("name") or mid
             search_val = escape(f"{mid} {name}".lower())
-            tag_list = get_tags(mid, m.get("context"))
+            tag_list = get_tags(mid, m.get("context"), m.get("capabilities"))
             tags_html = "".join(
                 f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
                 for l, c in tag_list
@@ -1160,7 +1262,7 @@ def render_cross_provider(groups, provider_map):
             pcolor = provider_map.get(e["provider"], {}).get("color", "#94a3b8")
             ctx_raw = int(e.get("context") or 0)
             ctx = fmt_context(ctx_raw)
-            tag_list = get_tags(e["model_id"], e.get("context"))
+            tag_list = get_tags(e["model_id"], e.get("context"), e.get("capabilities"))
             tags_html = "".join(
                 f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
                 for l, c in tag_list
@@ -1398,6 +1500,9 @@ def main():
     except Exception as e:
         print(f"  Self-correcting layer skipped: {e}")
 
+    print("Enriching with litellm model DB...")
+    enrich_with_litellm(results, fetch_litellm_db())
+
     # Read previous models.json for delta computation
     old_models_path = OUT_DIR / "models.json"
     old_model_ids = {}  # provider_key → set of model IDs
@@ -1475,6 +1580,7 @@ def main():
                     "model_id": m["id"],
                     "context": m.get("context"),
                     "limits": m.get("limits", ""),
+                    "capabilities": m.get("capabilities"),
                 })
     cross_groups = [
         (cname, entries)
