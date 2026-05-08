@@ -506,27 +506,34 @@ def fetch_llm7(api_key):
 
 
 def fetch_zai(api_key):
-    """Z.ai / Zhipu — only the genuinely-free Flash variants."""
+    """Z.ai / Zhipu — documented free Flash tier; /v4/models is unreliable."""
+    free_flash = [
+        "glm-4-flash",
+        "glm-4-flash-250414",
+        "glm-4v-flash",
+        "glm-z1-flash",
+        "glm-4.5-flash",
+        "cogvideox-flash",
+    ]
+    ids = list(free_flash)
     try:
         data = _json_get(
             "https://open.bigmodel.cn/api/paas/v4/models",
             headers={"Authorization": f"Bearer {api_key}"},
         )
         items = data.get("data", []) if isinstance(data, dict) else data
-        ids = []
         for m in items:
             mid = m.get("id") or m.get("modelCode") or ""
-            if not mid or "flash" not in mid.lower():
+            if not mid or mid in ids or "flash" not in mid.lower():
                 continue
             if any(x in mid.lower() for x in
-                   ("embed", "rerank", "tts", "stt", "audio", "image", "video")):
+                   ("embed", "rerank", "tts", "stt", "audio", "image")):
                 continue
             ids.append(mid)
-        log.info(f"[Z.ai] {len(ids)} models")
-        return ids
     except Exception as e:
-        log.error(f"[Z.ai] {e}")
-        return []
+        log.warning(f"[Z.ai] /models lookup failed ({e}); using hardcoded list")
+    log.info(f"[Z.ai] {len(ids)} models")
+    return ids
 
 
 
