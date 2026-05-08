@@ -45,7 +45,11 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/probes.jsonl docs/availability.json docs/probes-archive 2>/dev/null || true
+          # Stage paths only if they exist — `git add` aborts entirely if any
+          # pathspec is missing, leaving everything unstaged.
+          for p in docs/probes.jsonl docs/availability.json docs/probes-archive; do
+            [ -e "$p" ] && git add "$p"
+          done
           git diff --cached --quiet || git commit -m "chore: probe results $(date -u '+%Y-%m-%d %H:%M')"
           # Rebase-and-retry in case update-models.yml committed concurrently.
           for i in 1 2 3 4; do
