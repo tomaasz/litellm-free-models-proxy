@@ -43,6 +43,10 @@ jobs:
           GH_MODELS_TOKEN:     ${{ secrets.GH_MODELS_TOKEN }}
           CLOUDFLARE_API_KEY:  ${{ secrets.CLOUDFLARE_API_KEY }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
+          KLUSTER_API_KEY:     ${{ secrets.KLUSTER_API_KEY }}
+          LLM7_API_KEY:        ${{ secrets.LLM7_API_KEY }}
+          ZAI_API_KEY:         ${{ secrets.ZAI_API_KEY }}
         run: python generate_site.py
 
       - name: Commit generated site

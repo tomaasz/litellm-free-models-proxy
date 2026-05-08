@@ -180,6 +180,79 @@ def fetch_mistral(key):
             and not any(x in m.get("id","").lower() for x in ("embed","moderation"))]
 
 
+def fetch_pollinations(key):
+    headers = {"Authorization": f"Bearer {key}"} if key else {}
+    data = _get("https://gen.pollinations.ai/v1/models", headers=headers)
+    out = []
+    for m in data.get("data", []):
+        out_mods = m.get("output_modalities") or []
+        if "text" not in out_mods:
+            continue
+        if "/v1/chat/completions" not in (m.get("supported_endpoints") or []):
+            continue
+        out.append({
+            "id": m["id"],
+            "name": m["id"],
+            "context": m.get("context_length"),
+            "limits": "free tier — token from enter.pollinations.ai",
+        })
+    return out
+
+
+def fetch_kluster(key):
+    data = _get("https://api.kluster.ai/v1/models",
+                headers={"Authorization": f"Bearer {key}"})
+    return [{"id": m["id"], "name": m.get("name", m["id"]),
+             "context": m.get("context_length"),
+             "limits": "free tier"}
+            for m in data.get("data", [])
+            if not any(x in m.get("id","").lower()
+                       for x in ("embed","bge","rerank","tts","whisper"))]
+
+
+def fetch_llm7(key):
+    headers = {"Authorization": f"Bearer {key}"} if key else {}
+    data = _get("https://api.llm7.io/v1/models", headers=headers)
+    items = data if isinstance(data, list) else data.get("data", [])
+    out = []
+    for m in items:
+        mid = m.get("id", "")
+        if not mid:
+            continue
+        if any(x in mid.lower() for x in ("embed","tts","audio","whisper","image")):
+            continue
+        ctx_field = m.get("context_window") or {}
+        ctx = ctx_field.get("tokens") if isinstance(ctx_field, dict) else None
+        out.append({
+            "id": mid, "name": mid, "context": ctx,
+            "limits": "anonymous · 30 req/min with token",
+        })
+    return out
+
+
+def fetch_zai(key):
+    data = _get("https://open.bigmodel.cn/api/paas/v4/models",
+                headers={"Authorization": f"Bearer {key}"})
+    items = data.get("data", []) if isinstance(data, dict) else data
+    out = []
+    for m in items:
+        mid = m.get("id") or m.get("modelCode") or ""
+        if not mid:
+            continue
+        # Only flash variants are genuinely free
+        if "flash" not in mid.lower():
+            continue
+        if any(x in mid.lower() for x in ("embed","rerank","tts","stt","audio","image","video")):
+            continue
+        out.append({
+            "id": mid,
+            "name": m.get("name") or m.get("displayName") or mid,
+            "context": m.get("context_length") or m.get("maxInputTokens"),
+            "limits": "free Flash tier",
+        })
+    return out
+
+
 # ── Community cross-reference ─────────────────────────────────────────────────
 
 def fetch_cheahjs():
@@ -247,6 +320,10 @@ PROVIDERS = [
     {"key": "mistral",     "label": "Mistral",      "env": "MISTRAL_API_KEY",    "fetch": fetch_mistral,    "color": "#0ea5e9", "url": "https://console.mistral.ai",                  "key_url": "https://console.mistral.ai/api-keys/"},
     {"key": "github",      "label": "GitHub Models","env": "GH_MODELS_TOKEN",    "fetch": fetch_github,     "color": "#e2e8f0", "url": "https://github.com/marketplace/models",       "key_url": "https://github.com/settings/tokens"},
     {"key": "cloudflare",  "label": "Cloudflare AI","env": "CLOUDFLARE_API_KEY", "fetch": fetch_cloudflare, "color": "#f6821f", "url": "https://developers.cloudflare.com/workers-ai/","key_url": "https://dash.cloudflare.com/profile/api-tokens"},
+    {"key": "pollinations","label": "Pollinations", "env": "POLLINATIONS_API_KEY", "fetch": fetch_pollinations, "color": "#ec4899", "url": "https://pollinations.ai",                       "key_url": "https://enter.pollinations.ai"},
+    {"key": "kluster",     "label": "Kluster AI",   "env": "KLUSTER_API_KEY",     "fetch": fetch_kluster,     "color": "#a855f7", "url": "https://kluster.ai",                            "key_url": "https://platform.kluster.ai/apikeys"},
+    {"key": "llm7",        "label": "LLM7",         "env": "LLM7_API_KEY",        "fetch": fetch_llm7,        "color": "#facc15", "url": "https://llm7.io",                               "key_url": "https://token.llm7.io", "anonymous_ok": True},
+    {"key": "zai",         "label": "Z.ai (GLM)",   "env": "ZAI_API_KEY",         "fetch": fetch_zai,         "color": "#0ea5e9", "url": "https://open.bigmodel.cn",                     "key_url": "https://open.bigmodel.cn/usercenter/apikeys"},
 ]
 
 
@@ -1260,7 +1337,7 @@ def main():
 
     for p in PROVIDERS:
         key = os.environ.get(p["env"], "")
-        if not key:
+        if not key and not p.get("anonymous_ok"):
             print(f"  [{p['label']}] no API key, skipping")
             continue
         print(f"  [{p['label']}] fetching...", end=" ", flush=True)

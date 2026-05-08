@@ -106,6 +106,31 @@ PROVIDER_PROBES = {
         "auth": "bearer",
         "style": "cloudflare",
     },
+    "pollinations": {
+        "env": "POLLINATIONS_API_KEY",
+        "url": "https://gen.pollinations.ai/v1/chat/completions",
+        "auth": "bearer",
+        "style": "openai",
+    },
+    "kluster": {
+        "env": "KLUSTER_API_KEY",
+        "url": "https://api.kluster.ai/v1/chat/completions",
+        "auth": "bearer",
+        "style": "openai",
+    },
+    "llm7": {
+        "env": "LLM7_API_KEY",
+        "url": "https://api.llm7.io/v1/chat/completions",
+        "auth": "bearer",
+        "style": "openai",
+        "anonymous_ok": True,
+    },
+    "zai": {
+        "env": "ZAI_API_KEY",
+        "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        "auth": "bearer",
+        "style": "openai",
+    },
 }
 
 
@@ -114,7 +139,8 @@ def build_request(provider, cfg, model_id, nonce):
     headers = {"Content-Type": "application/json", "User-Agent": "litellm-free-models-proxy/probe"}
     key = os.environ.get(cfg["env"], "")
     if cfg["auth"] == "bearer":
-        headers["Authorization"] = f"Bearer {key}"
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
     elif cfg["auth"] == "x-goog":
         headers["x-goog-api-key"] = key
 
@@ -405,7 +431,8 @@ def main():
     for provider, pdata in providers_data.items():
         if provider not in PROVIDER_PROBES:
             continue
-        if not os.environ.get(PROVIDER_PROBES[provider]["env"]):
+        cfg = PROVIDER_PROBES[provider]
+        if not os.environ.get(cfg["env"]) and not cfg.get("anonymous_ok"):
             continue
         for m in pdata.get("models", []):
             mid = m.get("id")
