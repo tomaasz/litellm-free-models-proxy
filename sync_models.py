@@ -210,7 +210,7 @@ def fetch_openrouter(api_key):
         return free
     except Exception as e:
         log.error(f"[OpenRouter] {e}")
-        return None
+        return []
 
 
 def fetch_groq(api_key):
@@ -229,7 +229,7 @@ def fetch_groq(api_key):
         return ids
     except Exception as e:
         log.error(f"[Groq] {e}")
-        return None
+        return []
 
 
 def fetch_cerebras(api_key):
@@ -244,7 +244,7 @@ def fetch_cerebras(api_key):
         return ids
     except Exception as e:
         log.error(f"[Cerebras] {e}")
-        return None
+        return []
 
 
 def fetch_sambanova(api_key):
@@ -258,7 +258,7 @@ def fetch_sambanova(api_key):
         return ids
     except Exception as e:
         log.error(f"[SambaNova] {e}")
-        return None
+        return []
 
 
 def fetch_together(api_key):
@@ -280,7 +280,7 @@ def fetch_together(api_key):
         return free
     except Exception as e:
         log.error(f"[Together] {e}")
-        return None
+        return []
 
 
 def fetch_cohere(api_key, community_ids=None):
@@ -308,7 +308,7 @@ def fetch_cohere(api_key, community_ids=None):
         if community_ids:
             log.info(f"[Cohere] Falling back to community list ({len(community_ids)} models)")
             return list(community_ids)
-        return None
+        return []
 
 
 def fetch_gemini(api_key):
@@ -338,7 +338,7 @@ def fetch_gemini(api_key):
         return free
     except Exception as e:
         log.error(f"[Gemini] {e}")
-        return None
+        return []
 
 
 def fetch_nvidia(api_key):
@@ -357,7 +357,7 @@ def fetch_nvidia(api_key):
         return ids
     except Exception as e:
         log.error(f"[NVIDIA NIM] {e}")
-        return None
+        return []
 
 
 def fetch_huggingface(api_key):
@@ -375,7 +375,7 @@ def fetch_huggingface(api_key):
         return ids
     except Exception as e:
         log.error(f"[HuggingFace] {e}")
-        return None
+        return []
 
 
 def fetch_mistral(api_key):
@@ -400,7 +400,7 @@ def fetch_mistral(api_key):
         return ids
     except Exception as e:
         log.error(f"[Mistral] {e}")
-        return None
+        return []
 
 
 def fetch_github(api_key):
@@ -422,7 +422,7 @@ def fetch_github(api_key):
         return ids
     except Exception as e:
         log.error(f"[GitHub Models] {e}")
-        return None
+        return []
 
 
 def fetch_cloudflare(api_key):
@@ -430,7 +430,7 @@ def fetch_cloudflare(api_key):
     account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
     if not account_id:
         log.warning("[Cloudflare] CLOUDFLARE_ACCOUNT_ID not set, skipping")
-        return None
+        return []
     try:
         data = _json_get(
             f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/models/search?per_page=100",
@@ -446,7 +446,7 @@ def fetch_cloudflare(api_key):
         return ids
     except Exception as e:
         log.error(f"[Cloudflare] {e}")
-        return None
+        return []
 
 
 # ── Slug helper ───────────────────────────────────────────────────────────────
@@ -601,9 +601,6 @@ def sync():
             if provider["name"] == "Cloudflare" and cf_account_id
             else provider.get("api_base")
         )
-
-        if models is None:
-            continue
 
         # Remove models that are no longer offered by this provider
         if CLEANUP_STALE and models is not None:
