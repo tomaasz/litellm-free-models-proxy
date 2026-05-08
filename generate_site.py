@@ -341,6 +341,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .suggest-card .suggest-text p {{ font-size: .85rem; color: var(--muted); line-height: 1.5; }}
   .suggest-btn {{ display: inline-flex; align-items: center; gap: .5rem; background: #238636; color: #fff; border: none; border-radius: .5rem; padding: .6rem 1.2rem; font-size: .875rem; font-weight: 600; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background .15s; }}
   .suggest-btn:hover {{ background: #2ea043; }}
+  .change-entry {{ background: var(--surface); border: 1px solid var(--border); border-radius: .75rem; padding: .85rem 1.25rem; margin-bottom: .85rem; }}
+  .change-entry-header {{ display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-bottom: .55rem; font-size: .9rem; }}
+  .change-entry-header time {{ color: var(--muted); font-size: .8rem; font-family: ui-monospace, monospace; }}
+  .change-entry-header .provider-name {{ font-weight: 600; }}
+  .change-entry-header .change-summary {{ margin-left: auto; font-size: .78rem; color: var(--muted); }}
+  .change-list {{ display: flex; flex-direction: column; gap: .25rem; }}
+  .change-row {{ display: flex; align-items: center; gap: .5rem; font-family: ui-monospace, monospace; font-size: .8rem; }}
+  .change-row.added .change-marker {{ color: #22c55e; }}
+  .change-row.removed .change-marker {{ color: #f87171; }}
+  .change-marker {{ font-weight: 700; flex-shrink: 0; width: 1rem; text-align: center; }}
+  .change-id {{ color: var(--text); cursor: pointer; word-break: break-all; }}
+  .change-id:hover {{ text-decoration: underline; color: var(--accent); }}
+  .changes-empty {{ text-align: center; padding: 2rem; color: var(--muted); font-size: .9rem; }}
   .ctx-filters, .tag-filters {{ max-width: 960px; margin: 0 auto 1rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }}
   .ctx-label {{ font-size: .8rem; color: var(--muted); white-space: nowrap; }}
   .ctx-pill, .tag-pill {{ background: none; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); padding: .25rem .75rem; font-size: .8rem; cursor: pointer; transition: color .15s, border-color .15s, background .15s; }}
@@ -395,6 +408,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <div class="view-tabs">
   <button class="vtab active" data-target="view-provider">By Provider</button>
   <button class="vtab" data-target="view-model">By Model</button>
+  <button class="vtab" data-target="view-changes">Changes</button>
 </div>
 <main>
 <div id="view-provider">
@@ -403,6 +417,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </div>
 <div id="view-model" style="display:none">
 {cross_provider_section}
+</div>
+<div id="view-changes" style="display:none">
+{changes_section}
 </div>
 <div class="suggest-card">
   <div class="suggest-text">
@@ -506,7 +523,24 @@ document.querySelectorAll('.vtab').forEach(btn => {{
     btn.classList.add('active');
     const t = btn.dataset.target;
     document.getElementById('view-provider').style.display = t === 'view-provider' ? '' : 'none';
-    document.getElementById('view-model').style.display   = t === 'view-model'    ? '' : 'none';
+    document.getElementById('view-model').style.display    = t === 'view-model'    ? '' : 'none';
+    document.getElementById('view-changes').style.display  = t === 'view-changes'  ? '' : 'none';
+    const showFilters = t === 'view-provider';
+    document.querySelector('.search-wrap').style.display = showFilters ? '' : 'none';
+    document.querySelectorAll('.ctx-filters, .tag-filters').forEach(el => {{
+      el.style.display = showFilters ? '' : 'none';
+    }});
+  }});
+}});
+
+document.querySelectorAll('#view-changes .change-id').forEach(el => {{
+  el.title = 'Click to copy';
+  el.addEventListener('click', () => {{
+    navigator.clipboard.writeText(el.dataset.id || el.textContent.trim()).then(() => {{
+      const orig = el.textContent;
+      el.textContent = '✓ copied';
+      setTimeout(() => el.textContent = orig, 1200);
+    }});
   }});
 }});
 </script>
@@ -662,6 +696,58 @@ def render_cross_provider(groups, provider_map):
     return html
 
 
+def render_changes(history, provider_color_map):
+    """Render the Changes view: most recent provider-level changes first."""
+    if not history:
+        return '<p class="changes-empty">No changes recorded yet. Subsequent sync runs will populate this list.</p>'
+    html = ""
+    for entry in reversed(history):
+        ts = entry.get("timestamp", "")
+        try:
+            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            ts_display = dt.strftime("%Y-%m-%d %H:%M UTC")
+        except Exception:
+            ts_display = ts
+        pk = entry.get("provider", "")
+        plabel = entry.get("provider_label", pk)
+        color = provider_color_map.get(pk, "#94a3b8")
+        added = entry.get("added", []) or []
+        removed = entry.get("removed", []) or []
+        rows = ""
+        for mid in added:
+            rows += (
+                f'<div class="change-row added">'
+                f'<span class="change-marker">+</span>'
+                f'<span class="change-id" data-id="{escape(mid)}">{escape(mid)}</span>'
+                f'</div>'
+            )
+        for mid in removed:
+            rows += (
+                f'<div class="change-row removed">'
+                f'<span class="change-marker">−</span>'
+                f'<span class="change-id" data-id="{escape(mid)}">{escape(mid)}</span>'
+                f'</div>'
+            )
+        summary_parts = []
+        if added:
+            summary_parts.append(f'<span style="color:#22c55e">+{len(added)} added</span>')
+        if removed:
+            summary_parts.append(f'<span style="color:#f87171">−{len(removed)} removed</span>')
+        summary = " · ".join(summary_parts)
+        html += (
+            f'<div class="change-entry">'
+            f'<div class="change-entry-header">'
+            f'<span class="provider-dot" style="background:{color}"></span>'
+            f'<span class="provider-name">{escape(plabel)}</span>'
+            f'<time>{escape(ts_display)}</time>'
+            f'<span class="change-summary">{summary}</span>'
+            f'</div>'
+            f'<div class="change-list">{rows}</div>'
+            f'</div>'
+        )
+    return html
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -714,18 +800,41 @@ def main():
     old_models_path.write_text(json.dumps(json_out, indent=2, ensure_ascii=False))
     print(f"Written docs/models.json")
 
-    # Compute per-provider deltas
+    # Compute per-provider deltas (with full id sets for history)
     deltas = {}
+    deltas_full = {}
     for p in PROVIDERS:
         pk = p["key"]
         if pk not in results or pk not in old_model_ids:
             continue
         current_ids = {m["id"] for m in results[pk]}
         old_ids = old_model_ids[pk]
-        added = len(current_ids - old_ids)
-        removed = len(old_ids - current_ids)
-        if added or removed:
-            deltas[pk] = {"added": added, "removed": removed}
+        added_ids = sorted(current_ids - old_ids)
+        removed_ids = sorted(old_ids - current_ids)
+        if added_ids or removed_ids:
+            deltas[pk] = {"added": len(added_ids), "removed": len(removed_ids)}
+            deltas_full[pk] = {"added": added_ids, "removed": removed_ids}
+
+    # Append to history.json (one entry per provider that changed this run)
+    history_path = OUT_DIR / "history.json"
+    try:
+        history = json.loads(history_path.read_text()).get("entries", [])
+    except Exception:
+        history = []
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    provider_label_map = {p["key"]: p["label"] for p in PROVIDERS}
+    for pk, d in deltas_full.items():
+        history.append({
+            "timestamp": now_iso,
+            "provider": pk,
+            "provider_label": provider_label_map.get(pk, pk),
+            "added": d["added"],
+            "removed": d["removed"],
+        })
+    # Cap to last 500 entries
+    history = history[-500:]
+    history_path.write_text(json.dumps({"entries": history}, indent=2, ensure_ascii=False))
 
     # Compute cross-provider model groups
     from collections import defaultdict
@@ -765,6 +874,8 @@ def main():
         )
 
     cross_html = render_cross_provider(cross_groups, provider_map)
+    provider_color_map = {p["key"]: p["color"] for p in PROVIDERS}
+    changes_html = render_changes(history, provider_color_map)
 
     html = HTML_TEMPLATE.format(
         updated=updated,
@@ -772,6 +883,7 @@ def main():
         total_providers=total_providers,
         provider_sections=sections,
         cross_provider_section=cross_html,
+        changes_section=changes_html,
     )
     (OUT_DIR / "index.html").write_text(html, encoding="utf-8")
     print(f"Written docs/index.html  ({total_models} models, {total_providers} providers, {len(cross_groups)} cross-provider groups)")
