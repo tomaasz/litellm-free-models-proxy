@@ -1365,6 +1365,39 @@ def main():
             results[p["key"]] = []
             print(f"ERROR: {e}")
 
+    # Self-correcting layer: drop models that probe data confirms are broken.
+    # A model is dropped when uptime_7d == 0 with samples_7d >= MIN_SAMPLES.
+    # Once probes start succeeding again (e.g. provider restores credit), the
+    # rolling 7d window will lift the model back onto the list.
+    DROP_MIN_SAMPLES = 5
+    avail_path = OUT_DIR / "availability.json"
+    try:
+        avail = json.loads(avail_path.read_text())
+        dropped_total = 0
+        for pk, models in list(results.items()):
+            prov_avail = avail.get("providers", {}).get(pk, {})
+            kept = []
+            dropped = []
+            for m in models:
+                stats = prov_avail.get(m["id"], {})
+                up = stats.get("uptime_7d")
+                n = stats.get("samples_7d", 0) or 0
+                if up == 0.0 and n >= DROP_MIN_SAMPLES:
+                    dropped.append(m["id"])
+                else:
+                    kept.append(m)
+            if dropped:
+                print(f"  [{pk}] dropped {len(dropped)} models with sustained 0% uptime: "
+                      f"{', '.join(dropped[:3])}{'...' if len(dropped) > 3 else ''}")
+                dropped_total += len(dropped)
+                results[pk] = kept
+        if dropped_total:
+            print(f"  Self-correcting layer dropped {dropped_total} broken models total")
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        print(f"  Self-correcting layer skipped: {e}")
+
     # Read previous models.json for delta computation
     old_models_path = OUT_DIR / "models.json"
     old_model_ids = {}  # provider_key → set of model IDs
