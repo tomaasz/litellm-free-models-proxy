@@ -231,25 +231,40 @@ def fetch_llm7(key):
 
 
 def fetch_zai(key):
-    data = _get("https://open.bigmodel.cn/api/paas/v4/models",
-                headers={"Authorization": f"Bearer {key}"})
-    items = data.get("data", []) if isinstance(data, dict) else data
-    out = []
-    for m in items:
-        mid = m.get("id") or m.get("modelCode") or ""
-        if not mid:
-            continue
-        # Only flash variants are genuinely free
-        if "flash" not in mid.lower():
-            continue
-        if any(x in mid.lower() for x in ("embed","rerank","tts","stt","audio","image","video")):
-            continue
-        out.append({
-            "id": mid,
-            "name": m.get("name") or m.get("displayName") or mid,
-            "context": m.get("context_length") or m.get("maxInputTokens"),
-            "limits": "free Flash tier",
-        })
+    # Z.ai/BigModel /v4/models often returns nothing useful with trial keys.
+    # Hardcode the documented free Flash tier; augment with anything Flash-ish
+    # the API does expose.
+    free_flash = {
+        "glm-4-flash": "GLM-4-Flash",
+        "glm-4-flash-250414": "GLM-4-Flash (250414)",
+        "glm-4v-flash": "GLM-4V-Flash (vision)",
+        "glm-z1-flash": "GLM-Z1-Flash (reasoning)",
+        "glm-4.5-flash": "GLM-4.5-Flash",
+        "cogvideox-flash": "CogVideoX-Flash (video)",
+    }
+    out = [{"id": mid, "name": name, "context": None, "limits": "free Flash tier"}
+           for mid, name in free_flash.items()]
+
+    try:
+        data = _get("https://open.bigmodel.cn/api/paas/v4/models",
+                    headers={"Authorization": f"Bearer {key}"})
+        items = data.get("data", []) if isinstance(data, dict) else data
+        seen = set(free_flash)
+        for m in items:
+            mid = m.get("id") or m.get("modelCode") or ""
+            if not mid or mid in seen or "flash" not in mid.lower():
+                continue
+            if any(x in mid.lower() for x in
+                   ("embed", "rerank", "tts", "stt", "audio", "image")):
+                continue
+            out.append({
+                "id": mid,
+                "name": m.get("name") or m.get("displayName") or mid,
+                "context": m.get("context_length") or m.get("maxInputTokens"),
+                "limits": "free Flash tier",
+            })
+    except Exception:
+        pass
     return out
 
 
