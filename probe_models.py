@@ -4,9 +4,9 @@ Probes each (provider, model) listed in docs/models.json with a minimal
 chat-completions request and records the result to docs/probes.jsonl.
 Regenerates docs/availability.json (rolling 7d/30d aggregates).
 
-Round-robin: each run probes ~1/3 of models (hash-bucketed by model_id);
-full cycle = 6h with cron every 2h. Models that failed their last 3
-probes are always included (watch list).
+Every cron run probes every model. Models that failed their last 3
+probes are still flagged on the watch list (currently informational —
+no special handling beyond the `watching` field in availability.json).
 """
 
 import os, sys, json, time, gzip, hashlib, secrets, threading, urllib.request, urllib.error
@@ -25,7 +25,7 @@ ARCHIVE_DIR   = DOCS / "probes-archive"
 PROBE_TIMEOUT = 15
 PER_PROVIDER_CONCURRENCY = 2
 PER_PROBE_PAUSE_S = 0.2
-ROUND_ROBIN_BUCKETS = 2  # full cycle = ROUND_ROBIN_BUCKETS hours (cron is hourly)
+ROUND_ROBIN_BUCKETS = 1  # every run probes every model
 WATCH_LIST_FAILS = 3
 
 # ── Provider probe configs ────────────────────────────────────────────────────
