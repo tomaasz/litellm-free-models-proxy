@@ -25,7 +25,7 @@ ARCHIVE_DIR   = DOCS / "probes-archive"
 PROBE_TIMEOUT = 15
 PER_PROVIDER_CONCURRENCY = 2
 PER_PROBE_PAUSE_S = 0.2
-ROUND_ROBIN_BUCKETS = 3
+ROUND_ROBIN_BUCKETS = 2  # full cycle = ROUND_ROBIN_BUCKETS hours (cron is hourly)
 WATCH_LIST_FAILS = 3
 
 # ── Provider probe configs ────────────────────────────────────────────────────
@@ -229,8 +229,8 @@ def bucket_for(model_id):
 
 
 def run_index_for(now):
-    # 12 runs/day, repeating every 6h → bucket = (hour // 2) % 3.
-    return (now.hour // 2) % ROUND_ROBIN_BUCKETS
+    # 24 runs/day, full cycle = ROUND_ROBIN_BUCKETS hours.
+    return now.hour % ROUND_ROBIN_BUCKETS
 
 
 def load_recent_statuses(path, lookback_runs=WATCH_LIST_FAILS, max_lines=200_000):

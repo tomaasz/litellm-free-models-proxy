@@ -552,14 +552,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .uptime-warn {{ background: rgba(245,158,11,.14); color: #fbbf24; border: 1px solid rgba(245,158,11,.28); }}
   .uptime-bad  {{ background: rgba(239,68,68,.14);  color: #f87171; border: 1px solid rgba(239,68,68,.28); }}
   .uptime-none {{ background: rgba(148,163,184,.08); color: var(--muted-2); border: 1px solid var(--border); }}
-  .av-heatmap {{ display: inline-flex; align-items: flex-end; gap: 1px; height: 18px; vertical-align: middle; }}
+  .av-heatmap {{ display: inline-flex; align-items: flex-end; gap: 1px; height: 18px; vertical-align: middle; justify-self: start; }}
   .av-bar {{ width: 4px; height: 100%; background: var(--border); border-radius: 1px; cursor: help; }}
   .av-row {{
-    display: grid; grid-template-columns: 1fr auto auto auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 60px 130px 160px;
     gap: .85rem; align-items: center;
     padding: .5rem 1.1rem;
     border-bottom: 1px solid var(--border); font-size: .82rem;
   }}
+  .av-row .uptime-badge {{ justify-self: start; }}
   .av-row:last-child {{ border-bottom: none; }}
   .av-row:hover {{ background: rgba(56,189,248,.03); }}
   .av-row .model-id {{ overflow: hidden; text-overflow: ellipsis; }}
@@ -854,6 +856,14 @@ document.querySelectorAll('.collapse-btn').forEach(btn => {{
   }});
 }});
 
+const TAB_TO_SLUG = {{
+  'view-provider':     'by-provider',
+  'view-model':        'by-model',
+  'view-availability': 'availability',
+  'view-changes':      'changes',
+}};
+const SLUG_TO_TAB = Object.fromEntries(Object.entries(TAB_TO_SLUG).map(([k,v]) => [v,k]));
+
 function applyTab(t) {{
   document.querySelectorAll('.vtab').forEach(b => b.classList.toggle('active', b.dataset.target === t));
   ['view-provider','view-model','view-availability','view-changes'].forEach(id => {{
@@ -873,8 +883,25 @@ function applyTab(t) {{
   if (toggle) toggle.style.display = anyShown ? '' : 'none';
   if (!anyShown) document.body.classList.remove('sidebar-open');
 }}
+
+function tabPath(t) {{
+  const slug = TAB_TO_SLUG[t];
+  // Strip trailing /<known-slug>/? from current pathname to get the site root.
+  const rootPath = location.pathname.replace(/\/(by-provider|by-model|availability|changes)\/?$/, '/');
+  return rootPath + (slug === 'by-provider' ? '' : slug + '/');
+}}
+
 document.querySelectorAll('.vtab').forEach(btn => {{
-  btn.addEventListener('click', () => applyTab(btn.dataset.target));
+  btn.addEventListener('click', () => {{
+    const t = btn.dataset.target;
+    applyTab(t);
+    if (history.pushState) history.pushState({{tab: t}}, '', tabPath(t));
+  }});
+}});
+
+window.addEventListener('popstate', () => {{
+  const m = location.pathname.match(/\/(by-provider|by-model|availability|changes)\/?$/);
+  applyTab(m ? SLUG_TO_TAB[m[1]] : 'view-provider');
 }});
 
 (function() {{
@@ -890,7 +917,7 @@ document.querySelectorAll('.vtab').forEach(btn => {{
   }});
 }})();
 
-applyTab('view-provider');
+applyTab(document.body.dataset.tab || 'view-provider');
 
 document.querySelectorAll('.av-pill').forEach(pill => {{
   pill.addEventListener('click', () => {{
@@ -1370,6 +1397,25 @@ def main():
     )
     (OUT_DIR / "index.html").write_text(html, encoding="utf-8")
     print(f"Written docs/index.html  ({total_models} models, {total_providers} providers, {len(cross_groups)} cross-provider groups)")
+
+    # Per-view entry points (so /availability, /by-model, etc. work as URLs).
+    # Each is the same HTML with <base href="../"> and a data-tab marker so
+    # the JS activates the right tab on initial load.
+    for slug, tab in [
+        ("by-provider",  "view-provider"),
+        ("by-model",     "view-model"),
+        ("availability", "view-availability"),
+        ("changes",      "view-changes"),
+    ]:
+        sub_dir = OUT_DIR / slug
+        sub_dir.mkdir(exist_ok=True)
+        sub_html = (
+            html
+            .replace("<head>", '<head>\n<base href="../">', 1)
+            .replace("<body>", f'<body data-tab="{tab}">', 1)
+        )
+        (sub_dir / "index.html").write_text(sub_html, encoding="utf-8")
+    print(f"Written 4 per-view entry points (by-provider/, by-model/, availability/, changes/)")
 
 
 if __name__ == "__main__":
