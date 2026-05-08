@@ -449,6 +449,87 @@ def fetch_cloudflare(api_key):
         return []
 
 
+def fetch_pollinations(api_key):
+    try:
+        headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+        data = _json_get("https://gen.pollinations.ai/v1/models", headers=headers)
+        ids = []
+        for m in data.get("data", []):
+            if "text" not in (m.get("output_modalities") or []):
+                continue
+            if "/v1/chat/completions" not in (m.get("supported_endpoints") or []):
+                continue
+            ids.append(m["id"])
+        log.info(f"[Pollinations] {len(ids)} models")
+        return ids
+    except Exception as e:
+        log.error(f"[Pollinations] {e}")
+        return []
+
+
+def fetch_kluster(api_key):
+    try:
+        data = _json_get(
+            "https://api.kluster.ai/v1/models",
+            headers={"Authorization": f"Bearer {api_key}"},
+        )
+        ids = [
+            m["id"] for m in data.get("data", [])
+            if not any(x in m.get("id", "").lower()
+                       for x in ("embed", "bge", "rerank", "tts", "whisper"))
+        ]
+        log.info(f"[Kluster] {len(ids)} models")
+        return ids
+    except Exception as e:
+        log.error(f"[Kluster] {e}")
+        return []
+
+
+def fetch_llm7(api_key):
+    """LLM7 works anonymously; token only raises rate limit."""
+    try:
+        headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+        data = _json_get("https://api.llm7.io/v1/models", headers=headers)
+        items = data if isinstance(data, list) else data.get("data", [])
+        ids = [
+            m["id"] for m in items
+            if m.get("id") and not any(
+                x in m["id"].lower()
+                for x in ("embed", "tts", "audio", "whisper", "image")
+            )
+        ]
+        log.info(f"[LLM7] {len(ids)} models")
+        return ids
+    except Exception as e:
+        log.error(f"[LLM7] {e}")
+        return []
+
+
+def fetch_zai(api_key):
+    """Z.ai / Zhipu — only the genuinely-free Flash variants."""
+    try:
+        data = _json_get(
+            "https://open.bigmodel.cn/api/paas/v4/models",
+            headers={"Authorization": f"Bearer {api_key}"},
+        )
+        items = data.get("data", []) if isinstance(data, dict) else data
+        ids = []
+        for m in items:
+            mid = m.get("id") or m.get("modelCode") or ""
+            if not mid or "flash" not in mid.lower():
+                continue
+            if any(x in mid.lower() for x in
+                   ("embed", "rerank", "tts", "stt", "audio", "image", "video")):
+                continue
+            ids.append(mid)
+        log.info(f"[Z.ai] {len(ids)} models")
+        return ids
+    except Exception as e:
+        log.error(f"[Z.ai] {e}")
+        return []
+
+
+
 # ── Slug helper ───────────────────────────────────────────────────────────────
 
 def slug(model_id):
@@ -566,6 +647,42 @@ PROVIDERS = [
         "name_fmt": lambda mid: f"cf/{slug(mid)}",
         "rpm": 20,
         "api_base": None,  # constructed dynamically in sync() — includes account_id
+    },
+    {
+        "name": "Pollinations",
+        "env_key": "POLLINATIONS_API_KEY",
+        "fetch": fetch_pollinations,
+        "litellm_fmt": lambda mid: f"openai/{mid}",
+        "name_fmt": lambda mid: f"pol/{slug(mid)}",
+        "rpm": 15,
+        "api_base": "https://gen.pollinations.ai/v1",
+    },
+    {
+        "name": "Kluster",
+        "env_key": "KLUSTER_API_KEY",
+        "fetch": fetch_kluster,
+        "litellm_fmt": lambda mid: f"openai/{mid}",
+        "name_fmt": lambda mid: f"kl/{slug(mid)}",
+        "rpm": 15,
+        "api_base": "https://api.kluster.ai/v1",
+    },
+    {
+        "name": "LLM7",
+        "env_key": "LLM7_API_KEY",
+        "fetch": fetch_llm7,
+        "litellm_fmt": lambda mid: f"openai/{mid}",
+        "name_fmt": lambda mid: f"llm7/{slug(mid)}",
+        "rpm": 30,
+        "api_base": "https://api.llm7.io/v1",
+    },
+    {
+        "name": "Z.ai",
+        "env_key": "ZAI_API_KEY",
+        "fetch": fetch_zai,
+        "litellm_fmt": lambda mid: f"openai/{mid}",
+        "name_fmt": lambda mid: f"zai/{slug(mid)}",
+        "rpm": 20,
+        "api_base": "https://open.bigmodel.cn/api/paas/v4",
     },
 ]
 
