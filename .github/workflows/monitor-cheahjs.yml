@@ -117,6 +117,7 @@ jobs:
             exit 0
           fi
           BODY=$(cat /tmp/issue_body.md)
+          gh label create new-provider --color BFD4F2 --description "Auto-detected new provider in cheahjs/free-llm-api-resources" 2>/dev/null || true
           gh issue create \
             --title "$TITLE" \
             --body "$BODY" \
