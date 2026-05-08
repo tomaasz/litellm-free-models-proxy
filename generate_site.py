@@ -260,210 +260,522 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <title>Free LLM API Access — providers with free tokens</title>
 <style>
   :root {{
-    --bg: #0f172a; --surface: #1e293b; --border: #334155;
-    --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8;
+    --bg: #0a0e1a;
+    --surface: #131a2c;
+    --surface-2: #1a2236;
+    --border: #1f2940;
+    --border-strong: #2c3a5a;
+    --text: #e7eaf2;
+    --muted: #8b95ad;
+    --muted-2: #647084;
+    --accent: #38bdf8;
+    --accent-2: #7c3aed;
+    --accent-glow: rgba(56,189,248,.16);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --sidebar-w: 264px;
   }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, sans-serif; padding: 2rem 1rem; }}
-  header {{ max-width: 960px; margin: 0 auto 1.5rem; }}
-  h1 {{ font-size: 1.75rem; font-weight: 700; color: #fff; }}
-  .subtitle {{ color: var(--muted); margin-top: .4rem; font-size: .95rem; }}
-  .subtitle a {{ color: var(--accent); text-decoration: none; }}
-  .subtitle a:hover {{ text-decoration: underline; }}
-  .meta {{ margin-top: .6rem; font-size: .8rem; color: var(--muted); }}
-  .stats {{ display: flex; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }}
-  .stat {{ background: var(--surface); border: 1px solid var(--border); border-radius: .5rem; padding: .5rem 1rem; font-size: .85rem; }}
-  .stat strong {{ color: #fff; font-size: 1.3rem; display: block; }}
-  .search-wrap {{ max-width: 960px; margin: 0 auto 1.5rem; }}
-  .search-wrap input {{
-    width: 100%; padding: .65rem 1rem .65rem 2.5rem; font-size: .95rem;
-    background: var(--surface); border: 1px solid var(--border); border-radius: .5rem;
+  html, body {{ height: 100%; }}
+  body {{
+    background:
+      radial-gradient(1200px 460px at 0% -10%, rgba(56,189,248,.08), transparent 60%),
+      radial-gradient(900px 360px at 100% -10%, rgba(124,58,237,.06), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-size: 14px;
+    line-height: 1.45;
+  }}
+  a {{ color: var(--accent); text-decoration: none; }}
+  a:hover {{ text-decoration: underline; }}
+  ::selection {{ background: var(--accent-glow); }}
+
+  .app {{ max-width: 1280px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }}
+
+  /* ── Top bar ─────────────────────────── */
+  .topbar {{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.25rem;
+    align-items: end;
+    padding-bottom: 1.1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }}
+  .brand h1 {{
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }}
+  .brand h1 .logo {{
+    width: 28px; height: 28px;
+    display: inline-grid; place-items: center;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #38bdf8 0%, #7c3aed 100%);
+    color: #0a0e1a;
+    font-weight: 800;
+    font-size: .95rem;
+    box-shadow: 0 4px 14px -4px rgba(56,189,248,.55);
+  }}
+  .tagline {{
+    margin-top: .4rem;
+    color: var(--muted);
+    font-size: .9rem;
+    max-width: 64ch;
+  }}
+  .tagline strong {{ color: var(--text); font-weight: 600; }}
+  .top-meta {{
+    display: flex; align-items: center; gap: .4rem;
+    flex-wrap: wrap; justify-content: flex-end;
+  }}
+  .top-pill {{
+    display: inline-flex; align-items: baseline; gap: .35rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 999px; padding: .28rem .7rem;
+    font-size: .78rem; color: var(--muted);
+    font-feature-settings: "tnum";
+    transition: border-color .15s, color .15s;
+  }}
+  .top-pill strong {{ color: #fff; font-weight: 700; font-size: .82rem; }}
+  .top-pill a {{ color: var(--muted); }}
+  .top-pill a:hover {{ color: var(--accent); text-decoration: none; }}
+  .top-pill:hover {{ border-color: var(--border-strong); }}
+
+  /* ── View tabs (segmented control) ──── */
+  .view-tabs {{
+    display: inline-flex; flex-wrap: nowrap;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 3px; gap: 2px;
+    margin-bottom: 1.25rem;
+  }}
+  .vtab {{
+    background: transparent; border: none;
+    border-radius: 7px; color: var(--muted);
+    padding: .42rem .95rem; font-size: .85rem;
+    font-weight: 500; cursor: pointer;
+    transition: color .15s, background .15s, box-shadow .15s;
+    font-family: inherit; white-space: nowrap;
+  }}
+  .vtab:hover {{ color: var(--text); }}
+  .vtab.active {{
+    background: var(--surface-2); color: var(--text);
+    box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 1px 2px rgba(0,0,0,.3);
+  }}
+
+  /* ── Layout (sidebar + main) ────────── */
+  .layout {{
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }}
+  .layout.no-sidebar {{ grid-template-columns: 1fr; }}
+
+  /* ── Sidebar ─────────────────────────── */
+  .sidebar {{
+    position: sticky; top: 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1rem;
+    display: flex; flex-direction: column; gap: 1.1rem;
+    max-height: calc(100vh - 2rem); overflow-y: auto;
+  }}
+  .sidebar::-webkit-scrollbar {{ width: 6px; }}
+  .sidebar::-webkit-scrollbar-thumb {{ background: var(--border-strong); border-radius: 3px; }}
+  .sb-section {{ display: flex; flex-direction: column; gap: .55rem; }}
+  .sb-title {{
+    font-size: .68rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted-2);
+  }}
+  .sb-search input {{
+    width: 100%; padding: .55rem .75rem .55rem 2.1rem;
+    font-size: .85rem; background: var(--bg);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
     color: var(--text); outline: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: .75rem center;
+    transition: border-color .15s, box-shadow .15s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238b95ad' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: .65rem center;
+    font-family: inherit;
+  }}
+  .sb-search input:focus {{
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }}
+  .sb-search input::placeholder {{ color: var(--muted-2); }}
+  .sb-pills {{ display: flex; flex-wrap: wrap; gap: .35rem; }}
+  .sb-pill {{
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 999px; color: var(--muted);
+    padding: .3rem .7rem; font-size: .78rem;
+    cursor: pointer; font-family: inherit;
+    transition: color .15s, border-color .15s, background .15s;
+  }}
+  .sb-pill:hover {{ color: var(--text); border-color: var(--border-strong); }}
+  .sb-pill.active {{
+    background: var(--accent); border-color: var(--accent);
+    color: #0a0e1a; font-weight: 600;
+  }}
+  .sb-pill.tag-pill.active {{
+    background: var(--tc, var(--accent));
+    border-color: var(--tc, var(--accent));
+    color: #0a0e1a;
+  }}
+  .sb-help {{
+    font-size: .74rem; color: var(--muted-2); line-height: 1.55;
+    border-top: 1px solid var(--border); padding-top: .8rem;
+  }}
+
+  /* ── Main column ─────────────────────── */
+  main {{ display: flex; flex-direction: column; gap: 1rem; min-width: 0; }}
+  .no-results {{
+    display: none; text-align: center; padding: 2rem;
+    color: var(--muted); font-size: .9rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }}
+
+  /* ── Provider cards ──────────────────── */
+  .provider-card {{
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
     transition: border-color .15s;
   }}
-  .search-wrap input:focus {{ border-color: var(--accent); }}
-  .search-wrap input::placeholder {{ color: var(--muted); }}
-  .no-results {{ display: none; text-align: center; padding: 2rem; color: var(--muted); font-size: .9rem; }}
-  main {{ max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }}
-  .provider-card {{ background: var(--surface); border: 1px solid var(--border); border-radius: .75rem; overflow: hidden; }}
-  .provider-header {{ display: flex; align-items: center; gap: .75rem; padding: .85rem 1.25rem; border-bottom: 1px solid var(--border); }}
-  .provider-dot {{ width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }}
-  .provider-name {{ font-weight: 600; font-size: 1rem; }}
-  .provider-name a {{ color: inherit; text-decoration: none; }}
-  .provider-name a:hover {{ color: var(--accent); }}
-  .provider-count {{ margin-left: auto; background: #0f172a; border-radius: 999px; padding: .15rem .6rem; font-size: .75rem; color: var(--muted); }}
-  .delta-add {{ color: #22c55e; font-size: .7rem; margin-left: .3rem; }}
-  .delta-rem {{ color: #f87171; font-size: .7rem; margin-left: .15rem; }}
+  .provider-card:hover {{ border-color: var(--border-strong); }}
+  .provider-header {{
+    display: flex; align-items: center; gap: .75rem;
+    padding: .8rem 1.1rem; border-bottom: 1px solid var(--border);
+  }}
+  .provider-dot {{ width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(255,255,255,.04); }}
+  .provider-name {{ font-weight: 600; font-size: .95rem; }}
+  .provider-name a {{ color: inherit; }}
+  .provider-name a:hover {{ color: var(--accent); text-decoration: none; }}
+  .provider-count {{
+    margin-left: auto; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: .14rem .6rem; font-size: .72rem; color: var(--muted);
+    font-feature-settings: "tnum";
+  }}
+  .delta-add {{ color: #4ade80; font-size: .7rem; margin-left: .3rem; font-weight: 600; }}
+  .delta-rem {{ color: #f87171; font-size: .7rem; margin-left: .15rem; font-weight: 600; }}
   .status-indicator {{ font-size: .5rem; flex-shrink: 0; }}
   .status-ok  {{ color: #22c55e; }}
   .status-err {{ color: #f87171; }}
-  .tag-chip {{ display: inline-block; border-radius: 999px; padding: .05rem .45rem; font-size: .68rem; font-weight: 500; margin-right: .2rem; margin-bottom: .1rem; white-space: nowrap; }}
-  .view-tabs {{ max-width: 960px; margin: 0 auto 1.25rem; display: flex; gap: .5rem; }}
-  .vtab {{ background: none; border: 1px solid var(--border); border-radius: .4rem; color: var(--muted); padding: .35rem .9rem; font-size: .85rem; cursor: pointer; transition: all .15s; }}
-  .vtab:hover {{ color: var(--text); border-color: #64748b; }}
-  .vtab.active {{ background: var(--surface); border-color: var(--accent); color: var(--accent); font-weight: 600; }}
-  .cross-group {{ background: var(--surface); border: 1px solid var(--border); border-radius: .75rem; overflow: hidden; margin-bottom: 1.5rem; }}
-  .cross-group-header {{ padding: .7rem 1.25rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: .95rem; display: flex; align-items: center; gap: .6rem; }}
-  .cross-group-count {{ font-size: .75rem; color: var(--muted); font-weight: 400; }}
-  .provider-chip {{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; }}
-  .api-key-link {{ font-size: .75rem; color: var(--muted); text-decoration: none; border: 1px solid var(--border); border-radius: .35rem; padding: .15rem .55rem; white-space: nowrap; transition: color .15s, border-color .15s; }}
-  .api-key-link:hover {{ color: var(--accent); border-color: var(--accent); }}
-  .collapse-btn {{ background: none; border: none; cursor: pointer; color: var(--muted); padding: .1rem .2rem; line-height: 1; display: flex; align-items: center; transition: color .15s; }}
+  .tag-chip {{
+    display: inline-block; border-radius: 999px;
+    padding: .05rem .5rem; font-size: .68rem;
+    font-weight: 500; margin-right: .2rem;
+    margin-bottom: .1rem; white-space: nowrap;
+  }}
+  .api-key-link {{
+    font-size: .72rem; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 5px;
+    padding: .15rem .55rem; white-space: nowrap;
+    transition: color .15s, border-color .15s;
+  }}
+  .api-key-link:hover {{ color: var(--accent); border-color: var(--accent); text-decoration: none; }}
+  .collapse-btn {{
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); padding: .1rem .2rem; line-height: 1;
+    display: flex; align-items: center; transition: color .15s;
+  }}
   .collapse-btn:hover {{ color: var(--text); }}
   .collapse-btn .chevron {{ transition: transform .2s; }}
   .provider-card.collapsed .chevron {{ transform: rotate(-90deg); }}
   .provider-card.collapsed .provider-header {{ border-bottom: none; }}
-  .provider-body {{ }}
   .provider-card.collapsed .provider-body {{ display: none; }}
-  .provider-error {{ padding: 1rem 1.25rem; color: #f87171; font-size: .85rem; }}
+  .provider-error {{ padding: 1rem 1.1rem; color: #f87171; font-size: .85rem; }}
+
+  /* ── Tables ──────────────────────────── */
   table {{ width: 100%; border-collapse: collapse; font-size: .85rem; table-layout: fixed; }}
   col.col-id      {{ width: 32%; }}
   col.col-name    {{ width: 20%; }}
   col.col-ctx     {{ width:  8%; }}
   col.col-tags    {{ width: 18%; }}
   col.col-limits  {{ width: 22%; }}
-  th {{ text-align: left; padding: .5rem 1.25rem; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); overflow: hidden; }}
-  td {{ padding: .45rem 1.25rem; border-bottom: 1px solid #1e293b; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+  th {{
+    text-align: left; padding: .55rem 1.1rem;
+    color: var(--muted-2); font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    font-size: .68rem; text-transform: uppercase;
+    letter-spacing: .07em;
+    background: rgba(255,255,255,.012);
+  }}
+  td {{
+    padding: .5rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }}
   tr:last-child td {{ border-bottom: none; }}
-  tr:hover td {{ background: rgba(255,255,255,.03); }}
-  .model-id {{ font-family: ui-monospace, monospace; font-size: .82rem; color: var(--accent); cursor: pointer; display: block; overflow: hidden; text-overflow: ellipsis; }}
+  tr:hover td {{ background: rgba(56,189,248,.04); }}
+  .model-id {{
+    font-family: ui-monospace, "JetBrains Mono", "Fira Code", monospace;
+    font-size: .82rem; color: var(--accent);
+    cursor: pointer; display: block;
+    overflow: hidden; text-overflow: ellipsis;
+  }}
   .model-id:hover {{ text-decoration: underline; }}
   .model-name {{ color: var(--text); overflow: hidden; text-overflow: ellipsis; }}
-  .ctx {{ color: var(--muted); font-size: .78rem; }}
-  .limits {{ color: var(--muted); font-size: .78rem; }}
-  .copy-tip {{ font-size: .7rem; color: #475569; margin-left: .4rem; }}
-  footer {{ max-width: 960px; margin: 2rem auto 0; font-size: .8rem; color: var(--muted); text-align: center; }}
-  footer a {{ color: var(--accent); text-decoration: none; }}
-  .suggest-card {{ background: var(--surface); border: 1px solid var(--border); border-radius: .75rem; padding: 1.5rem 1.75rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }}
-  .suggest-card .suggest-text h2 {{ font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: .3rem; }}
-  .suggest-card .suggest-text p {{ font-size: .85rem; color: var(--muted); line-height: 1.5; }}
-  .suggest-btn {{ display: inline-flex; align-items: center; gap: .5rem; background: #238636; color: #fff; border: none; border-radius: .5rem; padding: .6rem 1.2rem; font-size: .875rem; font-weight: 600; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background .15s; }}
-  .suggest-btn:hover {{ background: #2ea043; }}
-  .change-entry {{ background: var(--surface); border: 1px solid var(--border); border-radius: .75rem; padding: .85rem 1.25rem; margin-bottom: .85rem; }}
-  .change-entry-header {{ display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-bottom: .55rem; font-size: .9rem; }}
-  .change-entry-header time {{ color: var(--muted); font-size: .8rem; font-family: ui-monospace, monospace; }}
+  .ctx {{ color: var(--muted); font-size: .78rem; font-feature-settings: "tnum"; }}
+  .limits {{ color: var(--muted); font-size: .76rem; }}
+  .copy-tip {{ font-size: .65rem; color: var(--muted-2); margin-left: .35rem; font-weight: 400; text-transform: none; letter-spacing: 0; }}
+
+  /* ── Cross-provider groups ───────────── */
+  .cross-group {{
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }}
+  .cross-group-header {{
+    padding: .75rem 1.1rem; border-bottom: 1px solid var(--border);
+    font-weight: 600; font-size: .9rem;
+    display: flex; align-items: center; gap: .55rem;
+  }}
+  .cross-group-count {{ font-size: .72rem; color: var(--muted); font-weight: 400; margin-left: auto; }}
+  .provider-chip {{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; }}
+
+  /* ── Availability view ───────────────── */
+  .uptime-badge {{
+    display: inline-block; min-width: 3rem;
+    padding: .14rem .55rem; border-radius: 5px;
+    font-size: .72rem; font-weight: 600;
+    text-align: center;
+    font-family: ui-monospace, monospace;
+    font-feature-settings: "tnum";
+  }}
+  .uptime-good {{ background: rgba(34,197,94,.14); color: #4ade80; border: 1px solid rgba(34,197,94,.28); }}
+  .uptime-warn {{ background: rgba(245,158,11,.14); color: #fbbf24; border: 1px solid rgba(245,158,11,.28); }}
+  .uptime-bad  {{ background: rgba(239,68,68,.14);  color: #f87171; border: 1px solid rgba(239,68,68,.28); }}
+  .uptime-none {{ background: rgba(148,163,184,.08); color: var(--muted-2); border: 1px solid var(--border); }}
+  .av-heatmap {{ display: inline-flex; align-items: flex-end; gap: 1px; height: 18px; vertical-align: middle; }}
+  .av-bar {{ width: 4px; height: 100%; background: var(--border); border-radius: 1px; cursor: help; }}
+  .av-row {{
+    display: grid; grid-template-columns: 1fr auto auto auto;
+    gap: .85rem; align-items: center;
+    padding: .5rem 1.1rem;
+    border-bottom: 1px solid var(--border); font-size: .82rem;
+  }}
+  .av-row:last-child {{ border-bottom: none; }}
+  .av-row:hover {{ background: rgba(56,189,248,.03); }}
+  .av-row .model-id {{ overflow: hidden; text-overflow: ellipsis; }}
+  .av-meta {{ color: var(--muted); font-size: .72rem; font-family: ui-monospace, monospace; white-space: nowrap; }}
+  .av-empty {{
+    padding: 2rem; color: var(--muted); font-size: .9rem; text-align: center;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  }}
+
+  /* ── Changes view ────────────────────── */
+  .change-entry {{
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: .85rem 1.1rem;
+  }}
+  .change-entry-header {{
+    display: flex; align-items: center; gap: .55rem;
+    flex-wrap: wrap; margin-bottom: .55rem; font-size: .9rem;
+  }}
+  .change-entry-header time {{ color: var(--muted); font-size: .78rem; font-family: ui-monospace, monospace; }}
   .change-entry-header .provider-name {{ font-weight: 600; }}
-  .change-entry-header .change-summary {{ margin-left: auto; font-size: .78rem; color: var(--muted); }}
+  .change-entry-header .change-summary {{ margin-left: auto; font-size: .76rem; color: var(--muted); }}
   .change-list {{ display: flex; flex-direction: column; gap: .25rem; }}
   .change-row {{ display: flex; align-items: center; gap: .5rem; font-family: ui-monospace, monospace; font-size: .8rem; }}
-  .change-row.added .change-marker {{ color: #22c55e; }}
+  .change-row.added .change-marker {{ color: #4ade80; }}
   .change-row.removed .change-marker {{ color: #f87171; }}
   .change-marker {{ font-weight: 700; flex-shrink: 0; width: 1rem; text-align: center; }}
   .change-id {{ color: var(--text); cursor: pointer; word-break: break-all; }}
   .change-id:hover {{ text-decoration: underline; color: var(--accent); }}
-  .changes-empty {{ text-align: center; padding: 2rem; color: var(--muted); font-size: .9rem; }}
-  .ctx-filters, .tag-filters {{ max-width: 960px; margin: 0 auto 1rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }}
-  .ctx-label {{ font-size: .8rem; color: var(--muted); white-space: nowrap; }}
-  .ctx-pill, .tag-pill {{ background: none; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); padding: .25rem .75rem; font-size: .8rem; cursor: pointer; transition: color .15s, border-color .15s, background .15s; }}
-  .ctx-pill:hover, .tag-pill:hover {{ color: var(--text); border-color: #64748b; }}
-  .ctx-pill.active {{ background: var(--accent); border-color: var(--accent); color: #0f172a; font-weight: 600; }}
-  .tag-pill.active {{ background: var(--tc,var(--accent)); border-color: var(--tc,var(--accent)); color: #0f172a; font-weight: 600; }}
-  .av-filters {{ max-width: 960px; margin: 0 auto 1rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }}
-  .av-pill {{ background: none; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); padding: .25rem .75rem; font-size: .8rem; cursor: pointer; }}
-  .av-pill.active {{ background: var(--accent); border-color: var(--accent); color: #0f172a; font-weight: 600; }}
-  .uptime-badge {{ display: inline-block; min-width: 3rem; padding: .1rem .45rem; border-radius: .35rem; font-size: .72rem; font-weight: 600; text-align: center; font-family: ui-monospace, monospace; }}
-  .uptime-good {{ background: #14532d; color: #4ade80; }}
-  .uptime-warn {{ background: #422006; color: #fbbf24; }}
-  .uptime-bad  {{ background: #450a0a; color: #f87171; }}
-  .uptime-none {{ background: #1e293b; color: #64748b; }}
-  .av-heatmap {{ display: inline-flex; align-items: flex-end; gap: 1px; height: 16px; vertical-align: middle; }}
-  .av-bar {{ width: 4px; height: 100%; background: #334155; border-radius: 1px; cursor: help; }}
-  .av-row {{ display: grid; grid-template-columns: 1fr auto auto auto; gap: .75rem; align-items: center; padding: .35rem 1.25rem; border-bottom: 1px solid #1e293b; font-size: .82rem; }}
-  .av-row:last-child {{ border-bottom: none; }}
-  .av-row .model-id {{ overflow: hidden; text-overflow: ellipsis; }}
-  .av-meta {{ color: var(--muted); font-size: .72rem; font-family: ui-monospace, monospace; white-space: nowrap; }}
-  .av-empty {{ padding: 1rem 1.25rem; color: var(--muted); font-size: .85rem; }}
+  .changes-empty {{
+    text-align: center; padding: 2rem; color: var(--muted); font-size: .9rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  }}
+
+  /* ── Suggest card / footer ───────────── */
+  .suggest-card {{
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    display: flex; align-items: center;
+    gap: 1.25rem; flex-wrap: wrap;
+    margin-top: .5rem;
+  }}
+  .suggest-card h2 {{ font-size: .95rem; font-weight: 600; color: #fff; margin-bottom: .25rem; }}
+  .suggest-card p {{ font-size: .82rem; color: var(--muted); line-height: 1.5; max-width: 56ch; }}
+  .suggest-btn {{
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: #238636; color: #fff !important; border: none;
+    border-radius: 6px; padding: .55rem 1rem;
+    font-size: .85rem; font-weight: 600;
+    text-decoration: none; white-space: nowrap; cursor: pointer;
+    transition: background .15s, transform .1s;
+    margin-left: auto;
+  }}
+  .suggest-btn:hover {{ background: #2ea043; text-decoration: none; }}
+  .suggest-btn:active {{ transform: translateY(1px); }}
+  footer {{
+    margin-top: 2rem; padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: .76rem; color: var(--muted-2); text-align: center;
+  }}
+  footer a {{ color: var(--muted); }}
+  footer a:hover {{ color: var(--accent); }}
+
+  /* ── Mobile filters toggle ───────────── */
+  .filters-toggle {{
+    display: none;
+    position: fixed; bottom: 1.25rem; right: 1.25rem;
+    z-index: 30;
+    background: var(--accent); color: #0a0e1a;
+    border: none; border-radius: 999px;
+    padding: .75rem 1.1rem;
+    font-weight: 600; font-size: .85rem;
+    font-family: inherit; cursor: pointer;
+    align-items: center;
+    box-shadow: 0 8px 24px -8px rgba(56,189,248,.55);
+  }}
+  body.sidebar-open .scrim {{
+    position: fixed; inset: 0; z-index: 35;
+    background: rgba(0,0,0,.55); backdrop-filter: blur(2px);
+  }}
+  .scrim {{ display: none; }}
+
+  /* ── Responsive ──────────────────────── */
+  @media (max-width: 900px) {{
+    .layout, .layout.no-sidebar {{ grid-template-columns: 1fr; }}
+    .sidebar {{
+      position: fixed; inset: 0 auto 0 0;
+      width: 280px; max-width: 85vw;
+      max-height: 100vh; height: 100vh;
+      border-radius: 0;
+      transform: translateX(-100%);
+      transition: transform .25s ease;
+      z-index: 40;
+    }}
+    body.sidebar-open .sidebar {{ transform: translateX(0); }}
+    body.sidebar-open .scrim {{ display: block; }}
+    .filters-toggle {{ display: inline-flex; }}
+    .topbar {{ grid-template-columns: 1fr; }}
+    .top-meta {{ justify-content: flex-start; }}
+  }}
   @media (max-width: 600px) {{
+    body {{ font-size: 13.5px; }}
+    .app {{ padding: 1rem .75rem 5rem; }}
     col.col-ctx, th:nth-child(3), td:nth-child(3),
     col.col-tags, th:nth-child(4), td:nth-child(4),
     col.col-limits, th:nth-child(5), td:nth-child(5) {{ display: none; }}
     col.col-id   {{ width: 50%; }}
     col.col-name {{ width: 50%; }}
     .suggest-card {{ flex-direction: column; align-items: flex-start; }}
+    .suggest-btn {{ margin-left: 0; }}
+    .view-tabs {{ width: 100%; overflow-x: auto; }}
+    .av-row {{ grid-template-columns: 1fr auto; gap: .5rem 0; }}
+    .av-row .av-heatmap, .av-row .av-meta {{ grid-column: 1 / -1; }}
   }}
 </style>
 </head>
 <body>
-<header>
-  <h1>Free LLM API Access</h1>
-  <p class="subtitle">
-    Providers that give you <strong style="color:#e2e8f0">free API tokens</strong> to call LLM models — no credit card required.<br>
-    List is auto-updated every 8 hours from provider APIs.<br>
-    Source: provider APIs + <a href="https://github.com/cheahjs/free-llm-api-resources" target="_blank">cheahjs/free-llm-api-resources</a> ·
-    <a href="models.json" target="_blank">models.json</a> ·
-    <a href="https://github.com/tomaasz/litellm-free-models-proxy" target="_blank">GitHub</a>
-  </p>
-  <p class="meta">Updated: {updated}</p>
-  <div class="stats">
-    <div class="stat"><strong>{total_models}</strong>models with free API access</div>
-    <div class="stat"><strong>{total_providers}</strong>providers</div>
+<div class="app">
+<header class="topbar">
+  <div class="brand">
+    <h1><span class="logo">⚡</span>Free LLM API Access</h1>
+    <p class="tagline">
+      Providers that give you <strong>free API tokens</strong> to call LLM models — no credit card required.
+      Auto-updated every 8 hours from provider APIs.
+    </p>
+  </div>
+  <div class="top-meta">
+    <span class="top-pill"><strong>{total_models}</strong> models</span>
+    <span class="top-pill"><strong>{total_providers}</strong> providers</span>
+    <span class="top-pill" title="Last updated">{updated}</span>
+    <span class="top-pill"><a href="models.json" target="_blank">JSON</a></span>
+    <span class="top-pill"><a href="https://github.com/tomaasz/litellm-free-models-proxy" target="_blank">GitHub</a></span>
   </div>
 </header>
-<div class="search-wrap">
-  <input type="search" id="model-search" placeholder="Search models by ID or name…" autocomplete="off" spellcheck="false">
-</div>
-<div class="ctx-filters">
-  <span class="ctx-label">Context:</span>
-  <button class="ctx-pill active" data-min="0">Any</button>
-  <button class="ctx-pill" data-min="32768">&#8805; 32k</button>
-  <button class="ctx-pill" data-min="131072">&#8805; 128k</button>
-  <button class="ctx-pill" data-min="1000000">&#8805; 1M</button>
-</div>
-<div class="tag-filters">
-  <span class="ctx-label">Tags:</span>
-  <button class="tag-pill active" data-tag="">All</button>
-  <button class="tag-pill" data-tag="coding"    style="--tc:#a78bfa">coding</button>
-  <button class="tag-pill" data-tag="reasoning" style="--tc:#f59e0b">reasoning</button>
-  <button class="tag-pill" data-tag="vision"    style="--tc:#06b6d4">vision</button>
-  <button class="tag-pill" data-tag="fast"      style="--tc:#10b981">fast</button>
-  <button class="tag-pill" data-tag="128k+"     style="--tc:#38bdf8">128k+</button>
-</div>
-<div class="view-tabs">
+
+<nav class="view-tabs" role="tablist">
   <button class="vtab active" data-target="view-provider">By Provider</button>
   <button class="vtab" data-target="view-model">By Model</button>
   <button class="vtab" data-target="view-availability">Availability</button>
   <button class="vtab" data-target="view-changes">Changes</button>
+</nav>
+
+<div class="layout" id="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-section sb-search" data-for="view-provider view-model view-availability">
+      <input type="search" id="model-search" placeholder="Search models…" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="sb-section" data-for="view-provider view-model view-availability">
+      <h3 class="sb-title">Context window</h3>
+      <div class="sb-pills">
+        <button class="sb-pill ctx-pill active" data-min="0">Any</button>
+        <button class="sb-pill ctx-pill" data-min="32768">&#8805; 32k</button>
+        <button class="sb-pill ctx-pill" data-min="131072">&#8805; 128k</button>
+        <button class="sb-pill ctx-pill" data-min="1000000">&#8805; 1M</button>
+      </div>
+    </div>
+    <div class="sb-section" data-for="view-provider view-model">
+      <h3 class="sb-title">Tags</h3>
+      <div class="sb-pills">
+        <button class="sb-pill tag-pill active" data-tag="">All</button>
+        <button class="sb-pill tag-pill" data-tag="coding"    style="--tc:#a78bfa">coding</button>
+        <button class="sb-pill tag-pill" data-tag="reasoning" style="--tc:#f59e0b">reasoning</button>
+        <button class="sb-pill tag-pill" data-tag="vision"    style="--tc:#06b6d4">vision</button>
+        <button class="sb-pill tag-pill" data-tag="fast"      style="--tc:#10b981">fast</button>
+        <button class="sb-pill tag-pill" data-tag="128k+"     style="--tc:#38bdf8">128k+</button>
+      </div>
+    </div>
+    <div class="sb-section" data-for="view-availability">
+      <h3 class="sb-title">Availability</h3>
+      <div class="sb-pills">
+        <button class="sb-pill av-pill active" data-av="all">All</button>
+        <button class="sb-pill av-pill" data-av="problems">Only problems</button>
+        <button class="sb-pill av-pill" data-av="stable">Only stable 7d</button>
+      </div>
+    </div>
+    <p class="sb-help" data-for="view-provider view-model view-availability">
+      Click any model ID to copy it to clipboard.
+    </p>
+  </aside>
+
+  <main>
+    <div id="view-provider">
+      {provider_sections}
+      <p class="no-results" id="no-results">No models match your search.</p>
+    </div>
+    <div id="view-model" style="display:none">
+      {cross_provider_section}
+    </div>
+    <div id="view-availability" style="display:none">
+      {availability_section}
+    </div>
+    <div id="view-changes" style="display:none">
+      {changes_section}
+    </div>
+    <div class="suggest-card">
+      <div>
+        <h2>Know a provider we're missing?</h2>
+        <p>If you know of a provider that gives free API tokens / free-tier access to LLM models and isn't listed here, open a GitHub issue — we'll add support for it.</p>
+      </div>
+      <a class="suggest-btn"
+         href="https://github.com/tomaasz/litellm-free-models-proxy/issues/new?template=new-provider.yml"
+         target="_blank">+ Suggest a provider</a>
+    </div>
+  </main>
 </div>
-<main>
-<div id="view-provider">
-{provider_sections}
-<p class="no-results" id="no-results">No models match your search.</p>
-</div>
-<div id="view-model" style="display:none">
-{cross_provider_section}
-</div>
-<div id="view-availability" style="display:none">
-<div class="av-filters">
-  <span class="ctx-label">Show:</span>
-  <button class="av-pill active" data-av="all">All</button>
-  <button class="av-pill" data-av="problems">Only with problems</button>
-  <button class="av-pill" data-av="stable">Only stable 7d</button>
-</div>
-{availability_section}
-</div>
-<div id="view-changes" style="display:none">
-{changes_section}
-</div>
-<div class="suggest-card">
-  <div class="suggest-text">
-    <h2>Know a provider we're missing?</h2>
-    <p>If you know of a provider that gives free API tokens / free-tier access to LLM models
-    and isn't listed here, open a GitHub issue — we'll add support for it.</p>
-  </div>
-  <a class="suggest-btn"
-     href="https://github.com/tomaasz/litellm-free-models-proxy/issues/new?template=new-provider.yml"
-     target="_blank">
-    &#43; Suggest a provider
-  </a>
-</div>
-</main>
+
+<button class="filters-toggle" id="filters-toggle" aria-label="Toggle filters">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.45rem"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+  Filters
+</button>
+<div class="scrim" id="scrim"></div>
+
 <footer>
-  <p>Auto-generated by <a href="https://github.com/tomaasz/litellm-free-models-proxy">litellm-free-models-proxy</a>.
-  Models listed here are accessible via free-tier API tokens — not open-source or self-hostable models.
-  Not affiliated with any provider. Free tiers may change without notice.</p>
+  <p>Auto-generated by <a href="https://github.com/tomaasz/litellm-free-models-proxy">litellm-free-models-proxy</a> · Cross-referenced with <a href="https://github.com/cheahjs/free-llm-api-resources">cheahjs/free-llm-api-resources</a>. Free-tier API tokens — not open-source or self-hostable models. Tiers may change without notice; not affiliated with any provider.</p>
 </footer>
+</div>
 <script>
 document.querySelectorAll('.model-id').forEach(el => {{
   el.title = 'Click to copy';
@@ -542,22 +854,43 @@ document.querySelectorAll('.collapse-btn').forEach(btn => {{
   }});
 }});
 
-document.querySelectorAll('.vtab').forEach(btn => {{
-  btn.addEventListener('click', () => {{
-    document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const t = btn.dataset.target;
-    document.getElementById('view-provider').style.display     = t === 'view-provider'     ? '' : 'none';
-    document.getElementById('view-model').style.display        = t === 'view-model'        ? '' : 'none';
-    document.getElementById('view-availability').style.display = t === 'view-availability' ? '' : 'none';
-    document.getElementById('view-changes').style.display      = t === 'view-changes'      ? '' : 'none';
-    const showFilters = t === 'view-provider';
-    document.querySelector('.search-wrap').style.display = showFilters ? '' : 'none';
-    document.querySelectorAll('.ctx-filters, .tag-filters').forEach(el => {{
-      el.style.display = showFilters ? '' : 'none';
-    }});
+function applyTab(t) {{
+  document.querySelectorAll('.vtab').forEach(b => b.classList.toggle('active', b.dataset.target === t));
+  ['view-provider','view-model','view-availability','view-changes'].forEach(id => {{
+    document.getElementById(id).style.display = id === t ? '' : 'none';
   }});
+  let anyShown = false;
+  document.querySelectorAll('#sidebar [data-for]').forEach(el => {{
+    const ok = (el.dataset.for || '').split(' ').includes(t);
+    el.style.display = ok ? '' : 'none';
+    if (ok) anyShown = true;
+  }});
+  const layout = document.getElementById('layout');
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('filters-toggle');
+  layout.classList.toggle('no-sidebar', !anyShown);
+  sidebar.style.display = anyShown ? '' : 'none';
+  if (toggle) toggle.style.display = anyShown ? '' : 'none';
+  if (!anyShown) document.body.classList.remove('sidebar-open');
+}}
+document.querySelectorAll('.vtab').forEach(btn => {{
+  btn.addEventListener('click', () => applyTab(btn.dataset.target));
 }});
+
+(function() {{
+  const toggle = document.getElementById('filters-toggle');
+  const scrim = document.getElementById('scrim');
+  if (toggle) toggle.addEventListener('click', (e) => {{
+    e.stopPropagation();
+    document.body.classList.toggle('sidebar-open');
+  }});
+  if (scrim) scrim.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+  document.addEventListener('keydown', (e) => {{
+    if (e.key === 'Escape') document.body.classList.remove('sidebar-open');
+  }});
+}})();
+
+applyTab('view-provider');
 
 document.querySelectorAll('.av-pill').forEach(pill => {{
   pill.addEventListener('click', () => {{
