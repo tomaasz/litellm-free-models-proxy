@@ -415,6 +415,152 @@
         "codestral-latest",
         "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
       ]
+    },
+    {
+      "timestamp": "2026-05-08T20:47:43.412284+00:00",
+      "provider": "openrouter",
+      "provider_label": "OpenRouter",
+      "added": [],
+      "removed": [
+        "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+        "meta-llama/llama-3.3-70b-instruct:free"
+      ]
+    },
+    {
+      "timestamp": "2026-05-08T20:47:43.412284+00:00",
+      "provider": "groq",
+      "provider_label": "Groq",
+      "added": [],
+      "removed": [
+        "canopylabs/orpheus-arabic-saudi",
+        "canopylabs/orpheus-v1-english"
+      ]
+    },
+    {
+      "timestamp": "2026-05-08T20:47:43.412284+00:00",
+      "provider": "cerebras",
+      "provider_label": "Cerebras",
+      "added": [],
+      "removed": [
+        "gpt-oss-120b"
+      ]
+    },
+    {
+      "timestamp": "2026-05-08T20:47:43.412284+00:00",
+      "provider": "gemini",
+      "provider_label": "Gemini",
+      "added": [],
+      "removed": [
+        "gemini-2.0-flash-001",
+        "gemma-4-26b-a4b-it"
+      ]
+    },
+    {
+      "timestamp": "2026-05-08T20:47:43.412284+00:00",
+      "provider": "together",
+      "provider_label": "Together AI",
+      "added": [],
+      "removed": [
+        "ByteDance/Seedance-1.0-lite",
+        "ByteDance/Seedance-1.0-pro",
+        "ByteDance/Seedance-2.0",
+        "HiDream-ai/HiDream-I1-Full",
+        "Qwen/Qwen-Image-2.0",
+        "Qwen/Qwen2.5-1.5B",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "Qwen/Qwen2.5-7B",
+        "Qwen/Qwen3-30B-A3B-Base",
+        "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+        "Qwen/Qwen3.5-9B-FP8",
+        "Wan-AI/Wan2.2-T2V-A14B",
+        "Wan-AI/Wan2.6-image",
+        "Wan-AI/wan2.7-r2v",
+        "Wan-AI/wan2.7-t2v",
+        "black-forest-labs/FLUX.1-kontext-pro",
+        "black-forest-labs/FLUX.1.1-pro",
+        "black-forest-labs/FLUX.2-flex",
+        "deepcogito/cogito-v1-preview-qwen-32B",
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+        "google/flash-image-2.5",
+        "google/gemma-3-270m-it",
+        "google/gemma-3-27b-pt",
+        "google/gemma-4-26B-A4B-it",
+        "google/gemma-4-E2B-it",
+        "google/imagen-4.0-fast",
+        "google/veo-3.1-test-debug",
+        "kwaivgI/kling-1.6-standard",
+        "kwaivgI/kling-2.1-pro",
+        "meta-llama/Llama-3.3-70B-Instruct-FP8-Lora",
+        "meta-llama/Llama-4-Scout-17B-16E",
+        "meta-llama/Meta-Llama-3.1-70B",
+        "nim/meta/llama-3.2-11b-vision-instruct",
+        "nim/meta/llama-3.3-70b-instruct",
+        "nim/mistralai/mixtral-8x22b-instruct-v01",
+        "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8",
+        "openai/sora-2",
+        "openai/sora-2-pro",
+        "rime-labs/rime-arcana-v3",
+        "rime-labs/rime-mist-v2",
+        "stabilityai/stable-diffusion-xl-base-1.0",
+        "vidu/vidu-q1",
+        "vidu/vidu-q3-turbo"
+      ]
+    },
+    {
+      "timestamp": "2026-05-08T20:47:43.412284+00:00",
+      "provider": "nvidia",
+      "provider_label": "NVIDIA NIM",
+      "added": [],
+      "removed": [
+        "adept/fuyu-8b",
+        "ai21labs/jamba-1.5-large-instruct",
+        "aisingapore/sea-lion-7b-instruct",
+        "baai/bge-m3",
+        "bytedance/seed-oss-36b-instruct",
+        "google/codegemma-1.1-7b",
+        "ibm/granite-3.0-8b-instruct",
+        "ibm/granite-34b-code-instruct",
+        "mistralai/codestral-22b-instruct-v0.1",
+        "mistralai/mistral-large-2-instruct",
+        "mistralai/mixtral-8x22b-v0.1",
+        "nvidia/llama-3.1-nemotron-70b-instruct",
+        "nvidia/llama3-chatqa-1.5-70b",
+        "nvidia/mistral-nemo-minitron-8b-8k-instruct",
+        "nvidia/nemotron-4-340b-reward",
+        "nvidia/nemotron-parse",
+        "nvidia/vila",
+        "writer/palmyra-med-70b-32k"
+      ]
+    },
+    {
+      "timestamp": "2026-05-08T20:47:43.412284+00:00",
+      "provider": "github",
+      "provider_label": "GitHub Models",
+      "added": [],
+      "removed": [
+        "azureml://registries/azure-openai/models/gpt-4o-mini/versions/1",
+        "azureml://registries/azure-openai/models/gpt-4o/versions/2"
+      ]
+    },
+    {
+      "timestamp": "2026-05-08T20:47:43.412284+00:00",
+      "provider": "cloudflare",
+      "provider_label": "Cloudflare AI",
+      "added": [],
+      "removed": [
+        "@cf/tiiuae/falcon-7b-instruct",
+        "@hf/thebloke/zephyr-7b-beta-awq"
+      ]
+    },
+    {
+      "timestamp": "2026-05-08T20:47:43.412284+00:00",
+      "provider": "llm7",
+      "provider_label": "LLM7",
+      "added": [],
+      "removed": [
+        "GLM-4.6V-Flash",
+        "ministral-8b-2512"
+      ]
     }
   ]
 }
