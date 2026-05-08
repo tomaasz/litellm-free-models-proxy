@@ -3,6 +3,11 @@ name: Update free models list
 on:
   schedule:
     - cron: "0 */8 * * *"   # every 8 hours (00:00, 08:00, 16:00 UTC)
+  push:
+    branches: [main]
+    paths:
+      - generate_site.py
+      - .github/workflows/update-models.yml
   workflow_dispatch:        # allow manual trigger from GitHub UI
 
 permissions:
