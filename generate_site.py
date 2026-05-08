@@ -360,6 +360,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .ctx-pill:hover, .tag-pill:hover {{ color: var(--text); border-color: #64748b; }}
   .ctx-pill.active {{ background: var(--accent); border-color: var(--accent); color: #0f172a; font-weight: 600; }}
   .tag-pill.active {{ background: var(--tc,var(--accent)); border-color: var(--tc,var(--accent)); color: #0f172a; font-weight: 600; }}
+  .av-filters {{ max-width: 960px; margin: 0 auto 1rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }}
+  .av-pill {{ background: none; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); padding: .25rem .75rem; font-size: .8rem; cursor: pointer; }}
+  .av-pill.active {{ background: var(--accent); border-color: var(--accent); color: #0f172a; font-weight: 600; }}
+  .uptime-badge {{ display: inline-block; min-width: 3rem; padding: .1rem .45rem; border-radius: .35rem; font-size: .72rem; font-weight: 600; text-align: center; font-family: ui-monospace, monospace; }}
+  .uptime-good {{ background: #14532d; color: #4ade80; }}
+  .uptime-warn {{ background: #422006; color: #fbbf24; }}
+  .uptime-bad  {{ background: #450a0a; color: #f87171; }}
+  .uptime-none {{ background: #1e293b; color: #64748b; }}
+  .av-heatmap {{ display: inline-flex; align-items: flex-end; gap: 1px; height: 16px; vertical-align: middle; }}
+  .av-bar {{ width: 4px; height: 100%; background: #334155; border-radius: 1px; cursor: help; }}
+  .av-row {{ display: grid; grid-template-columns: 1fr auto auto auto; gap: .75rem; align-items: center; padding: .35rem 1.25rem; border-bottom: 1px solid #1e293b; font-size: .82rem; }}
+  .av-row:last-child {{ border-bottom: none; }}
+  .av-row .model-id {{ overflow: hidden; text-overflow: ellipsis; }}
+  .av-meta {{ color: var(--muted); font-size: .72rem; font-family: ui-monospace, monospace; white-space: nowrap; }}
+  .av-empty {{ padding: 1rem 1.25rem; color: var(--muted); font-size: .85rem; }}
   @media (max-width: 600px) {{
     col.col-ctx, th:nth-child(3), td:nth-child(3),
     col.col-tags, th:nth-child(4), td:nth-child(4),
@@ -408,6 +423,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <div class="view-tabs">
   <button class="vtab active" data-target="view-provider">By Provider</button>
   <button class="vtab" data-target="view-model">By Model</button>
+  <button class="vtab" data-target="view-availability">Availability</button>
   <button class="vtab" data-target="view-changes">Changes</button>
 </div>
 <main>
@@ -417,6 +433,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </div>
 <div id="view-model" style="display:none">
 {cross_provider_section}
+</div>
+<div id="view-availability" style="display:none">
+<div class="av-filters">
+  <span class="ctx-label">Show:</span>
+  <button class="av-pill active" data-av="all">All</button>
+  <button class="av-pill" data-av="problems">Only with problems</button>
+  <button class="av-pill" data-av="stable">Only stable 7d</button>
+</div>
+{availability_section}
 </div>
 <div id="view-changes" style="display:none">
 {changes_section}
@@ -522,13 +547,29 @@ document.querySelectorAll('.vtab').forEach(btn => {{
     document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const t = btn.dataset.target;
-    document.getElementById('view-provider').style.display = t === 'view-provider' ? '' : 'none';
-    document.getElementById('view-model').style.display    = t === 'view-model'    ? '' : 'none';
-    document.getElementById('view-changes').style.display  = t === 'view-changes'  ? '' : 'none';
+    document.getElementById('view-provider').style.display     = t === 'view-provider'     ? '' : 'none';
+    document.getElementById('view-model').style.display        = t === 'view-model'        ? '' : 'none';
+    document.getElementById('view-availability').style.display = t === 'view-availability' ? '' : 'none';
+    document.getElementById('view-changes').style.display      = t === 'view-changes'      ? '' : 'none';
     const showFilters = t === 'view-provider';
     document.querySelector('.search-wrap').style.display = showFilters ? '' : 'none';
     document.querySelectorAll('.ctx-filters, .tag-filters').forEach(el => {{
       el.style.display = showFilters ? '' : 'none';
+    }});
+  }});
+}});
+
+document.querySelectorAll('.av-pill').forEach(pill => {{
+  pill.addEventListener('click', () => {{
+    document.querySelectorAll('.av-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    const mode = pill.dataset.av;
+    document.querySelectorAll('#view-availability .av-row').forEach(row => {{
+      const u = parseFloat(row.dataset.uptime || '-1');
+      let show = true;
+      if (mode === 'problems') show = (u >= 0 && u < 0.95);
+      else if (mode === 'stable') show = (u >= 0.95);
+      row.style.display = show ? '' : 'none';
     }});
   }});
 }});
@@ -748,6 +789,106 @@ def render_changes(history, provider_color_map):
     return html
 
 
+def _uptime_class(u):
+    if u is None:
+        return "uptime-none"
+    if u >= 0.95:
+        return "uptime-good"
+    if u >= 0.70:
+        return "uptime-warn"
+    return "uptime-bad"
+
+
+def _uptime_text(u):
+    if u is None:
+        return "—"
+    return f"{u * 100:.0f}%"
+
+
+def render_availability(provider_list, results, availability):
+    """Render the Availability view from docs/availability.json data."""
+    if not availability:
+        return ('<p class="av-empty" style="text-align:center;padding:2rem">'
+                'No probe data yet. The probe workflow runs every 2h; data will '
+                'appear after the first run completes.</p>')
+
+    html = ""
+    for p in provider_list:
+        pk = p["key"]
+        models = results.get(pk, [])
+        if not models:
+            continue
+        avail_for_provider = availability.get(pk, {})
+        # Header (reuses provider-header styling).
+        header = (
+            f'<div class="provider-header">'
+            f'<span class="provider-dot" style="background:{p["color"]}"></span>'
+            f'<span class="provider-name">{escape(p["label"])}</span>'
+            f'<span class="provider-count">{len(models)} models</span>'
+            f'</div>'
+        )
+
+        rows_html = ""
+        # Order by uptime ascending (problems first), then by id.
+        def sort_key(m):
+            a = avail_for_provider.get(m["id"], {})
+            u = a.get("uptime_7d")
+            return (1 if u is None else 0, u if u is not None else 1.0, m["id"])
+
+        for m in sorted(models, key=sort_key):
+            mid = m["id"]
+            a = avail_for_provider.get(mid, {})
+            u7 = a.get("uptime_7d")
+            samples = a.get("samples_7d", 0)
+            rl = a.get("rate_limited_7d", 0)
+            p50 = a.get("p50_latency_ms")
+            hourly = a.get("hourly_uptime") or [{"ok": 0, "total": 0}] * 24
+
+            badge = (
+                f'<span class="uptime-badge {_uptime_class(u7)}" '
+                f'title="7-day uptime · {samples} probes · '
+                f'{rl} rate-limited">{_uptime_text(u7)}</span>'
+            )
+            bars = ""
+            for h, cell in enumerate(hourly):
+                tot = cell.get("total", 0)
+                ok_n = cell.get("ok", 0)
+                if tot == 0:
+                    bg = "#334155"
+                    title = f"{h:02d}:00 UTC · no data"
+                else:
+                    rate = ok_n / tot
+                    if rate >= 0.95:
+                        bg = "#22c55e"
+                    elif rate >= 0.70:
+                        bg = "#f59e0b"
+                    else:
+                        bg = "#ef4444"
+                    title = f"{h:02d}:00 UTC · {rate*100:.0f}% · {ok_n}/{tot} probes"
+                bars += f'<span class="av-bar" style="background:{bg}" title="{title}"></span>'
+            heatmap = f'<span class="av-heatmap" aria-label="hourly uptime, UTC">{bars}</span>'
+            meta_bits = []
+            if p50 is not None:
+                meta_bits.append(f"p50 {p50}ms")
+            if rl:
+                meta_bits.append(f"rl {rl}")
+            if samples:
+                meta_bits.append(f"n={samples}")
+            meta = " · ".join(meta_bits) or "no probes"
+            uptime_data = "" if u7 is None else f"{u7:.4f}"
+            rows_html += (
+                f'<div class="av-row" data-uptime="{uptime_data}">'
+                f'<span class="model-id" data-id="{escape(mid)}">{escape(mid)}</span>'
+                f'{badge}{heatmap}'
+                f'<span class="av-meta">{escape(meta)}</span>'
+                f'</div>'
+            )
+
+        body = f'<div class="provider-body">{rows_html}</div>'
+        html += f'<div class="provider-card">{header}{body}</div>'
+    return html
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -877,12 +1018,21 @@ def main():
     provider_color_map = {p["key"]: p["color"] for p in PROVIDERS}
     changes_html = render_changes(history, provider_color_map)
 
+    availability = {}
+    avail_path = OUT_DIR / "availability.json"
+    try:
+        availability = json.loads(avail_path.read_text()).get("providers", {})
+    except Exception:
+        pass
+    availability_html = render_availability(PROVIDERS, results, availability)
+
     html = HTML_TEMPLATE.format(
         updated=updated,
         total_models=total_models,
         total_providers=total_providers,
         provider_sections=sections,
         cross_provider_section=cross_html,
+        availability_section=availability_html,
         changes_section=changes_html,
     )
     (OUT_DIR / "index.html").write_text(html, encoding="utf-8")
