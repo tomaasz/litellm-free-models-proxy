@@ -2,7 +2,7 @@ name: Probe model availability
 
 on:
   schedule:
-    - cron: "0 * * * *"   # every hour
+    - cron: "*/30 * * * *"   # every 30 minutes
   workflow_dispatch:
 
 permissions:
