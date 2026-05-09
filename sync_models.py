@@ -21,6 +21,7 @@ import logging
 import urllib.request
 import urllib.error
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from html.parser import HTMLParser
 
 logging.basicConfig(
@@ -34,7 +35,11 @@ LITELLM_BASE = os.environ.get("LITELLM_BASE_URL", "http://litellm:4000")
 LITELLM_KEY = os.environ.get("LITELLM_MASTER_KEY", "")
 SYNC_INTERVAL_H = int(os.environ.get("SYNC_INTERVAL_HOURS", "24"))
 STARTUP_DELAY_S = int(os.environ.get("STARTUP_DELAY_SECONDS", "60"))
-CLEANUP_STALE = os.environ.get("CLEANUP_STALE_MODELS", "").lower() in ("1", "true", "yes")
+CLEANUP_STALE = os.environ.get("CLEANUP_STALE_MODELS", "").lower() in (
+    "1",
+    "true",
+    "yes",
+)
 
 # Community-maintained list of free LLM APIs (auto-generated, updated frequently).
 CHEAHJS_README_URL = (
@@ -82,6 +87,7 @@ def _get_litellm(path):
 
 # ── LiteLLM state ─────────────────────────────────────────────────────────────
 
+
 def get_existing_litellm_models():
     """Return dict: litellm_model → {"id": ..., "api_key": ...}"""
     try:
@@ -117,7 +123,9 @@ def add_model(model_name, litellm_model, api_key_env, rpm=None, api_base=None):
     if api_base:
         params["api_base"] = api_base
     try:
-        _post_litellm("/model/new", {"model_name": model_name, "litellm_params": params})
+        _post_litellm(
+            "/model/new", {"model_name": model_name, "litellm_params": params}
+        )
         return True
     except Exception as e:
         log.error(f"  Failed to add {model_name} ({litellm_model}): {e}")
@@ -126,18 +134,23 @@ def add_model(model_name, litellm_model, api_key_env, rpm=None, api_base=None):
 
 # ── cheahjs/free-llm-api-resources cross-reference ───────────────────────────
 
+
 class _TableTextParser(HTMLParser):
     """Extracts <td> text content from an HTML table."""
+
     def __init__(self):
         super().__init__()
         self.in_td = False
         self.cells = []
+
     def handle_starttag(self, tag, attrs):
         if tag == "td":
             self.in_td = True
+
     def handle_endtag(self, tag):
         if tag == "td":
             self.in_td = False
+
     def handle_data(self, data):
         if self.in_td:
             self.cells.append(data.strip())
@@ -150,7 +163,7 @@ def _extract_section(readme, heading):
     if not m:
         return ""
     start = m.start()
-    next_section = re.search(r"\n### ", readme[start + 1:])
+    next_section = re.search(r"\n### ", readme[start + 1 :])
     end = start + 1 + next_section.start() if next_section else len(readme)
     return readme[start:end]
 
@@ -174,8 +187,13 @@ def fetch_community_free_models():
     cohere_section = _extract_section(readme, "Cohere")
     for line in cohere_section.splitlines():
         line = line.strip().lstrip("- ")
-        if line and not line.startswith("[") and not line.startswith("#") \
-                and not line.startswith("*") and not line.startswith("<"):
+        if (
+            line
+            and not line.startswith("[")
+            and not line.startswith("#")
+            and not line.startswith("*")
+            and not line.startswith("<")
+        ):
             if "/" not in line and len(line) < 60:
                 result["cohere"].add(line)
 
@@ -192,6 +210,7 @@ def fetch_community_free_models():
 
 
 # ── Provider fetchers ──────────────────────────────────────────────────────────
+
 
 def fetch_openrouter(api_key):
     """Free models: pricing.prompt == '0' AND pricing.completion == '0'."""
@@ -223,7 +242,10 @@ def fetch_groq(api_key):
         ids = [
             m["id"]
             for m in data.get("data", [])
-            if not any(x in m.get("id", "").lower() for x in ("whisper", "tts", "embed", "guard"))
+            if not any(
+                x in m.get("id", "").lower()
+                for x in ("whisper", "tts", "embed", "guard")
+            )
         ]
         log.info(f"[Groq] {len(ids)} models")
         return ids
@@ -273,8 +295,11 @@ def fetch_together(api_key):
         for m in items:
             mid = m.get("id", "")
             p = m.get("pricing", {})
-            if (p.get("input", 1) == 0 and p.get("output", 1) == 0) \
-                    or "-Free" in mid or "-free" in mid:
+            if (
+                (p.get("input", 1) == 0 and p.get("output", 1) == 0)
+                or "-Free" in mid
+                or "-free" in mid
+            ):
                 free.append(mid)
         log.info(f"[Together] {len(free)} free models")
         return free
@@ -306,7 +331,9 @@ def fetch_cohere(api_key, community_ids=None):
     except Exception as e:
         log.error(f"[Cohere] API error: {e}")
         if community_ids:
-            log.info(f"[Cohere] Falling back to community list ({len(community_ids)} models)")
+            log.info(
+                f"[Cohere] Falling back to community list ({len(community_ids)} models)"
+            )
             return list(community_ids)
         return []
 
@@ -323,13 +350,17 @@ def fetch_gemini(api_key):
         )
         free = []
         for m in data.get("models", []):
-            name = m.get("name", "").replace("models/", "")  # "models/gemini-2.5-flash" → "gemini-2.5-flash"
+            name = m.get("name", "").replace(
+                "models/", ""
+            )  # "models/gemini-2.5-flash" → "gemini-2.5-flash"
             methods = m.get("supportedGenerationMethods", [])
             if "generateContent" not in methods:
                 continue
             nl = name.lower()
             # Exclude non-free variants
-            if any(x in nl for x in ("-pro", "-ultra", "embedding", "-tts", "robotics")):
+            if any(
+                x in nl for x in ("-pro", "-ultra", "embedding", "-tts", "robotics")
+            ):
                 continue
             # Include flash, lite, and gemma (open) models
             if any(x in nl for x in ("flash", "gemma")):
@@ -369,7 +400,9 @@ def fetch_huggingface(api_key):
         ids = [
             m["id"]
             for m in data.get("data", [])
-            if not any(x in m.get("id", "").lower() for x in ("embed", "vision", "tts", "stt"))
+            if not any(
+                x in m.get("id", "").lower() for x in ("embed", "vision", "tts", "stt")
+            )
         ]
         log.info(f"[HuggingFace] {len(ids)} models")
         return ids
@@ -414,8 +447,10 @@ def fetch_github(api_key):
         ids = [
             m.get("id") or m.get("name", "")
             for m in items
-            if not any(x in (m.get("id") or m.get("name", "")).lower()
-                       for x in ("embed", "tts", "whisper", "dall-e", "image"))
+            if not any(
+                x in (m.get("id") or m.get("name", "")).lower()
+                for x in ("embed", "tts", "whisper", "dall-e", "image")
+            )
             and (m.get("id") or m.get("name", ""))
         ]
         log.info(f"[GitHub Models] {len(ids)} models")
@@ -474,9 +509,12 @@ def fetch_kluster(api_key):
             headers={"Authorization": f"Bearer {api_key}"},
         )
         ids = [
-            m["id"] for m in data.get("data", [])
-            if not any(x in m.get("id", "").lower()
-                       for x in ("embed", "bge", "rerank", "tts", "whisper"))
+            m["id"]
+            for m in data.get("data", [])
+            if not any(
+                x in m.get("id", "").lower()
+                for x in ("embed", "bge", "rerank", "tts", "whisper")
+            )
         ]
         log.info(f"[Kluster] {len(ids)} models")
         return ids
@@ -492,8 +530,10 @@ def fetch_llm7(api_key):
         data = _json_get("https://api.llm7.io/v1/models", headers=headers)
         items = data if isinstance(data, list) else data.get("data", [])
         ids = [
-            m["id"] for m in items
-            if m.get("id") and not any(
+            m["id"]
+            for m in items
+            if m.get("id")
+            and not any(
                 x in m["id"].lower()
                 for x in ("embed", "tts", "audio", "whisper", "image")
             )
@@ -526,8 +566,10 @@ def fetch_zai(api_key):
             mid = m.get("id") or m.get("modelCode") or ""
             if not mid or mid in ids or "flash" not in mid.lower():
                 continue
-            if any(x in mid.lower() for x in
-                   ("embed", "rerank", "tts", "stt", "audio", "image")):
+            if any(
+                x in mid.lower()
+                for x in ("embed", "rerank", "tts", "stt", "audio", "image")
+            ):
                 continue
             ids.append(mid)
     except Exception as e:
@@ -536,8 +578,8 @@ def fetch_zai(api_key):
     return ids
 
 
-
 # ── Slug helper ───────────────────────────────────────────────────────────────
+
 
 def slug(model_id):
     return model_id.split("/")[-1].replace(":free", "").lower()
@@ -696,6 +738,20 @@ PROVIDERS = [
 
 # ── Main sync ─────────────────────────────────────────────────────────────────
 
+
+def _fetch_provider(provider, community):
+    api_key = os.environ.get(provider["env_key"], "")
+    if not api_key:
+        return provider, "", None
+
+    if provider["name"] == "Cohere":
+        models = fetch_cohere(api_key, community.get("cohere"))
+    else:
+        models = provider["fetch"](api_key)
+
+    return provider, api_key, models
+
+
 def sync():
     log.info("=== Model sync started ===")
     if CLEANUP_STALE:
@@ -709,55 +765,58 @@ def sync():
 
     added = skipped = errors = deleted = 0
 
-    for provider in PROVIDERS:
-        api_key = os.environ.get(provider["env_key"], "")
-        if not api_key:
-            continue
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(_fetch_provider, p, community): p for p in PROVIDERS}
 
-        if provider["name"] == "Cohere":
-            models = fetch_cohere(api_key, community.get("cohere"))
-        else:
-            models = provider["fetch"](api_key)
-
-        cf_account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
-        api_base = (
-            f"https://api.cloudflare.com/client/v4/accounts/{cf_account_id}/ai"
-            if provider["name"] == "Cloudflare" and cf_account_id
-            else provider.get("api_base")
-        )
-
-        # Remove models that are no longer offered by this provider
-        if CLEANUP_STALE and models is not None:
-            expected_key = f"os.environ/{provider['env_key']}"
-            current = {provider["litellm_fmt"](mid) for mid in models}
-            for model_str, info in list(existing.items()):
-                if info["api_key"] == expected_key and model_str not in current:
-                    log.info(f"  - Removing stale: {model_str}")
-                    if delete_model(info["id"]):
-                        del existing[model_str]
-                        existing_set.discard(model_str)
-                        deleted += 1
-
-        for mid in models:
-            litellm_model = provider["litellm_fmt"](mid)
-            if litellm_model in existing_set:
-                skipped += 1
+        for future in as_completed(futures):
+            try:
+                provider, api_key, models = future.result()
+            except Exception as e:
+                log.error(f"Failed to fetch models for a provider: {e}")
                 continue
 
-            model_name = provider["name_fmt"](mid)
-            ok = add_model(
-                model_name=model_name,
-                litellm_model=litellm_model,
-                api_key_env=provider["env_key"],
-                rpm=provider["rpm"],
-                api_base=api_base,
+            if not api_key or models is None:
+                continue
+
+            cf_account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
+            api_base = (
+                f"https://api.cloudflare.com/client/v4/accounts/{cf_account_id}/ai"
+                if provider["name"] == "Cloudflare" and cf_account_id
+                else provider.get("api_base")
             )
-            if ok:
-                log.info(f"  + {model_name}  ({litellm_model})")
-                existing_set.add(litellm_model)
-                added += 1
-            else:
-                errors += 1
+
+            # Remove models that are no longer offered by this provider
+            if CLEANUP_STALE:
+                expected_key = f"os.environ/{provider['env_key']}"
+                current = {provider["litellm_fmt"](mid) for mid in models}
+                for model_str, info in list(existing.items()):
+                    if info["api_key"] == expected_key and model_str not in current:
+                        log.info(f"  - Removing stale: {model_str}")
+                        if delete_model(info["id"]):
+                            del existing[model_str]
+                            existing_set.discard(model_str)
+                            deleted += 1
+
+            for mid in models:
+                litellm_model = provider["litellm_fmt"](mid)
+                if litellm_model in existing_set:
+                    skipped += 1
+                    continue
+
+                model_name = provider["name_fmt"](mid)
+                ok = add_model(
+                    model_name=model_name,
+                    litellm_model=litellm_model,
+                    api_key_env=provider["env_key"],
+                    rpm=provider["rpm"],
+                    api_base=api_base,
+                )
+                if ok:
+                    log.info(f"  + {model_name}  ({litellm_model})")
+                    existing_set.add(litellm_model)
+                    added += 1
+                else:
+                    errors += 1
 
     log.info(
         f"=== Done: +{added} added, -{deleted} removed, "
