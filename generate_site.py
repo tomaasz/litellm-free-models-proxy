@@ -887,6 +887,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <span class="top-pill"><strong>{total_providers}</strong> providers</span>
     <span class="top-pill" title="Last updated">{updated}</span>
     <span class="top-pill"><a href="https://tomaasz.github.io/litellm-free-models-proxy/models.json" target="_blank">JSON</a></span>
+    <span class="top-pill"><a href="https://tomaasz.github.io/litellm-free-models-proxy/availability/stable_models.json" target="_blank" title="Models with 7d uptime ≥ 95%">JSON · stable</a></span>
+    <span class="top-pill"><a href="https://tomaasz.github.io/litellm-free-models-proxy/availability/problems_models.json" target="_blank" title="Models with 7d uptime &lt; 95%">JSON · problems</a></span>
     <span class="top-pill"><a href="https://github.com/tomaasz/litellm-free-models-proxy" target="_blank">GitHub</a></span>
   </div>
 </header>
