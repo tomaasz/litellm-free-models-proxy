@@ -1080,8 +1080,9 @@ function applyTab(t) {{
 
 function tabPath(t) {{
   const slug = TAB_TO_SLUG[t];
-  // Strip trailing /<known-slug>/? from current pathname to get the site root.
-  const rootPath = location.pathname.replace(/\/(by-provider|by-model|availability|changes)\/?$/, '/');
+  // Strip trailing /<known-slug>(/availability sub-mode)? from current pathname.
+  const rootPath = location.pathname.replace(
+    /\/(by-provider|by-model|availability(?:\/(?:problems|stable))?|changes)\/?$/, '/');
   return rootPath + (slug === 'by-provider' ? '' : slug + '/');
 }}
 
@@ -1094,8 +1095,16 @@ document.querySelectorAll('.vtab').forEach(btn => {{
 }});
 
 window.addEventListener('popstate', () => {{
-  const m = location.pathname.match(/\/(by-provider|by-model|availability|changes)\/?$/);
+  const p = location.pathname;
+  const avSub = p.match(/\/availability\/(problems|stable)\/?$/);
+  if (avSub) {{
+    applyTab('view-availability');
+    applyAvFilter(avSub[1]);
+    return;
+  }}
+  const m = p.match(/\/(by-provider|by-model|availability|changes)\/?$/);
   applyTab(m ? SLUG_TO_TAB[m[1]] : 'view-provider');
+  if (m && m[1] === 'availability') applyAvFilter('all');
 }});
 
 (function() {{
@@ -1113,20 +1122,34 @@ window.addEventListener('popstate', () => {{
 
 applyTab(document.body.dataset.tab || 'view-provider');
 
+function applyAvFilter(mode) {{
+  document.querySelectorAll('.av-pill').forEach(p => p.classList.toggle('active', p.dataset.av === mode));
+  document.querySelectorAll('#view-availability .av-row').forEach(row => {{
+    const u = parseFloat(row.dataset.uptime || '-1');
+    let show = true;
+    if (mode === 'problems') show = (u >= 0 && u < 0.95);
+    else if (mode === 'stable') show = (u >= 0.95);
+    row.style.display = show ? '' : 'none';
+  }});
+}}
+
 document.querySelectorAll('.av-pill').forEach(pill => {{
   pill.addEventListener('click', () => {{
-    document.querySelectorAll('.av-pill').forEach(p => p.classList.remove('active'));
-    pill.classList.add('active');
     const mode = pill.dataset.av;
-    document.querySelectorAll('#view-availability .av-row').forEach(row => {{
-      const u = parseFloat(row.dataset.uptime || '-1');
-      let show = true;
-      if (mode === 'problems') show = (u >= 0 && u < 0.95);
-      else if (mode === 'stable') show = (u >= 0.95);
-      row.style.display = show ? '' : 'none';
-    }});
+    applyAvFilter(mode);
+    if (history.pushState) {{
+      const root = location.pathname.replace(
+        /\/availability(?:\/(?:problems|stable))?\/?$/, '/');
+      const next = mode === 'all'
+        ? root + 'availability/'
+        : root + 'availability/' + mode + '/';
+      history.pushState({{tab: 'view-availability', av: mode}}, '', next);
+    }}
   }});
 }});
+
+// Apply av filter from data-av attribute (set by per-view entry points).
+if (document.body.dataset.av) applyAvFilter(document.body.dataset.av);
 
 document.querySelectorAll('#view-changes .change-id').forEach(el => {{
   el.title = 'Click to copy';
@@ -1643,23 +1666,30 @@ def main():
     print(f"Written docs/index.html  ({total_models} models, {total_providers} providers, {len(cross_groups)} cross-provider groups)")
 
     # Per-view entry points (so /availability, /by-model, etc. work as URLs).
-    # Each is the same HTML with <base href="../"> and a data-tab marker so
-    # the JS activates the right tab on initial load.
-    for slug, tab in [
-        ("by-provider",  "view-provider"),
-        ("by-model",     "view-model"),
-        ("availability", "view-availability"),
-        ("changes",      "view-changes"),
-    ]:
+    # Each is the same HTML with <base href> pointing at the site root and a
+    # data-tab marker so the JS activates the right tab on initial load.
+    # Availability has shareable sub-filters (/availability/problems, /stable).
+    entry_points = [
+        ("by-provider",           "view-provider",     "../",    None),
+        ("by-model",              "view-model",        "../",    None),
+        ("availability",          "view-availability", "../",    None),
+        ("availability/problems", "view-availability", "../../", "problems"),
+        ("availability/stable",   "view-availability", "../../", "stable"),
+        ("changes",               "view-changes",      "../",    None),
+    ]
+    for slug, tab, base, av in entry_points:
         sub_dir = OUT_DIR / slug
-        sub_dir.mkdir(exist_ok=True)
+        sub_dir.mkdir(parents=True, exist_ok=True)
+        body_attrs = f'data-tab="{tab}"'
+        if av:
+            body_attrs += f' data-av="{av}"'
         sub_html = (
             html
-            .replace("<head>", '<head>\n<base href="../">', 1)
-            .replace("<body>", f'<body data-tab="{tab}">', 1)
+            .replace("<head>", f'<head>\n<base href="{base}">', 1)
+            .replace("<body>", f'<body {body_attrs}>', 1)
         )
         (sub_dir / "index.html").write_text(sub_html, encoding="utf-8")
-    print(f"Written 4 per-view entry points (by-provider/, by-model/, availability/, changes/)")
+    print(f"Written {len(entry_points)} per-view entry points")
 
 
 if __name__ == "__main__":
