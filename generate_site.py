@@ -886,7 +886,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <span class="top-pill"><strong>{total_models}</strong> models</span>
     <span class="top-pill"><strong>{total_providers}</strong> providers</span>
     <span class="top-pill" title="Last updated">{updated}</span>
-    <span class="top-pill"><a href="models.json" target="_blank">JSON</a></span>
+    <span class="top-pill"><a href="https://tomaasz.github.io/litellm-free-models-proxy/models.json" target="_blank">JSON</a></span>
     <span class="top-pill"><a href="https://github.com/tomaasz/litellm-free-models-proxy" target="_blank">GitHub</a></span>
   </div>
 </header>
@@ -1689,6 +1689,11 @@ def main():
             .replace("<body>", f'<body {body_attrs}>', 1)
         )
         (sub_dir / "index.html").write_text(sub_html, encoding="utf-8")
+        # Mirror the JSON files so links resolve from any sub-path.
+        for jf in ("models.json", "availability.json"):
+            src = OUT_DIR / jf
+            if src.exists():
+                (sub_dir / jf).write_bytes(src.read_bytes())
     print(f"Written {len(entry_points)} per-view entry points")
 
 
