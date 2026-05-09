@@ -987,7 +987,7 @@ document.querySelectorAll('.model-id').forEach(el => {{
 (function() {{
   const input = document.getElementById('model-search');
   const noResults = document.getElementById('no-results');
-  const cards = Array.from(document.querySelectorAll('.provider-card[data-total]'));
+  const cards = Array.from(document.querySelectorAll('.provider-card[data-total], .cross-group[data-total]'));
   let ctxMin = 0;
   let tagFilter = '';
 
@@ -1258,6 +1258,7 @@ def render_cross_provider(groups, provider_map):
             f'</div>'
         )
         rows = ""
+        rows_count = 0
         for e in sorted(entries, key=lambda x: x["provider"]):
             pcolor = provider_map.get(e["provider"], {}).get("color", "#94a3b8")
             ctx_raw = int(e.get("context") or 0)
@@ -1267,8 +1268,10 @@ def render_cross_provider(groups, provider_map):
                 f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
                 for l, c in tag_list
             )
+            search_val = escape(f'{e["model_id"]} {e["provider"]} {cname}'.lower())
+            tag_labels = escape(" ".join(l for l, _ in tag_list))
             rows += (
-                f'<tr>'
+                f'<tr data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<td><span class="provider-chip" style="background:{pcolor}"></span> {escape(e["provider"])}</td>'
                 f'<td><span class="model-id" data-id="{escape(e["model_id"])}">{escape(e["model_id"])}</span></td>'
                 f'<td class="ctx">{escape(ctx)}</td>'
@@ -1276,6 +1279,7 @@ def render_cross_provider(groups, provider_map):
                 f'<td class="limits">{escape(e.get("limits") or "")}</td>'
                 f'</tr>'
             )
+            rows_count += 1
         colgroup = (
             '<colgroup>'
             '<col style="width:18%"><col style="width:34%">'
@@ -1287,7 +1291,7 @@ def render_cross_provider(groups, provider_map):
             '<th>Provider</th><th>Model ID</th><th>Context</th><th>Tags</th><th>Limits</th>'
             '</tr></thead><tbody>' + rows + '</tbody></table>'
         )
-        html += f'<div class="cross-group">{header}{table}</div>'
+        html += f'<div class="cross-group" data-total="{rows_count}">{header}{table}</div>'
     return html
 
 
