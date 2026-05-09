@@ -997,7 +997,7 @@ document.querySelectorAll('.model-id').forEach(el => {{
     let totalVisible = 0;
 
     cards.forEach(card => {{
-      const rows = card.querySelectorAll('tbody tr');
+      const rows = card.querySelectorAll('tbody tr, .av-row');
       const countEl = card.querySelector('.provider-count');
       const total = parseInt(card.dataset.total, 10);
       let visible = 0;
@@ -1439,8 +1439,12 @@ def render_availability(provider_list, results, availability):
                 meta_bits.append(f"n={samples}")
             meta = " · ".join(meta_bits) or "no probes"
             uptime_data = "" if u7 is None else f"{u7:.4f}"
+            search_val = escape(f'{mid} {p["label"]}'.lower())
+            tag_labels = escape(" ".join(l for l, _ in get_tags(mid, m.get("context"), m.get("capabilities"))))
+            ctx_raw = int(m.get("context") or 0)
             rows_html += (
-                f'<div class="av-row" data-uptime="{uptime_data}">'
+                f'<div class="av-row" data-uptime="{uptime_data}" '
+                f'data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<span class="model-id" data-id="{escape(mid)}">{escape(mid)}</span>'
                 f'{badge}{heatmap}'
                 f'<span class="av-meta">{escape(meta)}</span>'
@@ -1448,7 +1452,7 @@ def render_availability(provider_list, results, availability):
             )
 
         body = f'<div class="provider-body">{rows_html}</div>'
-        html += f'<div class="provider-card">{header}{body}</div>'
+        html += f'<div class="provider-card" data-total="{len(models)}">{header}{body}</div>'
     return html
 
 
