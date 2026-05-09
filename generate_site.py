@@ -1366,6 +1366,10 @@ def render_availability(provider_list, results, availability):
                 'No probe data yet. The probe workflow runs every 2h; data will '
                 'appear after the first run completes.</p>')
 
+    # Rotate so the rightmost bar = current UTC hour (freshest possible data).
+    now_hour = datetime.now(timezone.utc).hour
+    bar_order = [(now_hour + 1 + i) % 24 for i in range(24)]
+
     html = ""
     for p in provider_list:
         pk = p["key"]
@@ -1404,7 +1408,8 @@ def render_availability(provider_list, results, availability):
                 f'{rl} rate-limited">{_uptime_text(u7)}</span>'
             )
             bars = ""
-            for h, cell in enumerate(hourly):
+            for h in bar_order:
+                cell = hourly[h] if h < len(hourly) else {"ok": 0, "total": 0}
                 tot = cell.get("total", 0)
                 ok_n = cell.get("ok", 0)
                 if tot == 0:
