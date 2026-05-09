@@ -1567,6 +1567,45 @@ def main():
     old_models_path.write_text(json.dumps(json_out, indent=2, ensure_ascii=False))
     print(f"Written docs/models.json")
 
+    # Filtered variants under /availability/ — same shape as models.json,
+    # but each provider's "models" list is restricted by 7-day probe uptime.
+    # Stable: uptime_7d >= 0.95; Problems: 0 <= uptime_7d < 0.95.
+    # Both require samples_7d >= 5 so we don't include unproven models.
+    try:
+        avail_for_filter = json.loads(
+            (OUT_DIR / "availability.json").read_text()
+        ).get("providers", {})
+    except Exception:
+        avail_for_filter = {}
+
+    def _filtered_json(predicate):
+        out = {"updated": json_out["updated"], "providers": {}}
+        for pk, pdata in json_out["providers"].items():
+            prov_avail = avail_for_filter.get(pk, {})
+            kept = []
+            for m in pdata["models"]:
+                a = prov_avail.get(m["id"], {})
+                u = a.get("uptime_7d")
+                n = a.get("samples_7d", 0) or 0
+                if u is not None and n >= 5 and predicate(u):
+                    kept.append(m)
+            if kept:
+                out["providers"][pk] = {**pdata, "models": kept}
+        return out
+
+    avail_subdir = OUT_DIR / "availability"
+    avail_subdir.mkdir(parents=True, exist_ok=True)
+    stable = _filtered_json(lambda u: u >= 0.95)
+    problems = _filtered_json(lambda u: 0.0 <= u < 0.95)
+    (avail_subdir / "stable_models.json").write_text(
+        json.dumps(stable, indent=2, ensure_ascii=False))
+    (avail_subdir / "problems_models.json").write_text(
+        json.dumps(problems, indent=2, ensure_ascii=False))
+    n_stable = sum(len(p["models"]) for p in stable["providers"].values())
+    n_problems = sum(len(p["models"]) for p in problems["providers"].values())
+    print(f"Written docs/availability/stable_models.json ({n_stable} models)")
+    print(f"Written docs/availability/problems_models.json ({n_problems} models)")
+
     # Compute per-provider deltas (with full id sets for history)
     deltas = {}
     deltas_full = {}
