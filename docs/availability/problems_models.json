@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-10T22:13:53.710552+00:00",
+  "updated": "2026-05-10T23:15:48.587182+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -37,14 +37,14 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
         },
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model"
         }
@@ -478,20 +478,26 @@
           "limits": "free credits/month"
         },
         {
+          "id": "zai-org/GLM-4.7-Flash",
+          "name": "zai-org/GLM-4.7-Flash",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
           "id": "deepseek-ai/DeepSeek-V3.2",
           "name": "deepseek-ai/DeepSeek-V3.2",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen3.5-27B",
-          "name": "Qwen/Qwen3.5-27B",
+          "id": "zai-org/GLM-4.6",
+          "name": "zai-org/GLM-4.6",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "zai-org/GLM-4.6",
-          "name": "zai-org/GLM-4.6",
+          "id": "Qwen/Qwen3.5-27B",
+          "name": "Qwen/Qwen3.5-27B",
           "context": null,
           "limits": "free credits/month"
         },
@@ -514,20 +520,14 @@
           "limits": "free credits/month"
         },
         {
-          "id": "deepseek-ai/DeepSeek-V3.2-Exp",
-          "name": "deepseek-ai/DeepSeek-V3.2-Exp",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
           "id": "zai-org/GLM-4.6V-Flash",
           "name": "zai-org/GLM-4.6V-Flash",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-          "name": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+          "id": "deepseek-ai/DeepSeek-V3.2-Exp",
+          "name": "deepseek-ai/DeepSeek-V3.2-Exp",
           "context": null,
           "limits": "free credits/month"
         },
@@ -538,8 +538,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "CohereLabs/c4ai-command-r-08-2024",
-          "name": "CohereLabs/c4ai-command-r-08-2024",
+          "id": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+          "name": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
           "context": null,
           "limits": "free credits/month"
         },
@@ -556,14 +556,38 @@
           "limits": "free credits/month"
         },
         {
-          "id": "google/gemma-3n-E4B-it",
-          "name": "google/gemma-3n-E4B-it",
+          "id": "CohereLabs/c4ai-command-r-08-2024",
+          "name": "CohereLabs/c4ai-command-r-08-2024",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8",
+          "name": "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "allenai/Olmo-3-7B-Instruct",
+          "name": "allenai/Olmo-3-7B-Instruct",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "deepseek-ai/DeepSeek-Prover-V2-671B",
+          "name": "deepseek-ai/DeepSeek-Prover-V2-671B",
           "context": null,
           "limits": "free credits/month"
         },
         {
           "id": "Qwen/Qwen3-235B-A22B-Thinking-2507",
           "name": "Qwen/Qwen3-235B-A22B-Thinking-2507",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "google/gemma-3n-E4B-it",
+          "name": "google/gemma-3n-E4B-it",
           "context": null,
           "limits": "free credits/month"
         },
