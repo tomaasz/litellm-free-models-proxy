@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-10T18:15:41.108045+00:00",
+  "updated": "2026-05-10T19:23:26.289819+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -94,6 +94,21 @@
         {
           "id": "gemini-flash-lite-latest",
           "name": "Gemini Flash-Lite Latest",
+          "context": 1048576,
+          "limits": "varies — see AI Studio",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "vision",
+            "system_messages",
+            "reasoning",
+            "prompt_caching"
+          ]
+        },
+        {
+          "id": "gemini-2.5-flash-lite",
+          "name": "Gemini 2.5 Flash-Lite",
           "context": 1048576,
           "limits": "varies — see AI Studio",
           "capabilities": [
@@ -360,6 +375,18 @@
           "limits": "40 req/min"
         },
         {
+          "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+          "name": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+          "context": null,
+          "limits": "40 req/min"
+        },
+        {
+          "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+          "name": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+          "context": null,
+          "limits": "40 req/min"
+        },
+        {
           "id": "openai/gpt-oss-120b",
           "name": "openai/gpt-oss-120b",
           "context": null,
@@ -451,8 +478,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen3-235B-A22B-Instruct-2507",
-          "name": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+          "id": "Qwen/Qwen3.5-27B",
+          "name": "Qwen/Qwen3.5-27B",
           "context": null,
           "limits": "free credits/month"
         },
@@ -463,14 +490,14 @@
           "limits": "free credits/month"
         },
         {
-          "id": "zai-org/GLM-4.6",
-          "name": "zai-org/GLM-4.6",
+          "id": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+          "name": "Qwen/Qwen3-235B-A22B-Instruct-2507",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen3.5-27B",
-          "name": "Qwen/Qwen3.5-27B",
+          "id": "zai-org/GLM-4.6",
+          "name": "zai-org/GLM-4.6",
           "context": null,
           "limits": "free credits/month"
         },
@@ -511,8 +538,20 @@
           "limits": "free credits/month"
         },
         {
+          "id": "swiss-ai/Apertus-70B-Instruct-2509",
+          "name": "swiss-ai/Apertus-70B-Instruct-2509",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
           "id": "CohereLabs/c4ai-command-r-08-2024",
           "name": "CohereLabs/c4ai-command-r-08-2024",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "google/gemma-3n-E4B-it",
+          "name": "google/gemma-3n-E4B-it",
           "context": null,
           "limits": "free credits/month"
         },
@@ -523,20 +562,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "swiss-ai/Apertus-70B-Instruct-2509",
-          "name": "swiss-ai/Apertus-70B-Instruct-2509",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
           "id": "Qwen/Qwen3-235B-A22B-Thinking-2507",
           "name": "Qwen/Qwen3-235B-A22B-Thinking-2507",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "google/gemma-3n-E4B-it",
-          "name": "google/gemma-3n-E4B-it",
           "context": null,
           "limits": "free credits/month"
         },
