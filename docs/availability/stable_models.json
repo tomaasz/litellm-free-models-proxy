@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-09T23:15:00.337043+00:00",
+  "updated": "2026-05-10T00:20:36.912553+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -116,33 +116,6 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
-          "limits": "varies per model"
-        },
-        {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
-        {
           "id": "openai/gpt-oss-20b",
           "name": "openai/gpt-oss-20b",
           "context": 131072,
@@ -152,16 +125,6 @@
             "tool_choice",
             "response_schema",
             "reasoning"
-          ]
-        },
-        {
-          "id": "llama-3.3-70b-versatile",
-          "name": "llama-3.3-70b-versatile",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
           ]
         },
         {
@@ -177,6 +140,16 @@
           ]
         },
         {
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
           "id": "openai/gpt-oss-120b",
           "name": "openai/gpt-oss-120b",
           "context": 131072,
@@ -185,6 +158,33 @@
             "function_calling",
             "tool_choice",
             "response_schema",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
+        },
+        {
+          "id": "llama-3.3-70b-versatile",
+          "name": "llama-3.3-70b-versatile",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
             "reasoning"
           ]
         }
@@ -203,28 +203,6 @@
           "capabilities": [
             "function_calling",
             "tool_choice"
-          ]
-        }
-      ],
-      "error": null
-    },
-    "gemini": {
-      "name": "Gemini",
-      "url": "https://aistudio.google.com",
-      "models": [
-        {
-          "id": "gemini-2.5-flash-lite",
-          "name": "Gemini 2.5 Flash-Lite",
-          "context": 1048576,
-          "limits": "varies — see AI Studio",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "vision",
-            "system_messages",
-            "reasoning",
-            "prompt_caching"
           ]
         }
       ],
@@ -267,12 +245,6 @@
         {
           "id": "command-a-vision-07-2025",
           "name": "command-a-vision-07-2025",
-          "context": 128000,
-          "limits": "20 req/min · 1000 req/month"
-        },
-        {
-          "id": "command-r-08-2024",
-          "name": "command-r-08-2024",
           "context": 128000,
           "limits": "20 req/min · 1000 req/month"
         },
@@ -639,6 +611,12 @@
           "limits": "free credits/month"
         },
         {
+          "id": "stepfun-ai/Step-3.5-Flash",
+          "name": "stepfun-ai/Step-3.5-Flash",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
           "id": "Qwen/Qwen3.5-35B-A3B",
           "name": "Qwen/Qwen3.5-35B-A3B",
           "context": null,
@@ -647,12 +625,6 @@
         {
           "id": "meta-llama/Meta-Llama-3-8B-Instruct",
           "name": "meta-llama/Meta-Llama-3-8B-Instruct",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "stepfun-ai/Step-3.5-Flash",
-          "name": "stepfun-ai/Step-3.5-Flash",
           "context": null,
           "limits": "free credits/month"
         },
@@ -681,6 +653,12 @@
           "limits": "free credits/month"
         },
         {
+          "id": "zai-org/GLM-5",
+          "name": "zai-org/GLM-5",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
           "id": "MiniMaxAI/MiniMax-M2.5",
           "name": "MiniMaxAI/MiniMax-M2.5",
           "context": null,
@@ -699,12 +677,6 @@
           "limits": "free credits/month"
         },
         {
-          "id": "zai-org/GLM-5",
-          "name": "zai-org/GLM-5",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
           "id": "Qwen/Qwen3-Next-80B-A3B-Instruct",
           "name": "Qwen/Qwen3-Next-80B-A3B-Instruct",
           "context": null,
@@ -717,14 +689,14 @@
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen2.5-Coder-32B-Instruct",
-          "name": "Qwen/Qwen2.5-Coder-32B-Instruct",
+          "id": "Qwen/Qwen3.5-397B-A17B",
+          "name": "Qwen/Qwen3.5-397B-A17B",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen3.5-397B-A17B",
-          "name": "Qwen/Qwen3.5-397B-A17B",
+          "id": "Qwen/Qwen2.5-Coder-32B-Instruct",
+          "name": "Qwen/Qwen2.5-Coder-32B-Instruct",
           "context": null,
           "limits": "free credits/month"
         },
@@ -735,8 +707,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "deepseek-ai/DeepSeek-R1",
-          "name": "deepseek-ai/DeepSeek-R1",
+          "id": "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+          "name": "Qwen/Qwen3-Coder-480B-A35B-Instruct",
           "context": null,
           "limits": "free credits/month"
         },
@@ -747,8 +719,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen3-Coder-480B-A35B-Instruct",
-          "name": "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+          "id": "Qwen/Qwen3-VL-235B-A22B-Instruct",
+          "name": "Qwen/Qwen3-VL-235B-A22B-Instruct",
           "context": null,
           "limits": "free credits/month"
         },
@@ -759,14 +731,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen3-VL-235B-A22B-Instruct",
-          "name": "Qwen/Qwen3-VL-235B-A22B-Instruct",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "Qwen/Qwen3-Coder-Next-FP8",
-          "name": "Qwen/Qwen3-Coder-Next-FP8",
+          "id": "deepseek-ai/DeepSeek-R1",
+          "name": "deepseek-ai/DeepSeek-R1",
           "context": null,
           "limits": "free credits/month"
         },
@@ -777,8 +743,14 @@
           "limits": "free credits/month"
         },
         {
-          "id": "deepseek-ai/DeepSeek-V3",
-          "name": "deepseek-ai/DeepSeek-V3",
+          "id": "Qwen/Qwen3-Coder-Next-FP8",
+          "name": "Qwen/Qwen3-Coder-Next-FP8",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "zai-org/GLM-4.7",
+          "name": "zai-org/GLM-4.7",
           "context": null,
           "limits": "free credits/month"
         },
@@ -795,56 +767,14 @@
           "limits": "free credits/month"
         },
         {
-          "id": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
-          "name": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+          "id": "Qwen/Qwen2.5-VL-72B-Instruct",
+          "name": "Qwen/Qwen2.5-VL-72B-Instruct",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen3-VL-30B-A3B-Instruct",
-          "name": "Qwen/Qwen3-VL-30B-A3B-Instruct",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "zai-org/GLM-4.7",
-          "name": "zai-org/GLM-4.7",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "aisingapore/Gemma-SEA-LION-v4-27B-IT",
-          "name": "aisingapore/Gemma-SEA-LION-v4-27B-IT",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "deepseek-ai/DeepSeek-V3-0324",
-          "name": "deepseek-ai/DeepSeek-V3-0324",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "Qwen/Qwen3-30B-A3B",
-          "name": "Qwen/Qwen3-30B-A3B",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "CohereLabs/c4ai-command-r7b-12-2024",
-          "name": "CohereLabs/c4ai-command-r7b-12-2024",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "swiss-ai/Apertus-8B-Instruct-2509",
-          "name": "swiss-ai/Apertus-8B-Instruct-2509",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "openai/gpt-oss-safeguard-20b",
-          "name": "openai/gpt-oss-safeguard-20b",
+          "id": "deepseek-ai/DeepSeek-V3",
+          "name": "deepseek-ai/DeepSeek-V3",
           "context": null,
           "limits": "free credits/month"
         },
@@ -855,20 +785,62 @@
           "limits": "free credits/month"
         },
         {
-          "id": "moonshotai/Kimi-K2-Instruct",
-          "name": "moonshotai/Kimi-K2-Instruct",
+          "id": "aisingapore/Gemma-SEA-LION-v4-27B-IT",
+          "name": "aisingapore/Gemma-SEA-LION-v4-27B-IT",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen2.5-VL-72B-Instruct",
-          "name": "Qwen/Qwen2.5-VL-72B-Instruct",
+          "id": "swiss-ai/Apertus-8B-Instruct-2509",
+          "name": "swiss-ai/Apertus-8B-Instruct-2509",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "deepseek-ai/DeepSeek-V3-0324",
+          "name": "deepseek-ai/DeepSeek-V3-0324",
           "context": null,
           "limits": "free credits/month"
         },
         {
           "id": "utter-project/EuroLLM-22B-Instruct-2512",
           "name": "utter-project/EuroLLM-22B-Instruct-2512",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+          "name": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "openai/gpt-oss-safeguard-20b",
+          "name": "openai/gpt-oss-safeguard-20b",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "Qwen/Qwen3-30B-A3B",
+          "name": "Qwen/Qwen3-30B-A3B",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+          "name": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "moonshotai/Kimi-K2-Instruct",
+          "name": "moonshotai/Kimi-K2-Instruct",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "CohereLabs/c4ai-command-r7b-12-2024",
+          "name": "CohereLabs/c4ai-command-r7b-12-2024",
           "context": null,
           "limits": "free credits/month"
         },
@@ -885,14 +857,20 @@
           "limits": "free credits/month"
         },
         {
+          "id": "zai-org/GLM-4.5-Air",
+          "name": "zai-org/GLM-4.5-Air",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
           "id": "alpindale/WizardLM-2-8x22B",
           "name": "alpindale/WizardLM-2-8x22B",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "aisingapore/Qwen-SEA-LION-v4-32B-IT",
-          "name": "aisingapore/Qwen-SEA-LION-v4-32B-IT",
+          "id": "zai-org/GLM-4.6-FP8",
+          "name": "zai-org/GLM-4.6-FP8",
           "context": null,
           "limits": "free credits/month"
         },
@@ -909,74 +887,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "allenai/Olmo-3-7B-Instruct",
-          "name": "allenai/Olmo-3-7B-Instruct",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "Qwen/Qwen3-32B",
-          "name": "Qwen/Qwen3-32B",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
           "id": "CohereLabs/c4ai-command-r7b-arabic-02-2025",
           "name": "CohereLabs/c4ai-command-r7b-arabic-02-2025",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "NousResearch/Hermes-2-Pro-Llama-3-8B",
-          "name": "NousResearch/Hermes-2-Pro-Llama-3-8B",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "dicta-il/DictaLM-3.0-24B-Thinking",
-          "name": "dicta-il/DictaLM-3.0-24B-Thinking",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "baidu/ERNIE-4.5-VL-424B-A47B-Base-PT",
-          "name": "baidu/ERNIE-4.5-VL-424B-A47B-Base-PT",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "CohereLabs/command-a-reasoning-08-2025",
-          "name": "CohereLabs/command-a-reasoning-08-2025",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "Sao10K/L3-70B-Euryale-v2.1",
-          "name": "Sao10K/L3-70B-Euryale-v2.1",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "Qwen/Qwen3-VL-30B-A3B-Thinking",
-          "name": "Qwen/Qwen3-VL-30B-A3B-Thinking",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "zai-org/GLM-4.5V",
-          "name": "zai-org/GLM-4.5V",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "CohereLabs/command-a-translate-08-2025",
-          "name": "CohereLabs/command-a-translate-08-2025",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "Sao10K/L3-8B-Lunaris-v1",
-          "name": "Sao10K/L3-8B-Lunaris-v1",
           "context": null,
           "limits": "free credits/month"
         },
@@ -987,8 +899,68 @@
           "limits": "free credits/month"
         },
         {
+          "id": "NousResearch/Hermes-2-Pro-Llama-3-8B",
+          "name": "NousResearch/Hermes-2-Pro-Llama-3-8B",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "Qwen/Qwen3-VL-30B-A3B-Thinking",
+          "name": "Qwen/Qwen3-VL-30B-A3B-Thinking",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "CohereLabs/command-a-reasoning-08-2025",
+          "name": "CohereLabs/command-a-reasoning-08-2025",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "zai-org/GLM-4.5V-FP8",
+          "name": "zai-org/GLM-4.5V-FP8",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "Sao10K/L3-70B-Euryale-v2.1",
+          "name": "Sao10K/L3-70B-Euryale-v2.1",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "Qwen/Qwen3-32B",
+          "name": "Qwen/Qwen3-32B",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "CohereLabs/command-a-translate-08-2025",
+          "name": "CohereLabs/command-a-translate-08-2025",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "zai-org/GLM-4.5V",
+          "name": "zai-org/GLM-4.5V",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "Sao10K/L3-8B-Lunaris-v1",
+          "name": "Sao10K/L3-8B-Lunaris-v1",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
           "id": "CohereLabs/tiny-aya-water",
           "name": "CohereLabs/tiny-aya-water",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "zai-org/GLM-4.6V",
+          "name": "zai-org/GLM-4.6V",
           "context": null,
           "limits": "free credits/month"
         },
@@ -999,8 +971,14 @@
           "limits": "free credits/month"
         },
         {
-          "id": "zai-org/GLM-4.5V-FP8",
-          "name": "zai-org/GLM-4.5V-FP8",
+          "id": "aisingapore/Qwen-SEA-LION-v4-32B-IT",
+          "name": "aisingapore/Qwen-SEA-LION-v4-32B-IT",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "baidu/ERNIE-4.5-VL-424B-A47B-Base-PT",
+          "name": "baidu/ERNIE-4.5-VL-424B-A47B-Base-PT",
           "context": null,
           "limits": "free credits/month"
         },
@@ -1017,8 +995,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "zai-org/GLM-4.6V",
-          "name": "zai-org/GLM-4.6V",
+          "id": "allenai/Olmo-3-7B-Instruct",
+          "name": "allenai/Olmo-3-7B-Instruct",
           "context": null,
           "limits": "free credits/month"
         },
@@ -1029,14 +1007,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
-          "name": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "zai-org/GLM-4.5-Air",
-          "name": "zai-org/GLM-4.5-Air",
+          "id": "dicta-il/DictaLM-3.0-24B-Thinking",
+          "name": "dicta-il/DictaLM-3.0-24B-Thinking",
           "context": null,
           "limits": "free credits/month"
         },
@@ -1053,14 +1025,14 @@
           "limits": "free credits/month"
         },
         {
-          "id": "zai-org/GLM-4.6-FP8",
-          "name": "zai-org/GLM-4.6-FP8",
+          "id": "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8",
+          "name": "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8",
-          "name": "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8",
+          "id": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+          "name": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
           "context": null,
           "limits": "free credits/month"
         },
@@ -1752,12 +1724,6 @@
           "id": "llama-scout",
           "name": "llama-scout",
           "context": 10000000,
-          "limits": "free tier — token from enter.pollinations.ai"
-        },
-        {
-          "id": "minimax",
-          "name": "minimax",
-          "context": 200000,
           "limits": "free tier — token from enter.pollinations.ai"
         },
         {
