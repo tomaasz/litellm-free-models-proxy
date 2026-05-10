@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-10T09:29:59.724018+00:00",
+  "updated": "2026-05-10T10:24:37.033610+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -37,14 +37,14 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
         },
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model"
         }
@@ -94,21 +94,6 @@
         {
           "id": "gemini-flash-lite-latest",
           "name": "Gemini Flash-Lite Latest",
-          "context": 1048576,
-          "limits": "varies — see AI Studio",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "vision",
-            "system_messages",
-            "reasoning",
-            "prompt_caching"
-          ]
-        },
-        {
-          "id": "gemini-2.5-flash-lite",
-          "name": "Gemini 2.5 Flash-Lite",
           "context": 1048576,
           "limits": "varies — see AI Studio",
           "capabilities": [
@@ -222,6 +207,12 @@
       "name": "Cohere",
       "url": "https://cohere.com",
       "models": [
+        {
+          "id": "command-a-03-2025",
+          "name": "command-a-03-2025",
+          "context": 288000,
+          "limits": "20 req/min · 1000 req/month"
+        },
         {
           "id": "command-r-08-2024",
           "name": "command-r-08-2024",
@@ -525,6 +516,12 @@
           "limits": "free credits/month"
         },
         {
+          "id": "swiss-ai/Apertus-70B-Instruct-2509",
+          "name": "swiss-ai/Apertus-70B-Instruct-2509",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
           "id": "CohereLabs/c4ai-command-r-08-2024",
           "name": "CohereLabs/c4ai-command-r-08-2024",
           "context": null,
@@ -537,20 +534,14 @@
           "limits": "free credits/month"
         },
         {
-          "id": "swiss-ai/Apertus-70B-Instruct-2509",
-          "name": "swiss-ai/Apertus-70B-Instruct-2509",
+          "id": "google/gemma-3n-E4B-it",
+          "name": "google/gemma-3n-E4B-it",
           "context": null,
           "limits": "free credits/month"
         },
         {
           "id": "deepseek-ai/DeepSeek-Prover-V2-671B",
           "name": "deepseek-ai/DeepSeek-Prover-V2-671B",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "google/gemma-3n-E4B-it",
-          "name": "google/gemma-3n-E4B-it",
           "context": null,
           "limits": "free credits/month"
         },
