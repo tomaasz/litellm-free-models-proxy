@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-10T11:18:34.584520+00:00",
+  "updated": "2026-05-10T12:14:22.471008+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -138,33 +138,16 @@
           ]
         },
         {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
+          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
             "response_schema",
-            "reasoning"
+            "vision"
           ]
-        },
-        {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
-          "limits": "varies per model"
         },
         {
           "id": "llama-3.3-70b-versatile",
@@ -177,15 +160,32 @@
           ]
         },
         {
-          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
             "response_schema",
-            "vision"
+            "reasoning"
           ]
         }
       ],
@@ -527,12 +527,6 @@
         {
           "id": "Qwen/Qwen3.6-35B-A3B",
           "name": "Qwen/Qwen3.6-35B-A3B",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "google/gemma-4-31B-it",
-          "name": "google/gemma-4-31B-it",
           "context": null,
           "limits": "free credits/month"
         },
@@ -989,6 +983,12 @@
         {
           "id": "EssentialAI/rnj-1-instruct",
           "name": "EssentialAI/rnj-1-instruct",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "deepseek-ai/DeepSeek-Prover-V2-671B",
+          "name": "deepseek-ai/DeepSeek-Prover-V2-671B",
           "context": null,
           "limits": "free credits/month"
         },
