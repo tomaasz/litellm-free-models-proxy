@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-10T08:34:50.698872+00:00",
+  "updated": "2026-05-10T09:29:59.724018+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -140,15 +140,15 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
+          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
             "response_schema",
-            "reasoning"
+            "vision"
           ]
         },
         {
@@ -162,6 +162,12 @@
           ]
         },
         {
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
+        },
+        {
           "id": "llama-3.1-8b-instant",
           "name": "llama-3.1-8b-instant",
           "context": 131072,
@@ -172,20 +178,8 @@
           ]
         },
         {
-          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "vision"
-          ]
-        },
-        {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model"
         },
@@ -202,6 +196,12 @@
           ]
         },
         {
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
+          "context": 131072,
+          "limits": "varies per model"
+        },
+        {
           "id": "qwen/qwen3-32b",
           "name": "qwen/qwen3-32b",
           "context": 131072,
@@ -213,16 +213,16 @@
           ]
         },
         {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
-          "limits": "varies per model"
-        },
-        {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
           "context": 131072,
-          "limits": "varies per model"
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
+          ]
         }
       ],
       "error": null
@@ -982,26 +982,26 @@
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen3-Coder-Next",
-          "name": "Qwen/Qwen3-Coder-Next",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
           "id": "meta-llama/Llama-3.1-8B-Instruct",
           "name": "meta-llama/Llama-3.1-8B-Instruct",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "MiniMaxAI/MiniMax-M2.7",
-          "name": "MiniMaxAI/MiniMax-M2.7",
+          "id": "Qwen/Qwen3-Coder-Next",
+          "name": "Qwen/Qwen3-Coder-Next",
           "context": null,
           "limits": "free credits/month"
         },
         {
           "id": "openai/gpt-oss-120b",
           "name": "openai/gpt-oss-120b",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "MiniMaxAI/MiniMax-M2.7",
+          "name": "MiniMaxAI/MiniMax-M2.7",
           "context": null,
           "limits": "free credits/month"
         },
@@ -1216,8 +1216,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "openai/gpt-oss-safeguard-20b",
-          "name": "openai/gpt-oss-safeguard-20b",
+          "id": "zai-org/GLM-4.6V-Flash",
+          "name": "zai-org/GLM-4.6V-Flash",
           "context": null,
           "limits": "free credits/month"
         },
@@ -1228,8 +1228,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "zai-org/GLM-4.6V-Flash",
-          "name": "zai-org/GLM-4.6V-Flash",
+          "id": "openai/gpt-oss-safeguard-20b",
+          "name": "openai/gpt-oss-safeguard-20b",
           "context": null,
           "limits": "free credits/month"
         },
