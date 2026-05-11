@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-11T00:21:20.589315+00:00",
+  "updated": "2026-05-11T01:33:41.229208+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -37,14 +37,14 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model"
         },
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
         }
@@ -212,12 +212,6 @@
       "url": "https://cohere.com",
       "models": [
         {
-          "id": "command-r-08-2024",
-          "name": "command-r-08-2024",
-          "context": 128000,
-          "limits": "20 req/min · 1000 req/month"
-        },
-        {
           "id": "command-r-plus-08-2024",
           "name": "command-r-plus-08-2024",
           "context": 128000,
@@ -339,20 +333,8 @@
           "limits": "40 req/min"
         },
         {
-          "id": "mistralai/mistral-nemotron",
-          "name": "mistralai/mistral-nemotron",
-          "context": null,
-          "limits": "40 req/min"
-        },
-        {
           "id": "mistralai/mistral-small-4-119b-2603",
           "name": "mistralai/mistral-small-4-119b-2603",
-          "context": null,
-          "limits": "40 req/min"
-        },
-        {
-          "id": "mistralai/mixtral-8x22b-instruct-v0.1",
-          "name": "mistralai/mixtral-8x22b-instruct-v0.1",
           "context": null,
           "limits": "40 req/min"
         },
@@ -460,12 +442,6 @@
           "limits": "free credits/month"
         },
         {
-          "id": "Qwen/Qwen3.5-9B",
-          "name": "Qwen/Qwen3.5-9B",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
           "id": "zai-org/GLM-4.7-Flash",
           "name": "zai-org/GLM-4.7-Flash",
           "context": null,
@@ -480,12 +456,6 @@
         {
           "id": "zai-org/GLM-4.6",
           "name": "zai-org/GLM-4.6",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "Qwen/Qwen3.5-27B",
-          "name": "Qwen/Qwen3.5-27B",
           "context": null,
           "limits": "free credits/month"
         },
@@ -508,32 +478,14 @@
           "limits": "free credits/month"
         },
         {
-          "id": "zai-org/GLM-4.6V-Flash",
-          "name": "zai-org/GLM-4.6V-Flash",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
           "id": "deepseek-ai/DeepSeek-V3.2-Exp",
           "name": "deepseek-ai/DeepSeek-V3.2-Exp",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "CohereLabs/c4ai-command-a-03-2025",
-          "name": "CohereLabs/c4ai-command-a-03-2025",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "zai-org/GLM-4.7-FP8",
-          "name": "zai-org/GLM-4.7-FP8",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "swiss-ai/Apertus-70B-Instruct-2509",
-          "name": "swiss-ai/Apertus-70B-Instruct-2509",
+          "id": "zai-org/GLM-4.6V-Flash",
+          "name": "zai-org/GLM-4.6V-Flash",
           "context": null,
           "limits": "free credits/month"
         },
@@ -550,8 +502,8 @@
           "limits": "free credits/month"
         },
         {
-          "id": "allenai/Olmo-3-7B-Instruct",
-          "name": "allenai/Olmo-3-7B-Instruct",
+          "id": "zai-org/GLM-4.7-FP8",
+          "name": "zai-org/GLM-4.7-FP8",
           "context": null,
           "limits": "free credits/month"
         },
@@ -562,14 +514,26 @@
           "limits": "free credits/month"
         },
         {
+          "id": "google/gemma-3n-E4B-it",
+          "name": "google/gemma-3n-E4B-it",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
+          "id": "swiss-ai/Apertus-70B-Instruct-2509",
+          "name": "swiss-ai/Apertus-70B-Instruct-2509",
+          "context": null,
+          "limits": "free credits/month"
+        },
+        {
           "id": "Qwen/Qwen3-235B-A22B-Thinking-2507",
           "name": "Qwen/Qwen3-235B-A22B-Thinking-2507",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "google/gemma-3n-E4B-it",
-          "name": "google/gemma-3n-E4B-it",
+          "id": "allenai/Olmo-3-7B-Instruct",
+          "name": "allenai/Olmo-3-7B-Instruct",
           "context": null,
           "limits": "free credits/month"
         },
@@ -646,12 +610,6 @@
       "name": "Cloudflare AI",
       "url": "https://developers.cloudflare.com/workers-ai/",
       "models": [
-        {
-          "id": "@cf/moonshotai/kimi-k2.6",
-          "name": "@cf/moonshotai/kimi-k2.6",
-          "context": null,
-          "limits": "10k neurons/day"
-        },
         {
           "id": "@hf/nousresearch/hermes-2-pro-mistral-7b",
           "name": "@hf/nousresearch/hermes-2-pro-mistral-7b",
