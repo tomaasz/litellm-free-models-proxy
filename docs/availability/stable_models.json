@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-13T03:01:41.688787+00:00",
+  "updated": "2026-05-13T05:14:41.513020+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -116,15 +116,13 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
-            "tool_choice",
-            "response_schema",
-            "vision"
+            "tool_choice"
           ]
         },
         {
@@ -151,25 +149,15 @@
           ]
         },
         {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
+          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
             "response_schema",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
+            "vision"
           ]
         },
         {
@@ -180,6 +168,18 @@
           "capabilities": [
             "function_calling",
             "tool_choice"
+          ]
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
           ]
         },
         {
@@ -306,6 +306,18 @@
         {
           "id": "nvidia/nemotron-3-nano-30b-a3b",
           "name": "nvidia/nemotron-3-nano-30b-a3b",
+          "context": null,
+          "limits": "40 req/min"
+        },
+        {
+          "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+          "name": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+          "context": null,
+          "limits": "40 req/min"
+        },
+        {
+          "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+          "name": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
           "context": null,
           "limits": "40 req/min"
         },
@@ -858,12 +870,6 @@
           "id": "@cf/meta/llama-guard-3-8b",
           "name": "@cf/meta/llama-guard-3-8b",
           "context": null,
-          "limits": "10k neurons/day"
-        },
-        {
-          "id": "@cf/meta/llama-2-7b-chat-fp16",
-          "name": "@cf/meta/llama-2-7b-chat-fp16",
-          "context": 3072,
           "limits": "10k neurons/day"
         },
         {
