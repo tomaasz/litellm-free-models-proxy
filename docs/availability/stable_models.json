@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-14T22:24:32.564360+00:00",
+  "updated": "2026-05-14T23:16:43.676512+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -122,16 +122,6 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
-        {
           "id": "llama-3.3-70b-versatile",
           "name": "llama-3.3-70b-versatile",
           "context": 131072,
@@ -142,15 +132,42 @@
           ]
         },
         {
-          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
             "response_schema",
-            "vision"
+            "reasoning"
           ]
         },
         {
@@ -166,32 +183,15 @@
           ]
         },
         {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
+          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
             "response_schema",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
-          "limits": "varies per model"
-        },
-        {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
+            "vision"
           ]
         }
       ],
