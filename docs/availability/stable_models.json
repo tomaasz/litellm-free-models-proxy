@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-14T14:49:37.740116+00:00",
+  "updated": "2026-05-14T15:44:39.689293+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -32,7 +32,7 @@
         {
           "id": "deepseek/deepseek-v4-flash:free",
           "name": "DeepSeek: DeepSeek V4 Flash (free)",
-          "context": 256000,
+          "context": 1048576,
           "limits": "20 req/min · 50 req/day"
         },
         {
@@ -122,20 +122,39 @@
       "url": "https://console.groq.com",
       "models": [
         {
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
           "id": "allam-2-7b",
           "name": "allam-2-7b",
           "context": 4096,
           "limits": "varies per model"
         },
         {
-          "id": "openai/gpt-oss-20b",
-          "name": "openai/gpt-oss-20b",
+          "id": "llama-3.3-70b-versatile",
+          "name": "llama-3.3-70b-versatile",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
-            "response_schema",
             "reasoning"
           ]
         },
@@ -152,13 +171,14 @@
           ]
         },
         {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
+          "id": "openai/gpt-oss-20b",
+          "name": "openai/gpt-oss-20b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
+            "response_schema",
             "reasoning"
           ]
         },
@@ -172,26 +192,6 @@
             "tool_choice",
             "response_schema",
             "reasoning"
-          ]
-        },
-        {
-          "id": "llama-3.3-70b-versatile",
-          "name": "llama-3.3-70b-versatile",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
-        {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
           ]
         }
       ],
