@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-15T19:29:49.833285+00:00",
+  "updated": "2026-05-15T20:24:29.387317+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -110,6 +110,16 @@
       "url": "https://console.groq.com",
       "models": [
         {
+          "id": "llama-3.3-70b-versatile",
+          "name": "llama-3.3-70b-versatile",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
           "id": "llama-3.1-8b-instant",
           "name": "llama-3.1-8b-instant",
           "context": 131072,
@@ -130,6 +140,12 @@
             "response_schema",
             "reasoning"
           ]
+        },
+        {
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
         },
         {
           "id": "qwen/qwen3-32b",
@@ -164,22 +180,6 @@
             "tool_choice",
             "response_schema",
             "reasoning"
-          ]
-        },
-        {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
-          "limits": "varies per model"
-        },
-        {
-          "id": "llama-3.3-70b-versatile",
-          "name": "llama-3.3-70b-versatile",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
           ]
         }
       ],
@@ -269,12 +269,6 @@
         {
           "id": "mistralai/mixtral-8x22b-instruct-v0.1",
           "name": "mistralai/mixtral-8x22b-instruct-v0.1",
-          "context": null,
-          "limits": "40 req/min"
-        },
-        {
-          "id": "mistralai/mixtral-8x7b-instruct-v0.1",
-          "name": "mistralai/mixtral-8x7b-instruct-v0.1",
           "context": null,
           "limits": "40 req/min"
         },
@@ -878,6 +872,12 @@
           "limits": "10k neurons/day"
         },
         {
+          "id": "@cf/meta/llama-guard-3-8b",
+          "name": "@cf/meta/llama-guard-3-8b",
+          "context": null,
+          "limits": "10k neurons/day"
+        },
+        {
           "id": "@cf/meta/llama-2-7b-chat-fp16",
           "name": "@cf/meta/llama-2-7b-chat-fp16",
           "context": 3072,
@@ -1122,6 +1122,12 @@
           "id": "polly",
           "name": "polly",
           "context": null,
+          "limits": "free tier — token from enter.pollinations.ai"
+        },
+        {
+          "id": "qwen-vision",
+          "name": "qwen-vision",
+          "context": 131072,
           "limits": "free tier — token from enter.pollinations.ai"
         },
         {
