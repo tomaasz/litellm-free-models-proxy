@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-15T20:24:29.387317+00:00",
+  "updated": "2026-05-15T21:21:27.215074+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -110,44 +110,6 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "llama-3.3-70b-versatile",
-          "name": "llama-3.3-70b-versatile",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
-        {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
-        {
-          "id": "openai/gpt-oss-20b",
-          "name": "openai/gpt-oss-20b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
-          "limits": "varies per model"
-        },
-        {
           "id": "qwen/qwen3-32b",
           "name": "qwen/qwen3-32b",
           "context": 131072,
@@ -171,6 +133,34 @@
           ]
         },
         {
+          "id": "openai/gpt-oss-20b",
+          "name": "openai/gpt-oss-20b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
+        },
+        {
           "id": "openai/gpt-oss-120b",
           "name": "openai/gpt-oss-120b",
           "context": 131072,
@@ -180,6 +170,16 @@
             "tool_choice",
             "response_schema",
             "reasoning"
+          ]
+        },
+        {
+          "id": "llama-3.3-70b-versatile",
+          "name": "llama-3.3-70b-versatile",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
           ]
         }
       ],
@@ -1077,8 +1077,20 @@
           "limits": "free tier — token from enter.pollinations.ai"
         },
         {
+          "id": "mistral-4",
+          "name": "mistral-4",
+          "context": 262144,
+          "limits": "free tier — token from enter.pollinations.ai"
+        },
+        {
           "id": "gemini-fast",
           "name": "gemini-fast",
+          "context": 1048576,
+          "limits": "free tier — token from enter.pollinations.ai"
+        },
+        {
+          "id": "deepseek",
+          "name": "deepseek",
           "context": 1048576,
           "limits": "free tier — token from enter.pollinations.ai"
         },
