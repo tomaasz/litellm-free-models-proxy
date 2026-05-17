@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-17T09:31:35.343621+00:00",
+  "updated": "2026-05-17T10:28:10.999454+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -43,14 +43,14 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
         },
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model"
         }
@@ -147,6 +147,48 @@
           "name": "Gemini 3.1 Flash Lite",
           "context": 1048576,
           "limits": "varies — see AI Studio"
+        }
+      ],
+      "error": null
+    },
+    "sambanova": {
+      "name": "SambaNova",
+      "url": "https://cloud.sambanova.ai",
+      "models": [
+        {
+          "id": "DeepSeek-V3.2",
+          "name": "DeepSeek-V3.2",
+          "context": 32768,
+          "limits": "free tier"
+        },
+        {
+          "id": "Llama-4-Maverick-17B-128E-Instruct",
+          "name": "Llama-4-Maverick-17B-128E-Instruct",
+          "context": 131072,
+          "limits": "free tier",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "vision"
+          ]
+        },
+        {
+          "id": "Meta-Llama-3.3-70B-Instruct",
+          "name": "Meta-Llama-3.3-70B-Instruct",
+          "context": 131072,
+          "limits": "free tier",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema"
+          ]
+        },
+        {
+          "id": "gemma-3-12b-it",
+          "name": "gemma-3-12b-it",
+          "context": 131072,
+          "limits": "free tier"
         }
       ],
       "error": null
@@ -518,14 +560,14 @@
           "limits": "free credits/month"
         },
         {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
+          "id": "openai/gpt-oss-20b",
+          "name": "openai/gpt-oss-20b",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "openai/gpt-oss-20b",
-          "name": "openai/gpt-oss-20b",
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
           "context": null,
           "limits": "free credits/month"
         },
