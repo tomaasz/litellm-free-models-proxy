@@ -9,7 +9,16 @@ probes are still flagged on the watch list (currently informational —
 no special handling beyond the `watching` field in availability.json).
 """
 
-import os, sys, json, time, gzip, hashlib, secrets, threading, urllib.request, urllib.error
+import os
+import sys
+import json
+import time
+import gzip
+import hashlib
+import secrets
+import threading
+import urllib.request
+import urllib.error
 from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone, timedelta
@@ -229,11 +238,30 @@ def classify(http_status, body_text, exc):
     return "bad_response"
 
 
+class SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new_req = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new_req:
+            for h in ["Authorization", "x-goog-api-key"]:
+                if h in new_req.headers:
+                    del new_req.headers[h]
+                if h in new_req.unredirected_hdrs:
+                    del new_req.unredirected_hdrs[h]
+                if h.capitalize() in new_req.headers:
+                    del new_req.headers[h.capitalize()]
+                if h.capitalize() in new_req.unredirected_hdrs:
+                    del new_req.unredirected_hdrs[h.capitalize()]
+        return new_req
+
+
+_safe_opener = urllib.request.build_opener(SafeRedirectHandler)
+
+
 def do_probe(url, headers, body_bytes):
     t0 = time.monotonic()
     try:
         req = urllib.request.Request(url, data=body_bytes, headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=PROBE_TIMEOUT) as r:
+        with _safe_opener.open(req, timeout=PROBE_TIMEOUT) as r:
             body = r.read().decode(errors="replace")
             return r.status, body, None, int((time.monotonic() - t0) * 1000)
     except urllib.error.HTTPError as e:

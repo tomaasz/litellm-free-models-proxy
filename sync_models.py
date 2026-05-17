@@ -48,9 +48,28 @@ CHEAHJS_README_URL = (
 _HEADERS = {"User-Agent": "litellm-free-models-proxy/1.0"}
 
 
+class SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new_req = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new_req:
+            for h in ["Authorization", "x-goog-api-key"]:
+                if h in new_req.headers:
+                    del new_req.headers[h]
+                if h in new_req.unredirected_hdrs:
+                    del new_req.unredirected_hdrs[h]
+                if h.capitalize() in new_req.headers:
+                    del new_req.headers[h.capitalize()]
+                if h.capitalize() in new_req.unredirected_hdrs:
+                    del new_req.unredirected_hdrs[h.capitalize()]
+        return new_req
+
+
+_safe_opener = urllib.request.build_opener(SafeRedirectHandler)
+
+
 def _http_get(url, headers=None, timeout=20):
     req = urllib.request.Request(url, headers={**_HEADERS, **(headers or {})})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    with _safe_opener.open(req, timeout=timeout) as r:
         return r.read().decode()
 
 
@@ -69,7 +88,7 @@ def _post_litellm(path, payload):
         },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=15) as r:
+    with _safe_opener.open(req, timeout=15) as r:
         return json.loads(r.read().decode())
 
 

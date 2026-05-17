@@ -4,10 +4,13 @@ Generates docs/index.html and docs/models.json from provider APIs.
 Runs standalone (no LiteLLM needed) — used by GitHub Actions to build the site.
 """
 
-import os, json, re, time, urllib.request, urllib.error
+import os
+import json
+import re
+import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 from html import escape
-from html.parser import HTMLParser
 from pathlib import Path
 
 OUT_DIR = Path(__file__).parent / "docs"
@@ -24,10 +27,29 @@ CHEAHJS_URL = (
 _HEADERS = {"User-Agent": "litellm-free-models-proxy/1.0"}
 
 
+class SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new_req = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new_req:
+            for h in ["Authorization", "x-goog-api-key"]:
+                if h in new_req.headers:
+                    del new_req.headers[h]
+                if h in new_req.unredirected_hdrs:
+                    del new_req.unredirected_hdrs[h]
+                if h.capitalize() in new_req.headers:
+                    del new_req.headers[h.capitalize()]
+                if h.capitalize() in new_req.unredirected_hdrs:
+                    del new_req.unredirected_hdrs[h.capitalize()]
+        return new_req
+
+
+_safe_opener = urllib.request.build_opener(SafeRedirectHandler)
+
+
 def _get(url, headers=None, timeout=20):
     req = urllib.request.Request(url, headers={**_HEADERS, **(headers or {})})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with _safe_opener.open(req, timeout=timeout) as r:
             body = r.read().decode()
             ct = r.headers.get_content_type() or ""
             return json.loads(body) if "json" in ct or body.lstrip().startswith("{") or body.lstrip().startswith("[") else body
@@ -446,7 +468,7 @@ PROVIDERS = [
 
 # ── HTML generation ───────────────────────────────────────────────────────────
 
-HTML_TEMPLATE = """<!DOCTYPE html>
+HTML_TEMPLATE = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1234,10 +1256,10 @@ def render_provider(p, models, error=None, delta=None):
             search_val = escape(f"{mid} {name}".lower())
             tag_list = get_tags(mid, m.get("context"), m.get("capabilities"))
             tags_html = "".join(
-                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
-                for l, c in tag_list
+                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(lbl)}</span>'
+                for lbl, c in tag_list
             )
-            tag_labels = escape(" ".join(l for l, _ in tag_list))
+            tag_labels = escape(" ".join(lbl for lbl, _ in tag_list))
             rows += (
                 f'<tr data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<td><span class="model-id" data-id="{escape(mid)}">{escape(mid)}</span></td>'
@@ -1290,11 +1312,11 @@ def render_cross_provider(groups, provider_map):
             ctx = fmt_context(ctx_raw)
             tag_list = get_tags(e["model_id"], e.get("context"), e.get("capabilities"))
             tags_html = "".join(
-                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
-                for l, c in tag_list
+                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(lbl)}</span>'
+                for lbl, c in tag_list
             )
             search_val = escape(f'{e["model_id"]} {e["provider"]} {cname}'.lower())
-            tag_labels = escape(" ".join(l for l, _ in tag_list))
+            tag_labels = escape(" ".join(lbl for lbl, _ in tag_list))
             rows += (
                 f'<tr data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<td><span class="provider-chip" style="background:{pcolor}"></span> {escape(e["provider"])}</td>'
@@ -1465,7 +1487,7 @@ def render_availability(provider_list, results, availability):
             meta = " · ".join(meta_bits) or "no probes"
             uptime_data = "" if u7 is None else f"{u7:.4f}"
             search_val = escape(f'{mid} {p["label"]}'.lower())
-            tag_labels = escape(" ".join(l for l, _ in get_tags(mid, m.get("context"), m.get("capabilities"))))
+            tag_labels = escape(" ".join(lbl for lbl, _ in get_tags(mid, m.get("context"), m.get("capabilities"))))
             ctx_raw = int(m.get("context") or 0)
             rows_html += (
                 f'<div class="av-row" data-uptime="{uptime_data}" '
@@ -1567,7 +1589,7 @@ def main():
         }
 
     old_models_path.write_text(json.dumps(json_out, indent=2, ensure_ascii=False))
-    print(f"Written docs/models.json")
+    print("Written docs/models.json")
 
     # Filtered variants under /availability/ — same shape as models.json,
     # but each provider's "models" list is restricted by 7-day probe uptime.
