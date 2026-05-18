@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-18T18:32:20.265361+00:00",
+  "updated": "2026-05-18T19:31:25.192385+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -110,19 +110,14 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
-          "limits": "varies per model"
-        },
-        {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
-            "tool_choice"
+            "tool_choice",
+            "reasoning"
           ]
         },
         {
@@ -150,12 +145,6 @@
           ]
         },
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
-          "context": 131072,
-          "limits": "varies per model"
-        },
-        {
           "id": "openai/gpt-oss-20b",
           "name": "openai/gpt-oss-20b",
           "context": 131072,
@@ -168,6 +157,22 @@
           ]
         },
         {
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
+        },
+        {
           "id": "llama-3.3-70b-versatile",
           "name": "llama-3.3-70b-versatile",
           "context": 131072,
@@ -178,15 +183,10 @@
           ]
         },
         {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
-          ]
+          "limits": "varies per model"
         }
       ],
       "error": null
@@ -195,6 +195,18 @@
       "name": "Cerebras",
       "url": "https://cloud.cerebras.ai",
       "models": [
+        {
+          "id": "gpt-oss-120b",
+          "name": "gpt-oss-120b",
+          "context": 131072,
+          "limits": "1M tokens/day",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
+          ]
+        },
         {
           "id": "llama3.1-8b",
           "name": "llama3.1-8b",
@@ -213,18 +225,6 @@
           "capabilities": [
             "function_calling",
             "tool_choice",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "gpt-oss-120b",
-          "name": "gpt-oss-120b",
-          "context": 131072,
-          "limits": "1M tokens/day",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
             "reasoning"
           ]
         }
@@ -502,16 +502,6 @@
           "limits": "1 req/s · 1B tok/month",
           "capabilities": [
             "function_calling",
-            "tool_choice",
-            "response_schema"
-          ]
-        },
-        {
-          "id": "mistral-medium",
-          "name": "mistral-medium-2508",
-          "context": 32000,
-          "limits": "1 req/s · 1B tok/month",
-          "capabilities": [
             "tool_choice",
             "response_schema"
           ]
@@ -1140,12 +1130,6 @@
           "id": "claude-fast",
           "name": "claude-fast",
           "context": 200000,
-          "limits": "free tier — token from enter.pollinations.ai"
-        },
-        {
-          "id": "perplexity-fast",
-          "name": "perplexity-fast",
-          "context": 127072,
           "limits": "free tier — token from enter.pollinations.ai"
         },
         {
