@@ -259,7 +259,7 @@ def run_index_for(now):
     return now.hour % ROUND_ROBIN_BUCKETS
 
 
-def load_recent_statuses(path, lookback_runs=WATCH_LIST_FAILS, max_lines=200_000):
+def load_recent_statuses(path, lookback_runs=WATCH_LIST_FAILS, max_lines=10_000):
     """Return {(provider, model): deque-of-recent-statuses (newest first)}."""
     recent = defaultdict(lambda: deque(maxlen=lookback_runs))
     if not path.exists():
@@ -267,7 +267,8 @@ def load_recent_statuses(path, lookback_runs=WATCH_LIST_FAILS, max_lines=200_000
     # We want last N for each (provider,model). Read in chronological order
     # then keep only the tail per key.
     with path.open() as f:
-        for line in f:
+        lines = deque(f, maxlen=max_lines)
+        for line in lines:
             try:
                 row = json.loads(line)
             except Exception:
