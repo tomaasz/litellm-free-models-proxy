@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-18T11:16:13.750980+00:00",
+  "updated": "2026-05-18T13:04:45.457274+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -104,6 +104,22 @@
       "url": "https://console.groq.com",
       "models": [
         {
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
+        },
+        {
           "id": "qwen/qwen3-32b",
           "name": "qwen/qwen3-32b",
           "context": 131072,
@@ -111,6 +127,18 @@
           "capabilities": [
             "function_calling",
             "tool_choice",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "openai/gpt-oss-20b",
+          "name": "openai/gpt-oss-20b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
             "reasoning"
           ]
         },
@@ -137,19 +165,9 @@
           ]
         },
         {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
-        {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
           "limits": "varies per model"
         },
         {
@@ -163,24 +181,6 @@
             "response_schema",
             "reasoning"
           ]
-        },
-        {
-          "id": "openai/gpt-oss-20b",
-          "name": "openai/gpt-oss-20b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
-          "context": 131072,
-          "limits": "varies per model"
         }
       ],
       "error": null
@@ -189,16 +189,6 @@
       "name": "Cerebras",
       "url": "https://cloud.cerebras.ai",
       "models": [
-        {
-          "id": "llama3.1-8b",
-          "name": "llama3.1-8b",
-          "context": 128000,
-          "limits": "1M tokens/day",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
         {
           "id": "gpt-oss-120b",
           "name": "gpt-oss-120b",
@@ -220,6 +210,16 @@
             "function_calling",
             "tool_choice",
             "reasoning"
+          ]
+        },
+        {
+          "id": "llama3.1-8b",
+          "name": "llama3.1-8b",
+          "context": 128000,
+          "limits": "1M tokens/day",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
           ]
         }
       ],
@@ -881,12 +881,6 @@
           "id": "@cf/moonshotai/kimi-k2.5",
           "name": "@cf/moonshotai/kimi-k2.5",
           "context": null,
-          "limits": "10k neurons/day"
-        },
-        {
-          "id": "@cf/meta/llama-2-7b-chat-fp16",
-          "name": "@cf/meta/llama-2-7b-chat-fp16",
-          "context": 3072,
           "limits": "10k neurons/day"
         },
         {
