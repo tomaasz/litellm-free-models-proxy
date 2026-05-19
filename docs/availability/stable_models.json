@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-19T01:37:18.226949+00:00",
+  "updated": "2026-05-19T03:01:49.964886+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -85,12 +85,6 @@
           "limits": "20 req/min · 50 req/day"
         },
         {
-          "id": "nvidia/nemotron-nano-9b-v2:free",
-          "name": "NVIDIA: Nemotron Nano 9B V2 (free)",
-          "context": 128000,
-          "limits": "20 req/min · 50 req/day"
-        },
-        {
           "id": "openai/gpt-oss-120b:free",
           "name": "OpenAI: gpt-oss-120b (free)",
           "context": 131072,
@@ -120,55 +114,10 @@
           ]
         },
         {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "llama-3.3-70b-versatile",
-          "name": "llama-3.3-70b-versatile",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
-        {
           "id": "groq/compound-mini",
           "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
-        },
-        {
-          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "vision"
-          ]
-        },
-        {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "reasoning"
-          ]
         },
         {
           "id": "openai/gpt-oss-20b",
@@ -183,10 +132,55 @@
           ]
         },
         {
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "reasoning"
+          ]
+        },
+        {
           "id": "allam-2-7b",
           "name": "allam-2-7b",
           "context": 4096,
           "limits": "varies per model"
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "vision"
+          ]
+        },
+        {
+          "id": "llama-3.3-70b-versatile",
+          "name": "llama-3.3-70b-versatile",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
         }
       ],
       "error": null
@@ -196,14 +190,13 @@
       "url": "https://cloud.cerebras.ai",
       "models": [
         {
-          "id": "zai-glm-4.7",
-          "name": "zai-glm-4.7",
+          "id": "llama3.1-8b",
+          "name": "llama3.1-8b",
           "context": 128000,
           "limits": "1M tokens/day",
           "capabilities": [
             "function_calling",
-            "tool_choice",
-            "reasoning"
+            "tool_choice"
           ]
         },
         {
@@ -219,13 +212,14 @@
           ]
         },
         {
-          "id": "llama3.1-8b",
-          "name": "llama3.1-8b",
+          "id": "zai-glm-4.7",
+          "name": "zai-glm-4.7",
           "context": 128000,
           "limits": "1M tokens/day",
           "capabilities": [
             "function_calling",
-            "tool_choice"
+            "tool_choice",
+            "reasoning"
           ]
         }
       ],
