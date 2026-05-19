@@ -9,7 +9,16 @@ probes are still flagged on the watch list (currently informational —
 no special handling beyond the `watching` field in availability.json).
 """
 
-import os, sys, json, time, gzip, hashlib, secrets, threading, urllib.request, urllib.error
+import os
+import sys
+import json
+import time
+import gzip
+import hashlib
+import secrets
+import threading
+import urllib.request
+import urllib.error
 from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone, timedelta
@@ -267,13 +276,14 @@ def load_recent_statuses(path, lookback_runs=WATCH_LIST_FAILS, max_lines=200_000
     # We want last N for each (provider,model). Read in chronological order
     # then keep only the tail per key.
     with path.open() as f:
-        for line in f:
-            try:
-                row = json.loads(line)
-            except Exception:
-                continue
-            key = (row.get("provider"), row.get("model"))
-            recent[key].append(row.get("status"))
+        tail = deque(f, maxlen=max_lines)
+    for line in tail:
+        try:
+            row = json.loads(line)
+        except Exception:
+            continue
+        key = (row.get("provider"), row.get("model"))
+        recent[key].append(row.get("status"))
     # Trim each deque to lookback_runs (newest at right)
     trimmed = {}
     for k, q in recent.items():
