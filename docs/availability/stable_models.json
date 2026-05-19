@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-19T07:06:25.466104+00:00",
+  "updated": "2026-05-19T09:03:16.128304+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -104,18 +104,6 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
-          "context": 131072,
-          "limits": "varies per model"
-        },
-        {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
-          "limits": "varies per model"
-        },
-        {
           "id": "meta-llama/llama-4-scout-17b-16e-instruct",
           "name": "meta-llama/llama-4-scout-17b-16e-instruct",
           "context": 131072,
@@ -128,14 +116,10 @@
           ]
         },
         {
-          "id": "llama-3.3-70b-versatile",
-          "name": "llama-3.3-70b-versatile",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
         },
         {
           "id": "openai/gpt-oss-20b",
@@ -162,6 +146,16 @@
           ]
         },
         {
+          "id": "llama-3.3-70b-versatile",
+          "name": "llama-3.3-70b-versatile",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
           "id": "llama-3.1-8b-instant",
           "name": "llama-3.1-8b-instant",
           "context": 131072,
@@ -170,6 +164,12 @@
             "function_calling",
             "tool_choice"
           ]
+        },
+        {
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
+          "context": 131072,
+          "limits": "varies per model"
         },
         {
           "id": "qwen/qwen3-32b",
