@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-19T11:01:17.861546+00:00",
+  "updated": "2026-05-19T12:57:29.555754+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -104,10 +104,16 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "openai/gpt-oss-20b",
+          "name": "openai/gpt-oss-20b",
           "context": 131072,
-          "limits": "varies per model"
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
+          ]
         },
         {
           "id": "qwen/qwen3-32b",
@@ -117,18 +123,6 @@
           "capabilities": [
             "function_calling",
             "tool_choice",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
             "reasoning"
           ]
         },
@@ -153,18 +147,6 @@
           ]
         },
         {
-          "id": "openai/gpt-oss-20b",
-          "name": "openai/gpt-oss-20b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "reasoning"
-          ]
-        },
-        {
           "id": "meta-llama/llama-4-scout-17b-16e-instruct",
           "name": "meta-llama/llama-4-scout-17b-16e-instruct",
           "context": 131072,
@@ -174,6 +156,24 @@
             "tool_choice",
             "response_schema",
             "vision"
+          ]
+        },
+        {
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
+          "context": 131072,
+          "limits": "varies per model"
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
           ]
         },
         {
@@ -189,6 +189,17 @@
       "name": "Cerebras",
       "url": "https://cloud.cerebras.ai",
       "models": [
+        {
+          "id": "zai-glm-4.7",
+          "name": "zai-glm-4.7",
+          "context": 128000,
+          "limits": "1M tokens/day",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "reasoning"
+          ]
+        },
         {
           "id": "llama3.1-8b",
           "name": "llama3.1-8b",
@@ -208,17 +219,6 @@
             "function_calling",
             "tool_choice",
             "response_schema",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "zai-glm-4.7",
-          "name": "zai-glm-4.7",
-          "context": 128000,
-          "limits": "1M tokens/day",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
             "reasoning"
           ]
         }
@@ -257,24 +257,6 @@
             "system_messages",
             "reasoning",
             "prompt_caching"
-          ]
-        }
-      ],
-      "error": null
-    },
-    "sambanova": {
-      "name": "SambaNova",
-      "url": "https://cloud.sambanova.ai",
-      "models": [
-        {
-          "id": "DeepSeek-V3.1",
-          "name": "DeepSeek-V3.1",
-          "context": 131072,
-          "limits": "free tier",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
           ]
         }
       ],
