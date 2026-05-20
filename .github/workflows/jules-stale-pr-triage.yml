@@ -1,0 +1,30 @@
+name: Jules Stale PR Triage
+
+on:
+  schedule:
+    - cron: '30 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  triage:
+    runs-on: self-hosted
+    timeout-minutes: 20
+    steps:
+      - name: Open Jules triage session
+        uses: google-labs-code/jules-action@v1
+        with:
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
+          starting_branch: main
+          prompt: |
+            Triage open pull requests that have not been updated in 14+ days.
+
+            For each stale PR:
+            1. Fetch its diff and current CI status
+            2. Categorize as CLOSE / REBASE / REVIEW / BLOCKED
+            3. Post a single triage comment per PR with category + one-line reason.
+               Do NOT close or merge anything yourself.
+
+            Open ONE summary PR titled "chore(triage): stale-PR report"
+            with a markdown table: PR# | category | reason | last activity.
+
+            Do NOT close PRs, merge PRs, or modify source files.
