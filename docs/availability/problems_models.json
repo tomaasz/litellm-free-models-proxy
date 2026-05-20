@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-20T18:01:23.519180+00:00",
+  "updated": "2026-05-20T19:42:48.766611+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -92,6 +92,21 @@
         {
           "id": "gemini-flash-lite-latest",
           "name": "Gemini Flash-Lite Latest",
+          "context": 1048576,
+          "limits": "varies — see AI Studio",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "vision",
+            "system_messages",
+            "reasoning",
+            "prompt_caching"
+          ]
+        },
+        {
+          "id": "gemini-2.5-flash-lite",
+          "name": "Gemini 2.5 Flash-Lite",
           "context": 1048576,
           "limits": "varies — see AI Studio",
           "capabilities": [
@@ -355,6 +370,12 @@
         {
           "id": "moonshotai/kimi-k2.6",
           "name": "moonshotai/kimi-k2.6",
+          "context": null,
+          "limits": "40 req/min"
+        },
+        {
+          "id": "nvidia/llama-3.1-nemotron-nano-8b-v1",
+          "name": "nvidia/llama-3.1-nemotron-nano-8b-v1",
           "context": null,
           "limits": "40 req/min"
         },
