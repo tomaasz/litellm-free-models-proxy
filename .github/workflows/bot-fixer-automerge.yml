@@ -33,6 +33,8 @@ jobs:
       - name: Identify candidate PR
         id: pr
         uses: actions/github-script@v7
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -67,6 +69,10 @@ jobs:
             core.setOutput('skip', 'false');
             core.setOutput('number', pr.number.toString());
             core.setOutput('is_draft', pr.draft.toString());
+
+      - name: Checkout repository
+        if: steps.pr.outputs.skip == 'false'
+        uses: actions/checkout@v4
 
       - name: Mark ready and enable auto-merge
         if: steps.pr.outputs.skip == 'false'
