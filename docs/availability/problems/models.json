@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-20T20:40:14.186395+00:00",
+  "updated": "2026-05-20T21:32:10.747527+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -134,6 +134,12 @@
       "url": "https://console.groq.com",
       "models": [
         {
+          "id": "groq/compound",
+          "name": "groq/compound",
+          "context": 131072,
+          "limits": "varies per model"
+        },
+        {
           "id": "llama-3.3-70b-versatile",
           "name": "llama-3.3-70b-versatile",
           "context": 131072,
@@ -141,28 +147,6 @@
           "capabilities": [
             "function_calling",
             "tool_choice"
-          ]
-        },
-        {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
-        {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "reasoning"
           ]
         },
         {
@@ -178,18 +162,6 @@
           ]
         },
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
-          "context": 131072,
-          "limits": "varies per model"
-        },
-        {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
-          "limits": "varies per model"
-        },
-        {
           "id": "meta-llama/llama-4-scout-17b-16e-instruct",
           "name": "meta-llama/llama-4-scout-17b-16e-instruct",
           "context": 131072,
@@ -199,6 +171,18 @@
             "tool_choice",
             "response_schema",
             "vision"
+          ]
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
           ]
         },
         {
@@ -213,8 +197,24 @@
           ]
         },
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
+        },
+        {
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
         }
@@ -238,6 +238,12 @@
           ]
         },
         {
+          "id": "qwen-3-235b-a22b-instruct-2507",
+          "name": "qwen-3-235b-a22b-instruct-2507",
+          "context": null,
+          "limits": "1M tokens/day"
+        },
+        {
           "id": "zai-glm-4.7",
           "name": "zai-glm-4.7",
           "context": 128000,
@@ -247,12 +253,6 @@
             "tool_choice",
             "reasoning"
           ]
-        },
-        {
-          "id": "qwen-3-235b-a22b-instruct-2507",
-          "name": "qwen-3-235b-a22b-instruct-2507",
-          "context": null,
-          "limits": "1M tokens/day"
         },
         {
           "id": "llama3.1-8b",
@@ -886,26 +886,7 @@
     "huggingface": {
       "name": "HuggingFace",
       "url": "https://huggingface.co",
-      "models": [
-        {
-          "id": "CohereLabs/command-a-plus-05-2026-bf16",
-          "name": "CohereLabs/command-a-plus-05-2026-bf16",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "CohereLabs/command-a-plus-05-2026-w4a4",
-          "name": "CohereLabs/command-a-plus-05-2026-w4a4",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "CohereLabs/command-a-plus-05-2026-fp8",
-          "name": "CohereLabs/command-a-plus-05-2026-fp8",
-          "context": null,
-          "limits": "free credits/month"
-        }
-      ],
+      "models": [],
       "error": null
     },
     "mistral": {
