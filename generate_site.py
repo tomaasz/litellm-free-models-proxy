@@ -903,7 +903,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <div class="layout" id="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sb-section sb-search" data-for="view-provider view-model view-availability">
-      <input type="search" id="model-search" placeholder="Search models…" autocomplete="off" spellcheck="false">
+      <input type="search" id="model-search" aria-label="Search models" placeholder="Search models…" autocomplete="off" spellcheck="false">
     </div>
     <div class="sb-section" data-for="view-provider view-model view-availability">
       <h3 class="sb-title">Context window</h3>
