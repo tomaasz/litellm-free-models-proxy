@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-21T07:10:55.244278+00:00",
+  "updated": "2026-05-21T09:02:52.489439+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -120,18 +120,6 @@
           ]
         },
         {
-          "id": "openai/gpt-oss-20b",
-          "name": "openai/gpt-oss-20b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "reasoning"
-          ]
-        },
-        {
           "id": "qwen/qwen3-32b",
           "name": "qwen/qwen3-32b",
           "context": 131072,
@@ -149,13 +137,27 @@
           "limits": "varies per model"
         },
         {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
+          "id": "openai/gpt-oss-20b",
+          "name": "openai/gpt-oss-20b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
-            "tool_choice"
+            "tool_choice",
+            "response_schema",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
           ]
         },
         {
@@ -171,15 +173,13 @@
           ]
         },
         {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
-            "tool_choice",
-            "response_schema",
-            "reasoning"
+            "tool_choice"
           ]
         }
       ],
@@ -1115,12 +1115,6 @@
           "id": "llama-scout",
           "name": "llama-scout",
           "context": 327680,
-          "limits": "free tier — token from enter.pollinations.ai"
-        },
-        {
-          "id": "minimax",
-          "name": "minimax",
-          "context": 200000,
           "limits": "free tier — token from enter.pollinations.ai"
         },
         {
