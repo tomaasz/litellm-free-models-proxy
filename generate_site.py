@@ -4,10 +4,13 @@ Generates docs/index.html and docs/models.json from provider APIs.
 Runs standalone (no LiteLLM needed) — used by GitHub Actions to build the site.
 """
 
-import os, json, re, time, urllib.request, urllib.error
+import os
+import json
+import re
+import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 from html import escape
-from html.parser import HTMLParser
 from pathlib import Path
 
 OUT_DIR = Path(__file__).parent / "docs"
@@ -1084,7 +1087,7 @@ function tabPath(t) {{
   const slug = TAB_TO_SLUG[t];
   // Strip trailing /<known-slug>(/availability sub-mode)? from current pathname.
   const rootPath = location.pathname.replace(
-    /\/(by-provider|by-model|availability(?:\/(?:problems|stable))?|changes)\/?$/, '/');
+    /\\/(by-provider|by-model|availability(?:\\/(?:problems|stable))?|changes)\\/?$/, '/');
   return rootPath + (slug === 'by-provider' ? '' : slug + '/');
 }}
 
@@ -1098,13 +1101,13 @@ document.querySelectorAll('.vtab').forEach(btn => {{
 
 window.addEventListener('popstate', () => {{
   const p = location.pathname;
-  const avSub = p.match(/\/availability\/(problems|stable)\/?$/);
+  const avSub = p.match(/\\/availability\\/(problems|stable)\\/?$/);
   if (avSub) {{
     applyTab('view-availability');
     applyAvFilter(avSub[1]);
     return;
   }}
-  const m = p.match(/\/(by-provider|by-model|availability|changes)\/?$/);
+  const m = p.match(/\\/(by-provider|by-model|availability|changes)\\/?$/);
   applyTab(m ? SLUG_TO_TAB[m[1]] : 'view-provider');
   if (m && m[1] === 'availability') applyAvFilter('all');
 }});
@@ -1141,7 +1144,7 @@ document.querySelectorAll('.av-pill').forEach(pill => {{
     applyAvFilter(mode);
     if (history.pushState) {{
       const root = location.pathname.replace(
-        /\/availability(?:\/(?:problems|stable))?\/?$/, '/');
+        /\\/availability(?:\\/(?:problems|stable))?\\/?$/, '/');
       const next = mode === 'all'
         ? root + 'availability/'
         : root + 'availability/' + mode + '/';
@@ -1234,10 +1237,10 @@ def render_provider(p, models, error=None, delta=None):
             search_val = escape(f"{mid} {name}".lower())
             tag_list = get_tags(mid, m.get("context"), m.get("capabilities"))
             tags_html = "".join(
-                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
-                for l, c in tag_list
+                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(label)}</span>'
+                for label, c in tag_list
             )
-            tag_labels = escape(" ".join(l for l, _ in tag_list))
+            tag_labels = escape(" ".join(label for label, _ in tag_list))
             rows += (
                 f'<tr data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<td><span class="model-id" data-id="{escape(mid)}">{escape(mid)}</span></td>'
@@ -1290,11 +1293,11 @@ def render_cross_provider(groups, provider_map):
             ctx = fmt_context(ctx_raw)
             tag_list = get_tags(e["model_id"], e.get("context"), e.get("capabilities"))
             tags_html = "".join(
-                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
-                for l, c in tag_list
+                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(label)}</span>'
+                for label, c in tag_list
             )
             search_val = escape(f'{e["model_id"]} {e["provider"]} {cname}'.lower())
-            tag_labels = escape(" ".join(l for l, _ in tag_list))
+            tag_labels = escape(" ".join(label for label, _ in tag_list))
             rows += (
                 f'<tr data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<td><span class="provider-chip" style="background:{pcolor}"></span> {escape(e["provider"])}</td>'
@@ -1465,7 +1468,7 @@ def render_availability(provider_list, results, availability):
             meta = " · ".join(meta_bits) or "no probes"
             uptime_data = "" if u7 is None else f"{u7:.4f}"
             search_val = escape(f'{mid} {p["label"]}'.lower())
-            tag_labels = escape(" ".join(l for l, _ in get_tags(mid, m.get("context"), m.get("capabilities"))))
+            tag_labels = escape(" ".join(label for label, _ in get_tags(mid, m.get("context"), m.get("capabilities"))))
             ctx_raw = int(m.get("context") or 0)
             rows_html += (
                 f'<div class="av-row" data-uptime="{uptime_data}" '
@@ -1567,7 +1570,7 @@ def main():
         }
 
     old_models_path.write_text(json.dumps(json_out, indent=2, ensure_ascii=False))
-    print(f"Written docs/models.json")
+    print("Written docs/models.json")
 
     # Filtered variants under /availability/ — same shape as models.json,
     # but each provider's "models" list is restricted by 7-day probe uptime.
