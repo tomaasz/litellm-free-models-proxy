@@ -70,7 +70,7 @@ jobs:
 
       - name: Checkout
         if: steps.pr.outputs.skip == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Mark ready and enable auto-merge
         if: steps.pr.outputs.skip == 'false'
