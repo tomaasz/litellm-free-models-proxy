@@ -4,10 +4,13 @@ Generates docs/index.html and docs/models.json from provider APIs.
 Runs standalone (no LiteLLM needed) — used by GitHub Actions to build the site.
 """
 
-import os, json, re, time, urllib.request, urllib.error
+import json
+import os
+import re
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from html import escape
-from html.parser import HTMLParser
 from pathlib import Path
 
 OUT_DIR = Path(__file__).parent / "docs"
@@ -30,21 +33,32 @@ def _get(url, headers=None, timeout=20):
         with urllib.request.urlopen(req, timeout=timeout) as r:
             body = r.read().decode()
             ct = r.headers.get_content_type() or ""
-            return json.loads(body) if "json" in ct or body.lstrip().startswith("{") or body.lstrip().startswith("[") else body
+            return (
+                json.loads(body)
+                if "json" in ct
+                or body.lstrip().startswith("{")
+                or body.lstrip().startswith("[")
+                else body
+            )
     except Exception as e:
         raise RuntimeError(f"GET {url} → {e}")
 
 
 # ── Provider fetchers (same logic as sync_models.py) ─────────────────────────
 
+
 def fetch_openrouter(key):
-    data = _get("https://openrouter.ai/api/v1/models",
-                headers={"Authorization": f"Bearer {key}"})
+    data = _get(
+        "https://openrouter.ai/api/v1/models",
+        headers={"Authorization": f"Bearer {key}"},
+    )
     return [
-        {"id": m["id"],
-         "name": m.get("name", m["id"]),
-         "context": m.get("context_length"),
-         "limits": "20 req/min · 50 req/day"}
+        {
+            "id": m["id"],
+            "name": m.get("name", m["id"]),
+            "context": m.get("context_length"),
+            "limits": "20 req/min · 50 req/day",
+        }
         for m in data.get("data", [])
         if str(m.get("pricing", {}).get("prompt", "1")) == "0"
         and str(m.get("pricing", {}).get("completion", "1")) == "0"
@@ -52,58 +66,100 @@ def fetch_openrouter(key):
 
 
 def fetch_groq(key):
-    data = _get("https://api.groq.com/openai/v1/models",
-                headers={"Authorization": f"Bearer {key}"})
+    data = _get(
+        "https://api.groq.com/openai/v1/models",
+        headers={"Authorization": f"Bearer {key}"},
+    )
     return [
-        {"id": m["id"], "name": m["id"], "context": m.get("context_window"), "limits": "varies per model"}
+        {
+            "id": m["id"],
+            "name": m["id"],
+            "context": m.get("context_window"),
+            "limits": "varies per model",
+        }
         for m in data.get("data", [])
-        if not any(x in m.get("id","").lower() for x in ("whisper","tts","embed","guard"))
+        if not any(
+            x in m.get("id", "").lower() for x in ("whisper", "tts", "embed", "guard")
+        )
     ]
 
 
 def fetch_cerebras(key):
-    data = _get("https://api.cerebras.ai/v1/models",
-                headers={"Authorization": f"Bearer {key}"})
-    return [{"id": m["id"], "name": m["id"],
-             "context": m.get("context_length"), "limits": "1M tokens/day"}
-            for m in data.get("data", [])]
+    data = _get(
+        "https://api.cerebras.ai/v1/models", headers={"Authorization": f"Bearer {key}"}
+    )
+    return [
+        {
+            "id": m["id"],
+            "name": m["id"],
+            "context": m.get("context_length"),
+            "limits": "1M tokens/day",
+        }
+        for m in data.get("data", [])
+    ]
 
 
 def fetch_sambanova(key):
-    data = _get("https://api.sambanova.ai/v1/models",
-                headers={"Authorization": f"Bearer {key}"})
-    return [{"id": m["id"], "name": m["id"],
-             "context": m.get("context_length"), "limits": "free tier"}
-            for m in data.get("data", [])]
+    data = _get(
+        "https://api.sambanova.ai/v1/models", headers={"Authorization": f"Bearer {key}"}
+    )
+    return [
+        {
+            "id": m["id"],
+            "name": m["id"],
+            "context": m.get("context_length"),
+            "limits": "free tier",
+        }
+        for m in data.get("data", [])
+    ]
 
 
 def fetch_together(key):
-    data = _get("https://api.together.ai/v1/models",
-                headers={"Authorization": f"Bearer {key}"})
+    data = _get(
+        "https://api.together.ai/v1/models", headers={"Authorization": f"Bearer {key}"}
+    )
     items = data if isinstance(data, list) else data.get("data", [])
     out = []
     for m in items:
         mid = m.get("id", "")
         p = m.get("pricing", {})
-        if (p.get("input", 1) == 0 and p.get("output", 1) == 0) or \
-           "-Free" in mid or "-free" in mid:
-            out.append({"id": mid, "name": m.get("display_name", mid),
-                        "context": m.get("context_length"), "limits": "free"})
+        if (
+            (p.get("input", 1) == 0 and p.get("output", 1) == 0)
+            or "-Free" in mid
+            or "-free" in mid
+        ):
+            out.append(
+                {
+                    "id": mid,
+                    "name": m.get("display_name", mid),
+                    "context": m.get("context_length"),
+                    "limits": "free",
+                }
+            )
     return out
 
 
 def fetch_cohere(key):
-    data = _get("https://api.cohere.com/v2/models",
-                headers={"Authorization": f"Bearer {key}"})
-    return [{"id": m["name"], "name": m["name"],
-             "context": m.get("context_length"), "limits": "20 req/min · 1000 req/month"}
-            for m in data.get("models", [])
-            if "chat" in m.get("endpoints", [])]
+    data = _get(
+        "https://api.cohere.com/v2/models", headers={"Authorization": f"Bearer {key}"}
+    )
+    return [
+        {
+            "id": m["name"],
+            "name": m["name"],
+            "context": m.get("context_length"),
+            "limits": "20 req/min · 1000 req/month",
+        }
+        for m in data.get("models", [])
+        if "chat" in m.get("endpoints", [])
+    ]
 
 
 def fetch_gemini(key):
-    data = _get("https://generativelanguage.googleapis.com/v1beta/models",
-                headers={"x-goog-api-key": key})
+    data = _get(
+        "https://generativelanguage.googleapis.com/v1beta/models",
+        headers={"x-goog-api-key": key},
+    )
     out = []
     for m in data.get("models", []):
         name = m.get("name", "").replace("models/", "")
@@ -113,43 +169,68 @@ def fetch_gemini(key):
         if any(x in nl for x in ("-pro", "-ultra", "embedding", "-tts", "robotics")):
             continue
         if any(x in nl for x in ("flash", "gemma")):
-            out.append({"id": name,
-                        "name": m.get("displayName", name),
-                        "context": m.get("inputTokenLimit"),
-                        "limits": "varies — see AI Studio"})
+            out.append(
+                {
+                    "id": name,
+                    "name": m.get("displayName", name),
+                    "context": m.get("inputTokenLimit"),
+                    "limits": "varies — see AI Studio",
+                }
+            )
     return out
 
 
 def fetch_nvidia(key):
-    data = _get("https://integrate.api.nvidia.com/v1/models",
-                headers={"Authorization": f"Bearer {key}"})
-    return [{"id": m["id"], "name": m["id"],
-             "context": None, "limits": "40 req/min"}
-            for m in data.get("data", [])
-            if not any(x in m.get("id","").lower() for x in ("embed","rerank","tts"))]
+    data = _get(
+        "https://integrate.api.nvidia.com/v1/models",
+        headers={"Authorization": f"Bearer {key}"},
+    )
+    return [
+        {"id": m["id"], "name": m["id"], "context": None, "limits": "40 req/min"}
+        for m in data.get("data", [])
+        if not any(x in m.get("id", "").lower() for x in ("embed", "rerank", "tts"))
+    ]
 
 
 def fetch_huggingface(key):
-    data = _get("https://router.huggingface.co/v1/models",
-                headers={"Authorization": f"Bearer {key}"})
-    return [{"id": m["id"], "name": m["id"],
-             "context": None, "limits": "free credits/month"}
-            for m in data.get("data", [])
-            if not any(x in m.get("id","").lower() for x in ("embed","vision","tts","stt"))]
+    data = _get(
+        "https://router.huggingface.co/v1/models",
+        headers={"Authorization": f"Bearer {key}"},
+    )
+    return [
+        {
+            "id": m["id"],
+            "name": m["id"],
+            "context": None,
+            "limits": "free credits/month",
+        }
+        for m in data.get("data", [])
+        if not any(
+            x in m.get("id", "").lower() for x in ("embed", "vision", "tts", "stt")
+        )
+    ]
 
 
 def fetch_github(key):
-    data = _get("https://models.inference.ai.azure.com/models",
-                headers={"Authorization": f"Bearer {key}"})
+    data = _get(
+        "https://models.inference.ai.azure.com/models",
+        headers={"Authorization": f"Bearer {key}"},
+    )
     items = data if isinstance(data, list) else data.get("data", [])
     return [
-        {"id": m.get("id") or m.get("name", ""),
-         "name": m.get("friendly_name") or m.get("display_name") or m.get("name", ""),
-         "context": None,
-         "limits": "rate-limited (free / higher with Copilot)"}
+        {
+            "id": m.get("id") or m.get("name", ""),
+            "name": m.get("friendly_name")
+            or m.get("display_name")
+            or m.get("name", ""),
+            "context": None,
+            "limits": "rate-limited (free / higher with Copilot)",
+        }
         for m in items
-        if not any(x in (m.get("id") or m.get("name", "")).lower()
-                   for x in ("embed", "tts", "whisper", "dall-e", "image"))
+        if not any(
+            x in (m.get("id") or m.get("name", "")).lower()
+            for x in ("embed", "tts", "whisper", "dall-e", "image")
+        )
         and (m.get("id") or m.get("name", ""))
     ]
 
@@ -163,7 +244,12 @@ def fetch_cloudflare(key):
         headers={"Authorization": f"Bearer {key}"},
     )
     return [
-        {"id": m["name"], "name": m["name"], "context": None, "limits": "10k neurons/day"}
+        {
+            "id": m["name"],
+            "name": m["name"],
+            "context": None,
+            "limits": "10k neurons/day",
+        }
         for m in data.get("result", [])
         if "text" in str(m.get("task", {}).get("name", "")).lower()
         and "gen" in str(m.get("task", {}).get("name", "")).lower()
@@ -171,13 +257,20 @@ def fetch_cloudflare(key):
 
 
 def fetch_mistral(key):
-    data = _get("https://api.mistral.ai/v1/models",
-                headers={"Authorization": f"Bearer {key}"})
-    return [{"id": m["id"], "name": m.get("name", m["id"]),
-             "context": None, "limits": "1 req/s · 1B tok/month"}
-            for m in data.get("data", [])
-            if m.get("object") == "model"
-            and not any(x in m.get("id","").lower() for x in ("embed","moderation"))]
+    data = _get(
+        "https://api.mistral.ai/v1/models", headers={"Authorization": f"Bearer {key}"}
+    )
+    return [
+        {
+            "id": m["id"],
+            "name": m.get("name", m["id"]),
+            "context": None,
+            "limits": "1 req/s · 1B tok/month",
+        }
+        for m in data.get("data", [])
+        if m.get("object") == "model"
+        and not any(x in m.get("id", "").lower() for x in ("embed", "moderation"))
+    ]
 
 
 def fetch_pollinations(key):
@@ -190,24 +283,34 @@ def fetch_pollinations(key):
             continue
         if "/v1/chat/completions" not in (m.get("supported_endpoints") or []):
             continue
-        out.append({
-            "id": m["id"],
-            "name": m["id"],
-            "context": m.get("context_length"),
-            "limits": "free tier — token from enter.pollinations.ai",
-        })
+        out.append(
+            {
+                "id": m["id"],
+                "name": m["id"],
+                "context": m.get("context_length"),
+                "limits": "free tier — token from enter.pollinations.ai",
+            }
+        )
     return out
 
 
 def fetch_kluster(key):
-    data = _get("https://api.kluster.ai/v1/models",
-                headers={"Authorization": f"Bearer {key}"})
-    return [{"id": m["id"], "name": m.get("name", m["id"]),
-             "context": m.get("context_length"),
-             "limits": "free tier"}
-            for m in data.get("data", [])
-            if not any(x in m.get("id","").lower()
-                       for x in ("embed","bge","rerank","tts","whisper"))]
+    data = _get(
+        "https://api.kluster.ai/v1/models", headers={"Authorization": f"Bearer {key}"}
+    )
+    return [
+        {
+            "id": m["id"],
+            "name": m.get("name", m["id"]),
+            "context": m.get("context_length"),
+            "limits": "free tier",
+        }
+        for m in data.get("data", [])
+        if not any(
+            x in m.get("id", "").lower()
+            for x in ("embed", "bge", "rerank", "tts", "whisper")
+        )
+    ]
 
 
 def fetch_llm7(key):
@@ -219,14 +322,18 @@ def fetch_llm7(key):
         mid = m.get("id", "")
         if not mid:
             continue
-        if any(x in mid.lower() for x in ("embed","tts","audio","whisper","image")):
+        if any(x in mid.lower() for x in ("embed", "tts", "audio", "whisper", "image")):
             continue
         ctx_field = m.get("context_window") or {}
         ctx = ctx_field.get("tokens") if isinstance(ctx_field, dict) else None
-        out.append({
-            "id": mid, "name": mid, "context": ctx,
-            "limits": "anonymous · 30 req/min with token",
-        })
+        out.append(
+            {
+                "id": mid,
+                "name": mid,
+                "context": ctx,
+                "limits": "anonymous · 30 req/min with token",
+            }
+        )
     return out
 
 
@@ -242,27 +349,35 @@ def fetch_zai(key):
         "glm-4.5-flash": "GLM-4.5-Flash",
         "cogvideox-flash": "CogVideoX-Flash (video)",
     }
-    out = [{"id": mid, "name": name, "context": None, "limits": "free Flash tier"}
-           for mid, name in free_flash.items()]
+    out = [
+        {"id": mid, "name": name, "context": None, "limits": "free Flash tier"}
+        for mid, name in free_flash.items()
+    ]
 
     try:
-        data = _get("https://open.bigmodel.cn/api/paas/v4/models",
-                    headers={"Authorization": f"Bearer {key}"})
+        data = _get(
+            "https://open.bigmodel.cn/api/paas/v4/models",
+            headers={"Authorization": f"Bearer {key}"},
+        )
         items = data.get("data", []) if isinstance(data, dict) else data
         seen = set(free_flash)
         for m in items:
             mid = m.get("id") or m.get("modelCode") or ""
             if not mid or mid in seen or "flash" not in mid.lower():
                 continue
-            if any(x in mid.lower() for x in
-                   ("embed", "rerank", "tts", "stt", "audio", "image")):
+            if any(
+                x in mid.lower()
+                for x in ("embed", "rerank", "tts", "stt", "audio", "image")
+            ):
                 continue
-            out.append({
-                "id": mid,
-                "name": m.get("name") or m.get("displayName") or mid,
-                "context": m.get("context_length") or m.get("maxInputTokens"),
-                "limits": "free Flash tier",
-            })
+            out.append(
+                {
+                    "id": mid,
+                    "name": m.get("name") or m.get("displayName") or mid,
+                    "context": m.get("context_length") or m.get("maxInputTokens"),
+                    "limits": "free Flash tier",
+                }
+            )
     except Exception:
         pass
     return out
@@ -271,8 +386,10 @@ def fetch_zai(key):
 # ── LiteLLM model metadata enrichment ────────────────────────────────────────
 # https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json
 
-LITELLM_DB_URL = ("https://raw.githubusercontent.com/BerriAI/litellm/main/"
-                  "model_prices_and_context_window.json")
+LITELLM_DB_URL = (
+    "https://raw.githubusercontent.com/BerriAI/litellm/main/"
+    "model_prices_and_context_window.json"
+)
 
 # Map our provider key → litellm "litellm_provider" field
 LITELLM_PROVIDER_MAP = {
@@ -332,17 +449,21 @@ def enrich_with_litellm(results, db):
             continue
         for m in models:
             mid = m["id"]
-            entry = (prov_db.get(f"{llm_prov}/{mid}")
-                     or prov_db.get(mid)
-                     or prov_db.get(f"{our_key}/{mid}"))
+            entry = (
+                prov_db.get(f"{llm_prov}/{mid}")
+                or prov_db.get(mid)
+                or prov_db.get(f"{our_key}/{mid}")
+            )
             if not entry:
                 continue
-            ctx = (entry.get("max_input_tokens")
-                   or entry.get("max_tokens"))
+            ctx = entry.get("max_input_tokens") or entry.get("max_tokens")
             if ctx and not m.get("context"):
                 m["context"] = ctx
-            caps = [f.removeprefix("supports_") for f in CAPABILITY_FIELDS
-                    if entry.get(f) is True]
+            caps = [
+                f.removeprefix("supports_")
+                for f in CAPABILITY_FIELDS
+                if entry.get(f) is True
+            ]
             if caps:
                 m["capabilities"] = caps
             mode = entry.get("mode")
@@ -355,6 +476,7 @@ def enrich_with_litellm(results, db):
 
 # ── Community cross-reference ─────────────────────────────────────────────────
 
+
 def fetch_cheahjs():
     try:
         return _get(CHEAHJS_URL)
@@ -366,43 +488,50 @@ def fetch_cheahjs():
 # ── Model utilities ───────────────────────────────────────────────────────────
 
 _QUALITY_RE = re.compile(
-    r'[-_](instruct|chat|it|free|versatile|preview|latest|exp|experimental'
-    r'|hf|awq|gptq|gguf|fp16|bf16|int4|int8)$',
+    r"[-_](instruct|chat|it|free|versatile|preview|latest|exp|experimental"
+    r"|hf|awq|gptq|gguf|fp16|bf16|int4|int8)$",
     re.IGNORECASE,
 )
-_DATE_RE = re.compile(r'-\d{8}$')
-_FREE_RE  = re.compile(r':free$')
+_DATE_RE = re.compile(r"-\d{8}$")
+_FREE_RE = re.compile(r":free$")
 
 
 def canonical_name(model_id):
     """Normalize a model ID to a provider-agnostic key for cross-provider grouping."""
-    s = model_id.split('/')[-1].lower()
-    s = _FREE_RE.sub('', s)
+    s = model_id.split("/")[-1].lower()
+    s = _FREE_RE.sub("", s)
     for _ in range(5):
-        ns = _QUALITY_RE.sub('', s)
-        ns = _DATE_RE.sub('', ns)
+        ns = _QUALITY_RE.sub("", s)
+        ns = _DATE_RE.sub("", ns)
         if ns == s:
             break
         s = ns
-    return re.sub(r'[-_.]', '-', s).strip('-')
+    return re.sub(r"[-_.]", "-", s).strip("-")
 
 
 _TAG_RULES = [
-    (["coder", "-code-", "starcoder", "codestral", "deepseek-coder"], "coding",    "#a78bfa"),
-    (["reason", "think",  "qwq",   "deepseek-r", "-r1", "r1-"],       "reasoning", "#f59e0b"),
-    (["vision", "-vl",    "llava",  "pixtral",    "qvq",  "visual"],   "vision",    "#06b6d4"),
-    (["flash",  "turbo",  "lite",   "mini",       "small","haiku",
-      "nano",   "fast"],                                                "fast",      "#10b981"),
+    (
+        ["coder", "-code-", "starcoder", "codestral", "deepseek-coder"],
+        "coding",
+        "#a78bfa",
+    ),
+    (["reason", "think", "qwq", "deepseek-r", "-r1", "r1-"], "reasoning", "#f59e0b"),
+    (["vision", "-vl", "llava", "pixtral", "qvq", "visual"], "vision", "#06b6d4"),
+    (
+        ["flash", "turbo", "lite", "mini", "small", "haiku", "nano", "fast"],
+        "fast",
+        "#10b981",
+    ),
 ]
 
 
 _CAPABILITY_CHIPS = {
     "function_calling": ("tools", "#a78bfa"),
-    "tool_choice":      ("tools", "#a78bfa"),
-    "response_schema":  ("json", "#22d3ee"),
-    "vision":           ("vision", "#f59e0b"),
-    "reasoning":        ("reasoning", "#34d399"),
-    "prompt_caching":   ("cache", "#94a3b8"),
+    "tool_choice": ("tools", "#a78bfa"),
+    "response_schema": ("json", "#22d3ee"),
+    "vision": ("vision", "#f59e0b"),
+    "reasoning": ("reasoning", "#34d399"),
+    "prompt_caching": ("cache", "#94a3b8"),
 }
 
 
@@ -425,22 +554,151 @@ def get_tags(model_id, context=None, capabilities=None):
 
 
 PROVIDERS = [
-    {"key": "openrouter",  "label": "OpenRouter",   "env": "OPENROUTER_API_KEY", "fetch": fetch_openrouter, "color": "#6366f1", "url": "https://openrouter.ai",                       "key_url": "https://openrouter.ai/keys"},
-    {"key": "groq",        "label": "Groq",         "env": "GROQ_API_KEY",       "fetch": fetch_groq,       "color": "#f59e0b", "url": "https://console.groq.com",                    "key_url": "https://console.groq.com/keys"},
-    {"key": "cerebras",    "label": "Cerebras",     "env": "CEREBRAS_API_KEY",   "fetch": fetch_cerebras,   "color": "#10b981", "url": "https://cloud.cerebras.ai",                   "key_url": "https://cloud.cerebras.ai/platform"},
-    {"key": "gemini",      "label": "Gemini",       "env": "GEMINI_API_KEY",     "fetch": fetch_gemini,     "color": "#3b82f6", "url": "https://aistudio.google.com",                 "key_url": "https://aistudio.google.com/apikey"},
-    {"key": "sambanova",   "label": "SambaNova",    "env": "SAMBANOVA_API_KEY",  "fetch": fetch_sambanova,  "color": "#8b5cf6", "url": "https://cloud.sambanova.ai",                  "key_url": "https://cloud.sambanova.ai/"},
-    {"key": "cohere",      "label": "Cohere",       "env": "COHERE_API_KEY",     "fetch": fetch_cohere,     "color": "#ec4899", "url": "https://cohere.com",                          "key_url": "https://dashboard.cohere.com/api-keys"},
-    {"key": "together",    "label": "Together AI",  "env": "TOGETHER_API_KEY",   "fetch": fetch_together,   "color": "#14b8a6", "url": "https://api.together.ai",                     "key_url": "https://api.together.ai/settings/api-keys"},
-    {"key": "nvidia",      "label": "NVIDIA NIM",   "env": "NVIDIA_NIM_API_KEY", "fetch": fetch_nvidia,     "color": "#22c55e", "url": "https://build.nvidia.com",                    "key_url": "https://build.nvidia.com/"},
-    {"key": "huggingface", "label": "HuggingFace",  "env": "HF_TOKEN",           "fetch": fetch_huggingface,"color": "#f97316", "url": "https://huggingface.co",                      "key_url": "https://huggingface.co/settings/tokens"},
-    {"key": "mistral",     "label": "Mistral",      "env": "MISTRAL_API_KEY",    "fetch": fetch_mistral,    "color": "#0ea5e9", "url": "https://console.mistral.ai",                  "key_url": "https://console.mistral.ai/api-keys/"},
-    {"key": "github",      "label": "GitHub Models","env": "GH_MODELS_TOKEN",    "fetch": fetch_github,     "color": "#e2e8f0", "url": "https://github.com/marketplace/models",       "key_url": "https://github.com/settings/tokens"},
-    {"key": "cloudflare",  "label": "Cloudflare AI","env": "CLOUDFLARE_API_KEY", "fetch": fetch_cloudflare, "color": "#f6821f", "url": "https://developers.cloudflare.com/workers-ai/","key_url": "https://dash.cloudflare.com/profile/api-tokens"},
-    {"key": "pollinations","label": "Pollinations", "env": "POLLINATIONS_API_KEY", "fetch": fetch_pollinations, "color": "#ec4899", "url": "https://pollinations.ai",                       "key_url": "https://enter.pollinations.ai"},
-    {"key": "kluster",     "label": "Kluster AI",   "env": "KLUSTER_API_KEY",     "fetch": fetch_kluster,     "color": "#a855f7", "url": "https://kluster.ai",                            "key_url": "https://platform.kluster.ai/apikeys"},
-    {"key": "llm7",        "label": "LLM7",         "env": "LLM7_API_KEY",        "fetch": fetch_llm7,        "color": "#facc15", "url": "https://llm7.io",                               "key_url": "https://token.llm7.io", "anonymous_ok": True},
-    {"key": "zai",         "label": "Z.ai (GLM)",   "env": "ZAI_API_KEY",         "fetch": fetch_zai,         "color": "#0ea5e9", "url": "https://open.bigmodel.cn",                     "key_url": "https://open.bigmodel.cn/usercenter/apikeys"},
+    {
+        "key": "openrouter",
+        "label": "OpenRouter",
+        "env": "OPENROUTER_API_KEY",
+        "fetch": fetch_openrouter,
+        "color": "#6366f1",
+        "url": "https://openrouter.ai",
+        "key_url": "https://openrouter.ai/keys",
+    },
+    {
+        "key": "groq",
+        "label": "Groq",
+        "env": "GROQ_API_KEY",
+        "fetch": fetch_groq,
+        "color": "#f59e0b",
+        "url": "https://console.groq.com",
+        "key_url": "https://console.groq.com/keys",
+    },
+    {
+        "key": "cerebras",
+        "label": "Cerebras",
+        "env": "CEREBRAS_API_KEY",
+        "fetch": fetch_cerebras,
+        "color": "#10b981",
+        "url": "https://cloud.cerebras.ai",
+        "key_url": "https://cloud.cerebras.ai/platform",
+    },
+    {
+        "key": "gemini",
+        "label": "Gemini",
+        "env": "GEMINI_API_KEY",
+        "fetch": fetch_gemini,
+        "color": "#3b82f6",
+        "url": "https://aistudio.google.com",
+        "key_url": "https://aistudio.google.com/apikey",
+    },
+    {
+        "key": "sambanova",
+        "label": "SambaNova",
+        "env": "SAMBANOVA_API_KEY",
+        "fetch": fetch_sambanova,
+        "color": "#8b5cf6",
+        "url": "https://cloud.sambanova.ai",
+        "key_url": "https://cloud.sambanova.ai/",
+    },
+    {
+        "key": "cohere",
+        "label": "Cohere",
+        "env": "COHERE_API_KEY",
+        "fetch": fetch_cohere,
+        "color": "#ec4899",
+        "url": "https://cohere.com",
+        "key_url": "https://dashboard.cohere.com/api-keys",
+    },
+    {
+        "key": "together",
+        "label": "Together AI",
+        "env": "TOGETHER_API_KEY",
+        "fetch": fetch_together,
+        "color": "#14b8a6",
+        "url": "https://api.together.ai",
+        "key_url": "https://api.together.ai/settings/api-keys",
+    },
+    {
+        "key": "nvidia",
+        "label": "NVIDIA NIM",
+        "env": "NVIDIA_NIM_API_KEY",
+        "fetch": fetch_nvidia,
+        "color": "#22c55e",
+        "url": "https://build.nvidia.com",
+        "key_url": "https://build.nvidia.com/",
+    },
+    {
+        "key": "huggingface",
+        "label": "HuggingFace",
+        "env": "HF_TOKEN",
+        "fetch": fetch_huggingface,
+        "color": "#f97316",
+        "url": "https://huggingface.co",
+        "key_url": "https://huggingface.co/settings/tokens",
+    },
+    {
+        "key": "mistral",
+        "label": "Mistral",
+        "env": "MISTRAL_API_KEY",
+        "fetch": fetch_mistral,
+        "color": "#0ea5e9",
+        "url": "https://console.mistral.ai",
+        "key_url": "https://console.mistral.ai/api-keys/",
+    },
+    {
+        "key": "github",
+        "label": "GitHub Models",
+        "env": "GH_MODELS_TOKEN",
+        "fetch": fetch_github,
+        "color": "#e2e8f0",
+        "url": "https://github.com/marketplace/models",
+        "key_url": "https://github.com/settings/tokens",
+    },
+    {
+        "key": "cloudflare",
+        "label": "Cloudflare AI",
+        "env": "CLOUDFLARE_API_KEY",
+        "fetch": fetch_cloudflare,
+        "color": "#f6821f",
+        "url": "https://developers.cloudflare.com/workers-ai/",
+        "key_url": "https://dash.cloudflare.com/profile/api-tokens",
+    },
+    {
+        "key": "pollinations",
+        "label": "Pollinations",
+        "env": "POLLINATIONS_API_KEY",
+        "fetch": fetch_pollinations,
+        "color": "#ec4899",
+        "url": "https://pollinations.ai",
+        "key_url": "https://enter.pollinations.ai",
+    },
+    {
+        "key": "kluster",
+        "label": "Kluster AI",
+        "env": "KLUSTER_API_KEY",
+        "fetch": fetch_kluster,
+        "color": "#a855f7",
+        "url": "https://kluster.ai",
+        "key_url": "https://platform.kluster.ai/apikeys",
+    },
+    {
+        "key": "llm7",
+        "label": "LLM7",
+        "env": "LLM7_API_KEY",
+        "fetch": fetch_llm7,
+        "color": "#facc15",
+        "url": "https://llm7.io",
+        "key_url": "https://token.llm7.io",
+        "anonymous_ok": True,
+    },
+    {
+        "key": "zai",
+        "label": "Z.ai (GLM)",
+        "env": "ZAI_API_KEY",
+        "fetch": fetch_zai,
+        "color": "#0ea5e9",
+        "url": "https://open.bigmodel.cn",
+        "key_url": "https://open.bigmodel.cn/usercenter/apikeys",
+    },
 ]
 
 
@@ -1084,7 +1342,7 @@ function tabPath(t) {{
   const slug = TAB_TO_SLUG[t];
   // Strip trailing /<known-slug>(/availability sub-mode)? from current pathname.
   const rootPath = location.pathname.replace(
-    /\/(by-provider|by-model|availability(?:\/(?:problems|stable))?|changes)\/?$/, '/');
+    /\\/(by-provider|by-model|availability(?:\\/(?:problems|stable))?|changes)\\/?$/, '/');
   return rootPath + (slug === 'by-provider' ? '' : slug + '/');
 }}
 
@@ -1098,13 +1356,13 @@ document.querySelectorAll('.vtab').forEach(btn => {{
 
 window.addEventListener('popstate', () => {{
   const p = location.pathname;
-  const avSub = p.match(/\/availability\/(problems|stable)\/?$/);
+  const avSub = p.match(/\\/availability\\/(problems|stable)\\/?$/);
   if (avSub) {{
     applyTab('view-availability');
     applyAvFilter(avSub[1]);
     return;
   }}
-  const m = p.match(/\/(by-provider|by-model|availability|changes)\/?$/);
+  const m = p.match(/\\/(by-provider|by-model|availability|changes)\\/?$/);
   applyTab(m ? SLUG_TO_TAB[m[1]] : 'view-provider');
   if (m && m[1] === 'availability') applyAvFilter('all');
 }});
@@ -1141,7 +1399,7 @@ document.querySelectorAll('.av-pill').forEach(pill => {{
     applyAvFilter(mode);
     if (history.pushState) {{
       const root = location.pathname.replace(
-        /\/availability(?:\/(?:problems|stable))?\/?$/, '/');
+        /\\/availability(?:\\/(?:problems|stable))?\\/?$/, '/');
       const next = mode === 'all'
         ? root + 'availability/'
         : root + 'availability/' + mode + '/';
@@ -1195,7 +1453,8 @@ def render_provider(p, models, error=None, delta=None):
 
     key_link = (
         f'<a class="api-key-link" href="{key_url}" target="_blank" title="Get API key">Get API key</a>'
-        if key_url else ""
+        if key_url
+        else ""
     )
     delta_html = ""
     if delta:
@@ -1213,11 +1472,11 @@ def render_provider(p, models, error=None, delta=None):
         f'<div class="provider-header">'
         f'<span class="provider-dot" style="background:{color}"></span>'
         f'<span class="provider-name"><a href="{url}" target="_blank">{label}</a></span>'
-        f'{key_link}'
+        f"{key_link}"
         f'<span class="provider-count"><span class="count-num">{count}</span> models{delta_html}</span>'
-        f'{status}'
-        f'{collapse_btn}'
-        f'</div>'
+        f"{status}"
+        f"{collapse_btn}"
+        f"</div>"
     )
 
     if error:
@@ -1234,30 +1493,30 @@ def render_provider(p, models, error=None, delta=None):
             search_val = escape(f"{mid} {name}".lower())
             tag_list = get_tags(mid, m.get("context"), m.get("capabilities"))
             tags_html = "".join(
-                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
-                for l, c in tag_list
+                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(label)}</span>'
+                for label, c in tag_list
             )
-            tag_labels = escape(" ".join(l for l, _ in tag_list))
+            tag_labels = escape(" ".join(label for label, _ in tag_list))
             rows += (
                 f'<tr data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<td><span class="model-id" data-id="{escape(mid)}">{escape(mid)}</span></td>'
                 f'<td class="model-name">{escape(name)}</td>'
                 f'<td class="ctx">{escape(ctx)}</td>'
-                f'<td>{tags_html}</td>'
+                f"<td>{tags_html}</td>"
                 f'<td class="limits">{escape(m.get("limits") or "")}</td>'
                 f"</tr>"
             )
         colgroup = (
-            '<colgroup>'
+            "<colgroup>"
             '<col class="col-id"><col class="col-name"><col class="col-ctx">'
             '<col class="col-tags"><col class="col-limits">'
-            '</colgroup>'
+            "</colgroup>"
         )
         inner = (
-            '<table>' + colgroup + '<thead><tr>'
+            "<table>" + colgroup + "<thead><tr>"
             '<th>Model ID <span class="copy-tip">(click to copy)</span></th>'
-            '<th>Name</th><th>Context</th><th>Tags</th><th>Limits</th>'
-            '</tr></thead><tbody>' + rows + '</tbody></table>'
+            "<th>Name</th><th>Context</th><th>Tags</th><th>Limits</th>"
+            "</tr></thead><tbody>" + rows + "</tbody></table>"
         )
 
     body = f'<div class="provider-body">{inner}</div>'
@@ -1273,14 +1532,15 @@ def render_cross_provider(groups, provider_map):
         providers_in_group = sorted({e["provider"] for e in entries})
         provider_dots = "".join(
             f'<span class="provider-chip" style="background:{provider_map[pr]["color"]}" title="{escape(pr)}"></span>'
-            for pr in providers_in_group if pr in provider_map
+            for pr in providers_in_group
+            if pr in provider_map
         )
         header = (
             f'<div class="cross-group-header">'
-            f'{provider_dots}'
-            f'<span>{escape(cname)}</span>'
+            f"{provider_dots}"
+            f"<span>{escape(cname)}</span>"
             f'<span class="cross-group-count">{len(providers_in_group)} providers · {len(entries)} variants</span>'
-            f'</div>'
+            f"</div>"
         )
         rows = ""
         rows_count = 0
@@ -1290,33 +1550,35 @@ def render_cross_provider(groups, provider_map):
             ctx = fmt_context(ctx_raw)
             tag_list = get_tags(e["model_id"], e.get("context"), e.get("capabilities"))
             tags_html = "".join(
-                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(l)}</span>'
-                for l, c in tag_list
+                f'<span class="tag-chip" style="background:{c}22;color:{c}">{escape(label)}</span>'
+                for label, c in tag_list
             )
-            search_val = escape(f'{e["model_id"]} {e["provider"]} {cname}'.lower())
-            tag_labels = escape(" ".join(l for l, _ in tag_list))
+            search_val = escape(f"{e['model_id']} {e['provider']} {cname}".lower())
+            tag_labels = escape(" ".join(label for label, _ in tag_list))
             rows += (
                 f'<tr data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<td><span class="provider-chip" style="background:{pcolor}"></span> {escape(e["provider"])}</td>'
                 f'<td><span class="model-id" data-id="{escape(e["model_id"])}">{escape(e["model_id"])}</span></td>'
                 f'<td class="ctx">{escape(ctx)}</td>'
-                f'<td>{tags_html}</td>'
+                f"<td>{tags_html}</td>"
                 f'<td class="limits">{escape(e.get("limits") or "")}</td>'
-                f'</tr>'
+                f"</tr>"
             )
             rows_count += 1
         colgroup = (
-            '<colgroup>'
+            "<colgroup>"
             '<col style="width:18%"><col style="width:34%">'
             '<col style="width:8%"><col style="width:16%"><col style="width:24%">'
-            '</colgroup>'
+            "</colgroup>"
         )
         table = (
-            '<table>' + colgroup + '<thead><tr>'
-            '<th>Provider</th><th>Model ID</th><th>Context</th><th>Tags</th><th>Limits</th>'
-            '</tr></thead><tbody>' + rows + '</tbody></table>'
+            "<table>" + colgroup + "<thead><tr>"
+            "<th>Provider</th><th>Model ID</th><th>Context</th><th>Tags</th><th>Limits</th>"
+            "</tr></thead><tbody>" + rows + "</tbody></table>"
         )
-        html += f'<div class="cross-group" data-total="{rows_count}">{header}{table}</div>'
+        html += (
+            f'<div class="cross-group" data-total="{rows_count}">{header}{table}</div>'
+        )
     return html
 
 
@@ -1343,31 +1605,35 @@ def render_changes(history, provider_color_map):
                 f'<div class="change-row added">'
                 f'<span class="change-marker">+</span>'
                 f'<span class="change-id" data-id="{escape(mid)}">{escape(mid)}</span>'
-                f'</div>'
+                f"</div>"
             )
         for mid in removed:
             rows += (
                 f'<div class="change-row removed">'
                 f'<span class="change-marker">−</span>'
                 f'<span class="change-id" data-id="{escape(mid)}">{escape(mid)}</span>'
-                f'</div>'
+                f"</div>"
             )
         summary_parts = []
         if added:
-            summary_parts.append(f'<span style="color:#22c55e">+{len(added)} added</span>')
+            summary_parts.append(
+                f'<span style="color:#22c55e">+{len(added)} added</span>'
+            )
         if removed:
-            summary_parts.append(f'<span style="color:#f87171">−{len(removed)} removed</span>')
+            summary_parts.append(
+                f'<span style="color:#f87171">−{len(removed)} removed</span>'
+            )
         summary = " · ".join(summary_parts)
         html += (
             f'<div class="change-entry">'
             f'<div class="change-entry-header">'
             f'<span class="provider-dot" style="background:{color}"></span>'
             f'<span class="provider-name">{escape(plabel)}</span>'
-            f'<time>{escape(ts_display)}</time>'
+            f"<time>{escape(ts_display)}</time>"
             f'<span class="change-summary">{summary}</span>'
-            f'</div>'
+            f"</div>"
             f'<div class="change-list">{rows}</div>'
-            f'</div>'
+            f"</div>"
         )
     return html
 
@@ -1391,9 +1657,11 @@ def _uptime_text(u):
 def render_availability(provider_list, results, availability):
     """Render the Availability view from docs/availability.json data."""
     if not availability:
-        return ('<p class="av-empty" style="text-align:center;padding:2rem">'
-                'No probe data yet. The probe workflow runs every 2h; data will '
-                'appear after the first run completes.</p>')
+        return (
+            '<p class="av-empty" style="text-align:center;padding:2rem">'
+            "No probe data yet. The probe workflow runs every 2h; data will "
+            "appear after the first run completes.</p>"
+        )
 
     # Rotate so the rightmost bar = current UTC hour (freshest possible data).
     now_hour = datetime.now(timezone.utc).hour
@@ -1412,10 +1680,11 @@ def render_availability(provider_list, results, availability):
             f'<span class="provider-dot" style="background:{p["color"]}"></span>'
             f'<span class="provider-name">{escape(p["label"])}</span>'
             f'<span class="provider-count">{len(models)} models</span>'
-            f'</div>'
+            f"</div>"
         )
 
         rows_html = ""
+
         # Order by uptime ascending (problems first), then by id.
         def sort_key(m):
             a = avail_for_provider.get(m["id"], {})
@@ -1452,7 +1721,7 @@ def render_availability(provider_list, results, availability):
                         bg = "#f59e0b"
                     else:
                         bg = "#ef4444"
-                    title = f"{h:02d}:00 UTC · {rate*100:.0f}% · {ok_n}/{tot} probes"
+                    title = f"{h:02d}:00 UTC · {rate * 100:.0f}% · {ok_n}/{tot} probes"
                 bars += f'<span class="av-bar" style="background:{bg}" title="{title}"></span>'
             heatmap = f'<span class="av-heatmap" aria-label="hourly uptime, UTC">{bars}</span>'
             meta_bits = []
@@ -1464,16 +1733,23 @@ def render_availability(provider_list, results, availability):
                 meta_bits.append(f"n={samples}")
             meta = " · ".join(meta_bits) or "no probes"
             uptime_data = "" if u7 is None else f"{u7:.4f}"
-            search_val = escape(f'{mid} {p["label"]}'.lower())
-            tag_labels = escape(" ".join(l for l, _ in get_tags(mid, m.get("context"), m.get("capabilities"))))
+            search_val = escape(f"{mid} {p['label']}".lower())
+            tag_labels = escape(
+                " ".join(
+                    label
+                    for label, _ in get_tags(
+                        mid, m.get("context"), m.get("capabilities")
+                    )
+                )
+            )
             ctx_raw = int(m.get("context") or 0)
             rows_html += (
                 f'<div class="av-row" data-uptime="{uptime_data}" '
                 f'data-search="{search_val}" data-ctx="{ctx_raw}" data-tags="{tag_labels}">'
                 f'<span class="model-id" data-id="{escape(mid)}">{escape(mid)}</span>'
-                f'{badge}{heatmap}'
+                f"{badge}{heatmap}"
                 f'<span class="av-meta">{escape(meta)}</span>'
-                f'</div>'
+                f"</div>"
             )
 
         body = f'<div class="provider-body">{rows_html}</div>'
@@ -1482,6 +1758,7 @@ def render_availability(provider_list, results, availability):
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
+
 
 def main():
     print("Fetching community cross-reference...")
@@ -1527,12 +1804,16 @@ def main():
                 else:
                     kept.append(m)
             if dropped:
-                print(f"  [{pk}] dropped {len(dropped)} models with sustained 0% uptime: "
-                      f"{', '.join(dropped[:3])}{'...' if len(dropped) > 3 else ''}")
+                print(
+                    f"  [{pk}] dropped {len(dropped)} models with sustained 0% uptime: "
+                    f"{', '.join(dropped[:3])}{'...' if len(dropped) > 3 else ''}"
+                )
                 dropped_total += len(dropped)
                 results[pk] = kept
         if dropped_total:
-            print(f"  Self-correcting layer dropped {dropped_total} broken models total")
+            print(
+                f"  Self-correcting layer dropped {dropped_total} broken models total"
+            )
     except FileNotFoundError:
         pass
     except Exception as e:
@@ -1552,10 +1833,7 @@ def main():
         pass
 
     # Build JSON output
-    json_out = {
-        "updated": datetime.now(timezone.utc).isoformat(),
-        "providers": {}
-    }
+    json_out = {"updated": datetime.now(timezone.utc).isoformat(), "providers": {}}
     for p in PROVIDERS:
         if p["key"] not in results:
             continue
@@ -1567,16 +1845,16 @@ def main():
         }
 
     old_models_path.write_text(json.dumps(json_out, indent=2, ensure_ascii=False))
-    print(f"Written docs/models.json")
+    print("Written docs/models.json")
 
     # Filtered variants under /availability/ — same shape as models.json,
     # but each provider's "models" list is restricted by 7-day probe uptime.
     # Stable: uptime_7d >= 0.95; Problems: 0 <= uptime_7d < 0.95.
     # Both require samples_7d >= 5 so we don't include unproven models.
     try:
-        avail_for_filter = json.loads(
-            (OUT_DIR / "availability.json").read_text()
-        ).get("providers", {})
+        avail_for_filter = json.loads((OUT_DIR / "availability.json").read_text()).get(
+            "providers", {}
+        )
     except Exception:
         avail_for_filter = {}
 
@@ -1600,9 +1878,11 @@ def main():
     stable = _filtered_json(lambda u: u >= 0.95)
     problems = _filtered_json(lambda u: 0.0 <= u < 0.95)
     (avail_subdir / "stable_models.json").write_text(
-        json.dumps(stable, indent=2, ensure_ascii=False))
+        json.dumps(stable, indent=2, ensure_ascii=False)
+    )
     (avail_subdir / "problems_models.json").write_text(
-        json.dumps(problems, indent=2, ensure_ascii=False))
+        json.dumps(problems, indent=2, ensure_ascii=False)
+    )
     n_stable = sum(len(p["models"]) for p in stable["providers"].values())
     n_problems = sum(len(p["models"]) for p in problems["providers"].values())
     print(f"Written docs/availability/stable_models.json ({n_stable} models)")
@@ -1633,32 +1913,39 @@ def main():
     now_iso = datetime.now(timezone.utc).isoformat()
     provider_label_map = {p["key"]: p["label"] for p in PROVIDERS}
     for pk, d in deltas_full.items():
-        history.append({
-            "timestamp": now_iso,
-            "provider": pk,
-            "provider_label": provider_label_map.get(pk, pk),
-            "added": d["added"],
-            "removed": d["removed"],
-        })
+        history.append(
+            {
+                "timestamp": now_iso,
+                "provider": pk,
+                "provider_label": provider_label_map.get(pk, pk),
+                "added": d["added"],
+                "removed": d["removed"],
+            }
+        )
     # Cap to last 500 entries
     history = history[-500:]
-    history_path.write_text(json.dumps({"entries": history}, indent=2, ensure_ascii=False))
+    history_path.write_text(
+        json.dumps({"entries": history}, indent=2, ensure_ascii=False)
+    )
 
     # Compute cross-provider model groups
     from collections import defaultdict
+
     provider_map = {p["label"]: p for p in PROVIDERS}
     groups_raw = defaultdict(list)
     for p in PROVIDERS:
         for m in results.get(p["key"], []):
             key = canonical_name(m["id"])
             if key:
-                groups_raw[key].append({
-                    "provider": p["label"],
-                    "model_id": m["id"],
-                    "context": m.get("context"),
-                    "limits": m.get("limits", ""),
-                    "capabilities": m.get("capabilities"),
-                })
+                groups_raw[key].append(
+                    {
+                        "provider": p["label"],
+                        "model_id": m["id"],
+                        "context": m.get("context"),
+                        "limits": m.get("limits", ""),
+                        "capabilities": m.get("capabilities"),
+                    }
+                )
     cross_groups = [
         (cname, entries)
         for cname, entries in sorted(groups_raw.items())
@@ -1704,19 +1991,21 @@ def main():
         changes_section=changes_html,
     )
     (OUT_DIR / "index.html").write_text(html, encoding="utf-8")
-    print(f"Written docs/index.html  ({total_models} models, {total_providers} providers, {len(cross_groups)} cross-provider groups)")
+    print(
+        f"Written docs/index.html  ({total_models} models, {total_providers} providers, {len(cross_groups)} cross-provider groups)"
+    )
 
     # Per-view entry points (so /availability, /by-model, etc. work as URLs).
     # Each is the same HTML with <base href> pointing at the site root and a
     # data-tab marker so the JS activates the right tab on initial load.
     # Availability has shareable sub-filters (/availability/problems, /stable).
     entry_points = [
-        ("by-provider",           "view-provider",     "../",    None),
-        ("by-model",              "view-model",        "../",    None),
-        ("availability",          "view-availability", "../",    None),
+        ("by-provider", "view-provider", "../", None),
+        ("by-model", "view-model", "../", None),
+        ("availability", "view-availability", "../", None),
         ("availability/problems", "view-availability", "../../", "problems"),
-        ("availability/stable",   "view-availability", "../../", "stable"),
-        ("changes",               "view-changes",      "../",    None),
+        ("availability/stable", "view-availability", "../../", "stable"),
+        ("changes", "view-changes", "../", None),
     ]
     for slug, tab, base, av in entry_points:
         sub_dir = OUT_DIR / slug
@@ -1724,10 +2013,8 @@ def main():
         body_attrs = f'data-tab="{tab}"'
         if av:
             body_attrs += f' data-av="{av}"'
-        sub_html = (
-            html
-            .replace("<head>", f'<head>\n<base href="{base}">', 1)
-            .replace("<body>", f'<body {body_attrs}>', 1)
+        sub_html = html.replace("<head>", f'<head>\n<base href="{base}">', 1).replace(
+            "<body>", f"<body {body_attrs}>", 1
         )
         (sub_dir / "index.html").write_text(sub_html, encoding="utf-8")
         # Mirror the JSON files so links resolve from any sub-path.
