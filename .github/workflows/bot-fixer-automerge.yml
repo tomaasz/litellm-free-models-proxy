@@ -32,6 +32,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
 
       - name: Identify candidate PR
         id: pr
@@ -80,6 +82,6 @@ jobs:
         run: |
           set -eu
           if [ "$IS_DRAFT" = "true" ]; then
-            gh pr ready "$PR_NUMBER"
+            gh pr ready "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
           fi
-          gh pr merge "$PR_NUMBER" --squash --auto --delete-branch
+          gh pr merge "$PR_NUMBER" --squash --auto --delete-branch --repo "$GITHUB_REPOSITORY"

@@ -267,7 +267,7 @@ def load_recent_statuses(path, lookback_runs=WATCH_LIST_FAILS, max_lines=200_000
     # We want last N for each (provider,model). Read in chronological order
     # then keep only the tail per key.
     with path.open() as f:
-        for line in deque(f, maxlen=max_lines):
+        for line in f:
             try:
                 row = json.loads(line)
             except Exception:
