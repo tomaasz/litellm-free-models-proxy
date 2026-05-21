@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-21T11:02:17.709723+00:00",
+  "updated": "2026-05-21T12:58:44.767389+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -134,6 +134,18 @@
       "url": "https://console.groq.com",
       "models": [
         {
+          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "vision"
+          ]
+        },
+        {
           "id": "llama-3.3-70b-versatile",
           "name": "llama-3.3-70b-versatile",
           "context": 131072,
@@ -148,17 +160,6 @@
           "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
-        },
-        {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
-          ]
         },
         {
           "id": "llama-3.1-8b-instant",
@@ -183,27 +184,14 @@
           ]
         },
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
-          "context": 131072,
-          "limits": "varies per model"
-        },
-        {
-          "id": "allam-2-7b",
-          "name": "allam-2-7b",
-          "context": 4096,
-          "limits": "varies per model"
-        },
-        {
-          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "name": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
-            "response_schema",
-            "vision"
+            "reasoning"
           ]
         },
         {
@@ -217,6 +205,18 @@
             "response_schema",
             "reasoning"
           ]
+        },
+        {
+          "id": "allam-2-7b",
+          "name": "allam-2-7b",
+          "context": 4096,
+          "limits": "varies per model"
+        },
+        {
+          "id": "groq/compound",
+          "name": "groq/compound",
+          "context": 131072,
+          "limits": "varies per model"
         }
       ],
       "error": null
@@ -247,6 +247,12 @@
           ]
         },
         {
+          "id": "qwen-3-235b-a22b-instruct-2507",
+          "name": "qwen-3-235b-a22b-instruct-2507",
+          "context": null,
+          "limits": "1M tokens/day"
+        },
+        {
           "id": "gpt-oss-120b",
           "name": "gpt-oss-120b",
           "context": 131072,
@@ -257,12 +263,6 @@
             "response_schema",
             "reasoning"
           ]
-        },
-        {
-          "id": "qwen-3-235b-a22b-instruct-2507",
-          "name": "qwen-3-235b-a22b-instruct-2507",
-          "context": null,
-          "limits": "1M tokens/day"
         }
       ],
       "error": null
