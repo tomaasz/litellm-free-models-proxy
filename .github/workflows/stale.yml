@@ -18,7 +18,7 @@ jobs:
     name: Stale draft PRs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
           # Only act on draft PRs — open PRs that are out for review stay alone.
           only-pr-labels: ""
