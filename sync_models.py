@@ -210,7 +210,7 @@ def fetch_openrouter(api_key):
         return free
     except Exception as e:
         log.error(f"[OpenRouter] {e}")
-        return []
+        return None
 
 
 def fetch_groq(api_key):
@@ -229,7 +229,7 @@ def fetch_groq(api_key):
         return ids
     except Exception as e:
         log.error(f"[Groq] {e}")
-        return []
+        return None
 
 
 def fetch_cerebras(api_key):
@@ -244,7 +244,7 @@ def fetch_cerebras(api_key):
         return ids
     except Exception as e:
         log.error(f"[Cerebras] {e}")
-        return []
+        return None
 
 
 def fetch_sambanova(api_key):
@@ -258,7 +258,7 @@ def fetch_sambanova(api_key):
         return ids
     except Exception as e:
         log.error(f"[SambaNova] {e}")
-        return []
+        return None
 
 
 def fetch_together(api_key):
@@ -280,7 +280,7 @@ def fetch_together(api_key):
         return free
     except Exception as e:
         log.error(f"[Together] {e}")
-        return []
+        return None
 
 
 def fetch_cohere(api_key, community_ids=None):
@@ -308,7 +308,7 @@ def fetch_cohere(api_key, community_ids=None):
         if community_ids:
             log.info(f"[Cohere] Falling back to community list ({len(community_ids)} models)")
             return list(community_ids)
-        return []
+        return None
 
 
 def fetch_gemini(api_key):
@@ -338,7 +338,7 @@ def fetch_gemini(api_key):
         return free
     except Exception as e:
         log.error(f"[Gemini] {e}")
-        return []
+        return None
 
 
 def fetch_nvidia(api_key):
@@ -357,7 +357,7 @@ def fetch_nvidia(api_key):
         return ids
     except Exception as e:
         log.error(f"[NVIDIA NIM] {e}")
-        return []
+        return None
 
 
 def fetch_huggingface(api_key):
@@ -375,7 +375,7 @@ def fetch_huggingface(api_key):
         return ids
     except Exception as e:
         log.error(f"[HuggingFace] {e}")
-        return []
+        return None
 
 
 def fetch_mistral(api_key):
@@ -400,7 +400,7 @@ def fetch_mistral(api_key):
         return ids
     except Exception as e:
         log.error(f"[Mistral] {e}")
-        return []
+        return None
 
 
 def fetch_github(api_key):
@@ -422,7 +422,7 @@ def fetch_github(api_key):
         return ids
     except Exception as e:
         log.error(f"[GitHub Models] {e}")
-        return []
+        return None
 
 
 def fetch_cloudflare(api_key):
@@ -430,7 +430,7 @@ def fetch_cloudflare(api_key):
     account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
     if not account_id:
         log.warning("[Cloudflare] CLOUDFLARE_ACCOUNT_ID not set, skipping")
-        return []
+        return None
     try:
         data = _json_get(
             f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/models/search?per_page=100",
@@ -446,7 +446,7 @@ def fetch_cloudflare(api_key):
         return ids
     except Exception as e:
         log.error(f"[Cloudflare] {e}")
-        return []
+        return None
 
 
 def fetch_pollinations(api_key):
@@ -464,7 +464,7 @@ def fetch_pollinations(api_key):
         return ids
     except Exception as e:
         log.error(f"[Pollinations] {e}")
-        return []
+        return None
 
 
 def fetch_kluster(api_key):
@@ -482,7 +482,7 @@ def fetch_kluster(api_key):
         return ids
     except Exception as e:
         log.error(f"[Kluster] {e}")
-        return []
+        return None
 
 
 def fetch_llm7(api_key):
@@ -502,7 +502,7 @@ def fetch_llm7(api_key):
         return ids
     except Exception as e:
         log.error(f"[LLM7] {e}")
-        return []
+        return None
 
 
 def fetch_zai(api_key):
@@ -681,6 +681,7 @@ PROVIDERS = [
         "name_fmt": lambda mid: f"llm7/{slug(mid)}",
         "rpm": 30,
         "api_base": "https://api.llm7.io/v1",
+        "anonymous_ok": True,
     },
     {
         "name": "Z.ai",
@@ -711,13 +712,16 @@ def sync():
 
     for provider in PROVIDERS:
         api_key = os.environ.get(provider["env_key"], "")
-        if not api_key:
+        if not api_key and not provider.get("anonymous_ok"):
             continue
 
         if provider["name"] == "Cohere":
             models = fetch_cohere(api_key, community.get("cohere"))
         else:
             models = provider["fetch"](api_key)
+
+        if models is None:
+            continue
 
         cf_account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
         api_base = (
