@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-22T14:59:08.074662+00:00",
+  "updated": "2026-05-22T16:00:54.621976+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -51,6 +51,12 @@
         {
           "id": "groq/compound",
           "name": "groq/compound",
+          "context": 131072,
+          "limits": "varies per model"
+        },
+        {
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
         }
