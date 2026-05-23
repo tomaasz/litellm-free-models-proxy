@@ -126,23 +126,6 @@ def add_model(model_name, litellm_model, api_key_env, rpm=None, api_base=None):
 
 # ── cheahjs/free-llm-api-resources cross-reference ───────────────────────────
 
-class _TableTextParser(HTMLParser):
-    """Extracts <td> text content from an HTML table."""
-    def __init__(self):
-        super().__init__()
-        self.in_td = False
-        self.cells = []
-    def handle_starttag(self, tag, attrs):
-        if tag == "td":
-            self.in_td = True
-    def handle_endtag(self, tag):
-        if tag == "td":
-            self.in_td = False
-    def handle_data(self, data):
-        if self.in_td:
-            self.cells.append(data.strip())
-
-
 def _extract_section(readme, heading):
     """Return text of a markdown/HTML section starting at ### heading."""
     pattern = rf"### \[?{re.escape(heading)}"
