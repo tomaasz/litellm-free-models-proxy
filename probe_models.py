@@ -26,10 +26,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 DOCS = ROOT / "docs"
-MODELS_JSON   = DOCS / "models.json"
-PROBES_JSONL  = DOCS / "probes.jsonl"
-AVAIL_JSON    = DOCS / "availability.json"
-ARCHIVE_DIR   = DOCS / "probes-archive"
+MODELS_JSON = DOCS / "models.json"
+PROBES_JSONL = DOCS / "probes.jsonl"
+AVAIL_JSON = DOCS / "availability.json"
+ARCHIVE_DIR = DOCS / "probes-archive"
 
 PROBE_TIMEOUT = 15
 PER_PROVIDER_CONCURRENCY = 2
@@ -145,7 +145,10 @@ PROVIDER_PROBES = {
 
 def build_request(provider, cfg, model_id, nonce):
     prompt = f"ping {nonce}"
-    headers = {"Content-Type": "application/json", "User-Agent": "litellm-free-models-proxy/probe"}
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "litellm-free-models-proxy/probe",
+    }
     key = os.environ.get(cfg["env"], "")
     if cfg["auth"] == "bearer":
         if key:
@@ -231,7 +234,13 @@ def classify(http_status, body_text, exc):
                 if "rate" in err or "quota" in err:
                     return "rate_limited"
                 return "bad_response"
-            if "choices" in data or "candidates" in data or "message" in data or "result" in data or "text" in data:
+            if (
+                "choices" in data
+                or "candidates" in data
+                or "message" in data
+                or "result" in data
+                or "text" in data
+            ):
                 return "ok"
         return "ok"
     # Other 4xx → treat as bad_response with http code preserved.
@@ -241,7 +250,9 @@ def classify(http_status, body_text, exc):
 def do_probe(url, headers, body_bytes):
     t0 = time.monotonic()
     try:
-        req = urllib.request.Request(url, data=body_bytes, headers=headers, method="POST")
+        req = urllib.request.Request(
+            url, data=body_bytes, headers=headers, method="POST"
+        )
         with urllib.request.urlopen(req, timeout=PROBE_TIMEOUT) as r:
             body = r.read().decode(errors="replace")
             return r.status, body, None, int((time.monotonic() - t0) * 1000)
@@ -257,6 +268,7 @@ def do_probe(url, headers, body_bytes):
 
 
 # ── Round-robin selection ─────────────────────────────────────────────────────
+
 
 def bucket_for(model_id):
     h = hashlib.md5(model_id.encode()).hexdigest()
@@ -276,13 +288,15 @@ def load_recent_statuses(path, lookback_runs=WATCH_LIST_FAILS, max_lines=200_000
     # We want last N for each (provider,model). Read in chronological order
     # then keep only the tail per key.
     with path.open() as f:
-        for line in f:
-            try:
-                row = json.loads(line)
-            except Exception:
-                continue
-            key = (row.get("provider"), row.get("model"))
-            recent[key].append(row.get("status"))
+        # Use deque to read only the tail end of the file before JSON deserialization
+        lines = deque(f, maxlen=max_lines)
+    for line in lines:
+        try:
+            row = json.loads(line)
+        except Exception:
+            continue
+        key = (row.get("provider"), row.get("model"))
+        recent[key].append(row.get("status"))
     # Trim each deque to lookback_runs (newest at right)
     trimmed = {}
     for k, q in recent.items():
@@ -298,6 +312,7 @@ def is_on_watch_list(recent_statuses):
 
 
 # ── Aggregation ───────────────────────────────────────────────────────────────
+
 
 def percentile(values, pct):
     if not values:
@@ -316,13 +331,19 @@ def aggregate(probes_path):
     #   samples_7d, ok_7d, rate_limited_7d, samples_30d, ok_30d
     #   latencies_7d (ok only), hourly_counts[24] = [ok, total]
     #   last_ts, last_status
-    bucket = defaultdict(lambda: {
-        "samples_7d": 0, "ok_7d": 0, "rl_7d": 0,
-        "samples_30d": 0, "ok_30d": 0,
-        "latencies": [],
-        "hourly": [[0, 0] for _ in range(24)],
-        "last_ts": None, "last_status": None,
-    })
+    bucket = defaultdict(
+        lambda: {
+            "samples_7d": 0,
+            "ok_7d": 0,
+            "rl_7d": 0,
+            "samples_30d": 0,
+            "ok_30d": 0,
+            "latencies": [],
+            "hourly": [[0, 0] for _ in range(24)],
+            "last_ts": None,
+            "last_status": None,
+        }
+    )
 
     if not probes_path.exists():
         return {}
@@ -387,6 +408,7 @@ def aggregate(probes_path):
 
 # ── Rotation ─────────────────────────────────────────────────────────────────
 
+
 def rotate_old(probes_path, keep_days=30):
     if not probes_path.exists():
         return
@@ -420,6 +442,7 @@ def rotate_old(probes_path, keep_days=30):
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
+
 
 def main():
     if not MODELS_JSON.exists():
@@ -508,7 +531,9 @@ def main():
     # Run providers in parallel; each provider has its own pool.
     threads = []
     for provider, model_ids in by_provider.items():
-        t = threading.Thread(target=run_provider, args=(provider, model_ids), daemon=True)
+        t = threading.Thread(
+            target=run_provider, args=(provider, model_ids), daemon=True
+        )
         t.start()
         threads.append(t)
     for t in threads:
@@ -521,10 +546,16 @@ def main():
 
     # Regenerate aggregate.
     avail = aggregate(PROBES_JSONL)
-    AVAIL_JSON.write_text(json.dumps({
-        "updated": datetime.now(timezone.utc).isoformat(),
-        "providers": avail,
-    }, indent=2, ensure_ascii=False))
+    AVAIL_JSON.write_text(
+        json.dumps(
+            {
+                "updated": datetime.now(timezone.utc).isoformat(),
+                "providers": avail,
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+    )
     print(f"Wrote {AVAIL_JSON.relative_to(ROOT)}")
 
 
