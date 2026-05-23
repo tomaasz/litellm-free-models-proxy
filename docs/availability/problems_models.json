@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-23T14:30:00.571493+00:00",
+  "updated": "2026-05-23T15:22:07.321360+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -49,14 +49,14 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model"
         },
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
         }
@@ -519,12 +519,6 @@
         {
           "id": "@cf/meta/llama-3-8b-instruct",
           "name": "@cf/meta/llama-3-8b-instruct",
-          "context": null,
-          "limits": "10k neurons/day"
-        },
-        {
-          "id": "@cf/moonshotai/kimi-k2.6",
-          "name": "@cf/moonshotai/kimi-k2.6",
           "context": null,
           "limits": "10k neurons/day"
         }
