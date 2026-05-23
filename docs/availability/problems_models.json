@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-23T16:18:24.332796+00:00",
+  "updated": "2026-05-23T17:20:48.645663+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -326,12 +326,6 @@
           "limits": "40 req/min"
         },
         {
-          "id": "mistralai/mistral-7b-instruct-v0.3",
-          "name": "mistralai/mistral-7b-instruct-v0.3",
-          "context": null,
-          "limits": "40 req/min"
-        },
-        {
           "id": "mistralai/mistral-large-3-675b-instruct-2512",
           "name": "mistralai/mistral-large-3-675b-instruct-2512",
           "context": null,
@@ -508,19 +502,6 @@
             "tool_choice",
             "response_schema"
           ]
-        }
-      ],
-      "error": null
-    },
-    "cloudflare": {
-      "name": "Cloudflare AI",
-      "url": "https://developers.cloudflare.com/workers-ai/",
-      "models": [
-        {
-          "id": "@cf/meta/llama-3-8b-instruct",
-          "name": "@cf/meta/llama-3-8b-instruct",
-          "context": null,
-          "limits": "10k neurons/day"
         }
       ],
       "error": null
