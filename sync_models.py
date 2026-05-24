@@ -21,7 +21,6 @@ import logging
 import urllib.request
 import urllib.error
 import json
-from html.parser import HTMLParser
 
 logging.basicConfig(
     level=logging.INFO,
