@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-24T20:18:09.496653+00:00",
+  "updated": "2026-05-24T21:16:53.756572+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -146,38 +146,15 @@
           ]
         },
         {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
-        {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
-            "response_schema",
             "reasoning"
           ]
-        },
-        {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
-          "context": 131072,
-          "limits": "varies per model"
-        },
-        {
-          "id": "groq/compound",
-          "name": "groq/compound",
-          "context": 131072,
-          "limits": "varies per model"
         },
         {
           "id": "llama-3.3-70b-versatile",
@@ -187,17 +164,6 @@
           "capabilities": [
             "function_calling",
             "tool_choice"
-          ]
-        },
-        {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
           ]
         },
         {
@@ -217,6 +183,40 @@
             "response_schema",
             "vision"
           ]
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
+          "context": 131072,
+          "limits": "varies per model"
+        },
+        {
+          "id": "groq/compound",
+          "name": "groq/compound",
+          "context": 131072,
+          "limits": "varies per model"
         }
       ],
       "error": null
@@ -225,16 +225,6 @@
       "name": "Cerebras",
       "url": "https://cloud.cerebras.ai",
       "models": [
-        {
-          "id": "llama3.1-8b",
-          "name": "llama3.1-8b",
-          "context": 128000,
-          "limits": "1M tokens/day",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
         {
           "id": "gpt-oss-120b",
           "name": "gpt-oss-120b",
@@ -248,6 +238,22 @@
           ]
         },
         {
+          "id": "qwen-3-235b-a22b-instruct-2507",
+          "name": "qwen-3-235b-a22b-instruct-2507",
+          "context": null,
+          "limits": "1M tokens/day"
+        },
+        {
+          "id": "llama3.1-8b",
+          "name": "llama3.1-8b",
+          "context": 128000,
+          "limits": "1M tokens/day",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
           "id": "zai-glm-4.7",
           "name": "zai-glm-4.7",
           "context": 128000,
@@ -257,12 +263,6 @@
             "tool_choice",
             "reasoning"
           ]
-        },
-        {
-          "id": "qwen-3-235b-a22b-instruct-2507",
-          "name": "qwen-3-235b-a22b-instruct-2507",
-          "context": null,
-          "limits": "1M tokens/day"
         }
       ],
       "error": null
