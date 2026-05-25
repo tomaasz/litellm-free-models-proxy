@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-25T13:02:15.680903+00:00",
+  "updated": "2026-05-25T14:59:55.629462+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -134,6 +134,12 @@
       "url": "https://console.groq.com",
       "models": [
         {
+          "id": "groq/compound",
+          "name": "groq/compound",
+          "context": 131072,
+          "limits": "varies per model"
+        },
+        {
           "id": "llama-3.1-8b-instant",
           "name": "llama-3.1-8b-instant",
           "context": 131072,
@@ -144,14 +150,35 @@
           ]
         },
         {
-          "id": "openai/gpt-oss-20b",
-          "name": "openai/gpt-oss-20b",
+          "id": "llama-3.3-70b-versatile",
+          "name": "llama-3.3-70b-versatile",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ]
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
             "response_schema",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
             "reasoning"
           ]
         },
@@ -168,8 +195,14 @@
           ]
         },
         {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
+          "context": 131072,
+          "limits": "varies per model"
+        },
+        {
+          "id": "openai/gpt-oss-20b",
+          "name": "openai/gpt-oss-20b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
@@ -180,42 +213,9 @@
           ]
         },
         {
-          "id": "llama-3.3-70b-versatile",
-          "name": "llama-3.3-70b-versatile",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ]
-        },
-        {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
-          ]
-        },
-        {
           "id": "allam-2-7b",
           "name": "allam-2-7b",
           "context": 4096,
-          "limits": "varies per model"
-        },
-        {
-          "id": "groq/compound",
-          "name": "groq/compound",
-          "context": 131072,
-          "limits": "varies per model"
-        },
-        {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
-          "context": 131072,
           "limits": "varies per model"
         }
       ],
@@ -225,6 +225,18 @@
       "name": "Cerebras",
       "url": "https://cloud.cerebras.ai",
       "models": [
+        {
+          "id": "gpt-oss-120b",
+          "name": "gpt-oss-120b",
+          "context": 131072,
+          "limits": "1M tokens/day",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "response_schema",
+            "reasoning"
+          ]
+        },
         {
           "id": "zai-glm-4.7",
           "name": "zai-glm-4.7",
@@ -237,6 +249,12 @@
           ]
         },
         {
+          "id": "qwen-3-235b-a22b-instruct-2507",
+          "name": "qwen-3-235b-a22b-instruct-2507",
+          "context": null,
+          "limits": "1M tokens/day"
+        },
+        {
           "id": "llama3.1-8b",
           "name": "llama3.1-8b",
           "context": 128000,
@@ -244,24 +262,6 @@
           "capabilities": [
             "function_calling",
             "tool_choice"
-          ]
-        },
-        {
-          "id": "qwen-3-235b-a22b-instruct-2507",
-          "name": "qwen-3-235b-a22b-instruct-2507",
-          "context": null,
-          "limits": "1M tokens/day"
-        },
-        {
-          "id": "gpt-oss-120b",
-          "name": "gpt-oss-120b",
-          "context": 131072,
-          "limits": "1M tokens/day",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "response_schema",
-            "reasoning"
           ]
         }
       ],
@@ -866,50 +866,20 @@
           "limits": "free credits/month"
         },
         {
-          "id": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-          "name": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+          "id": "utter-project/EuroLLM-22B-Instruct-2512",
+          "name": "utter-project/EuroLLM-22B-Instruct-2512",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "MiniMaxAI/MiniMax-M2",
-          "name": "MiniMaxAI/MiniMax-M2",
+          "id": "Qwen/Qwen2.5-72B-Instruct",
+          "name": "Qwen/Qwen2.5-72B-Instruct",
           "context": null,
           "limits": "free credits/month"
         },
         {
-          "id": "moonshotai/Kimi-K2-Instruct-0905",
-          "name": "moonshotai/Kimi-K2-Instruct-0905",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "zai-org/GLM-4.5",
-          "name": "zai-org/GLM-4.5",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "baidu/ERNIE-4.5-VL-424B-A47B-Base-PT",
-          "name": "baidu/ERNIE-4.5-VL-424B-A47B-Base-PT",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "zai-org/GLM-4.6-FP8",
-          "name": "zai-org/GLM-4.6-FP8",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "deepseek-ai/DeepSeek-V3.1",
-          "name": "deepseek-ai/DeepSeek-V3.1",
-          "context": null,
-          "limits": "free credits/month"
-        },
-        {
-          "id": "deepseek-ai/DeepSeek-V3.2-Exp",
-          "name": "deepseek-ai/DeepSeek-V3.2-Exp",
+          "id": "Qwen/Qwen3-VL-235B-A22B-Thinking",
+          "name": "Qwen/Qwen3-VL-235B-A22B-Thinking",
           "context": null,
           "limits": "free credits/month"
         }

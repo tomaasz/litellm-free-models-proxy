@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-25T13:02:15.680903+00:00",
+  "updated": "2026-05-25T14:59:55.629462+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -67,17 +67,6 @@
       "name": "Cerebras",
       "url": "https://cloud.cerebras.ai",
       "models": [
-        {
-          "id": "zai-glm-4.7",
-          "name": "zai-glm-4.7",
-          "context": 128000,
-          "limits": "1M tokens/day",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
-          ]
-        },
         {
           "id": "qwen-3-235b-a22b-instruct-2507",
           "name": "qwen-3-235b-a22b-instruct-2507",
