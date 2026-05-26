@@ -331,16 +331,22 @@ def aggregate(probes_path):
 
     with probes_path.open() as f:
         for line in f:
-            try:
-                row = json.loads(line)
-            except Exception:
+            ts_idx = line.find('"ts": "')
+            if ts_idx == -1:
                 continue
+            ts_str = line[ts_idx + 7 : line.find('"', ts_idx + 7)]
             try:
-                ts = datetime.fromisoformat(row["ts"].replace("Z", "+00:00"))
+                ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
             except Exception:
                 continue
             if ts < cutoff_30d:
                 continue
+
+            try:
+                row = json.loads(line)
+            except Exception:
+                continue
+
             key = (row.get("provider"), row.get("model"))
             b = bucket[key]
             status = row.get("status")
@@ -397,9 +403,12 @@ def rotate_old(probes_path, keep_days=30):
     archive_lines = defaultdict(list)  # "YYYY-MM" → [lines]
     with probes_path.open() as f:
         for line in f:
+            ts_idx = line.find('"ts": "')
+            if ts_idx == -1:
+                continue
+            ts_str = line[ts_idx + 7 : line.find('"', ts_idx + 7)]
             try:
-                row = json.loads(line)
-                ts = datetime.fromisoformat(row["ts"].replace("Z", "+00:00"))
+                ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
             except Exception:
                 continue
             if ts >= cutoff:
