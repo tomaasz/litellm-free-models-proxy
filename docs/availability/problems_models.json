@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-26T01:35:17.928259+00:00",
+  "updated": "2026-05-26T03:01:43.444413+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -49,14 +49,14 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model"
         },
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
         }
@@ -215,6 +215,17 @@
           "name": "gemma-3-12b-it",
           "context": 131072,
           "limits": "free tier"
+        },
+        {
+          "id": "gpt-oss-120b",
+          "name": "gpt-oss-120b",
+          "context": 131072,
+          "limits": "free tier",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "reasoning"
+          ]
         }
       ],
       "error": null
@@ -502,12 +513,6 @@
           "id": "minimax",
           "name": "minimax",
           "context": 200000,
-          "limits": "free tier — token from enter.pollinations.ai"
-        },
-        {
-          "id": "qwen-large",
-          "name": "qwen-large",
-          "context": 1048576,
           "limits": "free tier — token from enter.pollinations.ai"
         }
       ],
