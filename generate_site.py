@@ -897,10 +897,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </header>
 
 <nav class="view-tabs" role="tablist">
-  <button class="vtab active" data-target="view-provider">By Provider</button>
-  <button class="vtab" data-target="view-model">By Model</button>
-  <button class="vtab" data-target="view-availability">Availability</button>
-  <button class="vtab" data-target="view-changes">Changes</button>
+  <button class="vtab active" data-target="view-provider" role="tab" aria-selected="true" aria-controls="view-provider">By Provider</button>
+  <button class="vtab" data-target="view-model" role="tab" aria-selected="false" aria-controls="view-model">By Model</button>
+  <button class="vtab" data-target="view-availability" role="tab" aria-selected="false" aria-controls="view-availability">Availability</button>
+  <button class="vtab" data-target="view-changes" role="tab" aria-selected="false" aria-controls="view-changes">Changes</button>
 </nav>
 
 <div class="layout" id="layout">
@@ -942,17 +942,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </aside>
 
   <main>
-    <div id="view-provider">
+    <div id="view-provider" role="tabpanel">
       {provider_sections}
       <p class="no-results" id="no-results">No models match your search.</p>
     </div>
-    <div id="view-model" style="display:none">
+    <div id="view-model" style="display:none" role="tabpanel">
       {cross_provider_section}
     </div>
-    <div id="view-availability" style="display:none">
+    <div id="view-availability" style="display:none" role="tabpanel">
       {availability_section}
     </div>
-    <div id="view-changes" style="display:none">
+    <div id="view-changes" style="display:none" role="tabpanel">
       {changes_section}
     </div>
     <div class="suggest-card">
@@ -1064,7 +1064,11 @@ const TAB_TO_SLUG = {{
 const SLUG_TO_TAB = Object.fromEntries(Object.entries(TAB_TO_SLUG).map(([k,v]) => [v,k]));
 
 function applyTab(t) {{
-  document.querySelectorAll('.vtab').forEach(b => b.classList.toggle('active', b.dataset.target === t));
+  document.querySelectorAll('.vtab').forEach(b => {{
+    const isActive = b.dataset.target === t;
+    b.classList.toggle('active', isActive);
+    b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  }});
   ['view-provider','view-model','view-availability','view-changes'].forEach(id => {{
     document.getElementById(id).style.display = id === t ? '' : 'none';
   }});
