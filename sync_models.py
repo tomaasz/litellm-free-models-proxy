@@ -21,6 +21,7 @@ import logging
 import urllib.request
 import urllib.error
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logging.basicConfig(
     level=logging.INFO,
@@ -57,7 +58,7 @@ def _json_get(url, headers=None, timeout=20):
     return json.loads(_http_get(url, headers, timeout))
 
 
-def _post_litellm(path, payload):
+def _post_litellm(path, payload, max_retries=3):
     data = json.dumps(payload).encode()
     req = urllib.request.Request(
         f"{LITELLM_BASE}{path}",
@@ -68,8 +69,14 @@ def _post_litellm(path, payload):
         },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=15) as r:
-        return json.loads(r.read().decode())
+    for attempt in range(max_retries):
+        try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return json.loads(r.read().decode())
+        except urllib.error.URLError:
+            if attempt == max_retries - 1:
+                raise
+            time.sleep(2 ** attempt)
 
 
 def _get_litellm(path):
@@ -692,6 +699,9 @@ def sync():
 
     added = skipped = errors = deleted = 0
 
+    to_delete = []
+    to_add = []
+
     for provider in PROVIDERS:
         api_key = os.environ.get(provider["env_key"], "")
         if not api_key and not provider.get("anonymous_ok"):
@@ -718,11 +728,7 @@ def sync():
             current = {provider["litellm_fmt"](mid) for mid in models}
             for model_str, info in list(existing.items()):
                 if info["api_key"] == expected_key and model_str not in current:
-                    log.info(f"  - Removing stale: {model_str}")
-                    if delete_model(info["id"]):
-                        del existing[model_str]
-                        existing_set.discard(model_str)
-                        deleted += 1
+                    to_delete.append((model_str, info["id"]))
 
         for mid in models:
             litellm_model = provider["litellm_fmt"](mid)
@@ -731,16 +737,46 @@ def sync():
                 continue
 
             model_name = provider["name_fmt"](mid)
-            ok = add_model(
-                model_name=model_name,
-                litellm_model=litellm_model,
-                api_key_env=provider["env_key"],
-                rpm=provider["rpm"],
-                api_base=api_base,
-            )
-            if ok:
-                log.info(f"  + {model_name}  ({litellm_model})")
-                existing_set.add(litellm_model)
+            to_add.append((
+                model_name,
+                litellm_model,
+                provider["env_key"],
+                provider["rpm"],
+                api_base
+            ))
+
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        # Submit delete tasks
+        delete_futures = {
+            executor.submit(delete_model, info_id): model_str
+            for model_str, info_id in to_delete
+        }
+        # Submit add tasks
+        add_futures = {
+            executor.submit(
+                add_model,
+                model_name=m_name,
+                litellm_model=l_model,
+                api_key_env=env_k,
+                rpm=rpm,
+                api_base=base
+            ): (m_name, l_model)
+            for m_name, l_model, env_k, rpm, base in to_add
+        }
+
+        for future in as_completed(delete_futures):
+            model_str = delete_futures[future]
+            log.info(f"  - Removing stale: {model_str}")
+            if future.result():
+                del existing[model_str]
+                existing_set.discard(model_str)
+                deleted += 1
+
+        for future in as_completed(add_futures):
+            m_name, l_model = add_futures[future]
+            if future.result():
+                log.info(f"  + {m_name}  ({l_model})")
+                existing_set.add(l_model)
                 added += 1
             else:
                 errors += 1
