@@ -1512,17 +1512,23 @@ def main():
             results[p["key"]] = []
             print(f"ERROR: {e}")
 
+    # Cache availability.json for use in self-correcting, filtered, and view rendering.
+    avail_path = OUT_DIR / "availability.json"
+    avail_providers = {}
+    try:
+        avail_providers = json.loads(avail_path.read_text()).get("providers", {})
+    except Exception:
+        pass
+
     # Self-correcting layer: drop models that probe data confirms are broken.
     # A model is dropped when uptime_7d == 0 with samples_7d >= MIN_SAMPLES.
     # Once probes start succeeding again (e.g. provider restores credit), the
     # rolling 7d window will lift the model back onto the list.
     DROP_MIN_SAMPLES = 5
-    avail_path = OUT_DIR / "availability.json"
     try:
-        avail = json.loads(avail_path.read_text())
         dropped_total = 0
         for pk, models in list(results.items()):
-            prov_avail = avail.get("providers", {}).get(pk, {})
+            prov_avail = avail_providers.get(pk, {})
             kept = []
             dropped = []
             for m in models:
@@ -1540,8 +1546,6 @@ def main():
                 results[pk] = kept
         if dropped_total:
             print(f"  Self-correcting layer dropped {dropped_total} broken models total")
-    except FileNotFoundError:
-        pass
     except Exception as e:
         print(f"  Self-correcting layer skipped: {e}")
 
@@ -1580,12 +1584,7 @@ def main():
     # but each provider's "models" list is restricted by 7-day probe uptime.
     # Stable: uptime_7d >= 0.95; Problems: 0 <= uptime_7d < 0.95.
     # Both require samples_7d >= 5 so we don't include unproven models.
-    try:
-        avail_for_filter = json.loads(
-            (OUT_DIR / "availability.json").read_text()
-        ).get("providers", {})
-    except Exception:
-        avail_for_filter = {}
+    avail_for_filter = avail_providers
 
     def _filtered_json(predicate):
         out = {"updated": json_out["updated"], "providers": {}}
@@ -1693,12 +1692,7 @@ def main():
     provider_color_map = {p["key"]: p["color"] for p in PROVIDERS}
     changes_html = render_changes(history, provider_color_map)
 
-    availability = {}
-    avail_path = OUT_DIR / "availability.json"
-    try:
-        availability = json.loads(avail_path.read_text()).get("providers", {})
-    except Exception:
-        pass
+    availability = avail_providers
     availability_html = render_availability(PROVIDERS, results, availability)
 
     html = HTML_TEMPLATE.format(
