@@ -21,6 +21,7 @@ import logging
 import urllib.request
 import urllib.error
 import json
+import concurrent.futures
 
 logging.basicConfig(
     level=logging.INFO,
@@ -68,8 +69,15 @@ def _post_litellm(path, payload):
         },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=15) as r:
-        return json.loads(r.read().decode())
+    max_retries = 4
+    for attempt in range(max_retries):
+        try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return json.loads(r.read().decode())
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise e
+            time.sleep(2 ** attempt)
 
 
 def _get_litellm(path):
@@ -691,6 +699,8 @@ def sync():
     log.info(f"Currently {len(existing_set)} litellm model entries registered")
 
     added = skipped = errors = deleted = 0
+    to_delete = []
+    to_add = []
 
     for provider in PROVIDERS:
         api_key = os.environ.get(provider["env_key"], "")
@@ -718,11 +728,8 @@ def sync():
             current = {provider["litellm_fmt"](mid) for mid in models}
             for model_str, info in list(existing.items()):
                 if info["api_key"] == expected_key and model_str not in current:
-                    log.info(f"  - Removing stale: {model_str}")
-                    if delete_model(info["id"]):
-                        del existing[model_str]
-                        existing_set.discard(model_str)
-                        deleted += 1
+                    to_delete.append((model_str, info["id"]))
+                    existing_set.discard(model_str)
 
         for mid in models:
             litellm_model = provider["litellm_fmt"](mid)
@@ -731,18 +738,51 @@ def sync():
                 continue
 
             model_name = provider["name_fmt"](mid)
-            ok = add_model(
-                model_name=model_name,
-                litellm_model=litellm_model,
-                api_key_env=provider["env_key"],
-                rpm=provider["rpm"],
-                api_base=api_base,
-            )
-            if ok:
-                log.info(f"  + {model_name}  ({litellm_model})")
-                existing_set.add(litellm_model)
-                added += 1
-            else:
+            to_add.append({
+                "model_name": model_name,
+                "litellm_model": litellm_model,
+                "api_key_env": provider["env_key"],
+                "rpm": provider["rpm"],
+                "api_base": api_base,
+            })
+            existing_set.add(litellm_model)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        future_to_delete = {executor.submit(delete_model, model_id): model_str for model_str, model_id in to_delete}
+        for future in concurrent.futures.as_completed(future_to_delete):
+            model_str = future_to_delete[future]
+            try:
+                ok = future.result()
+                if ok:
+                    log.info(f"  - Removed stale: {model_str}")
+                    deleted += 1
+                else:
+                    errors += 1
+            except Exception as e:
+                log.error(f"Error removing {model_str}: {e}")
+                errors += 1
+
+        future_to_add = {
+            executor.submit(
+                add_model,
+                model_name=item["model_name"],
+                litellm_model=item["litellm_model"],
+                api_key_env=item["api_key_env"],
+                rpm=item["rpm"],
+                api_base=item["api_base"],
+            ): item for item in to_add
+        }
+        for future in concurrent.futures.as_completed(future_to_add):
+            item = future_to_add[future]
+            try:
+                ok = future.result()
+                if ok:
+                    log.info(f"  + {item['model_name']}  ({item['litellm_model']})")
+                    added += 1
+                else:
+                    errors += 1
+            except Exception as e:
+                log.error(f"Error adding {item['model_name']} ({item['litellm_model']}): {e}")
                 errors += 1
 
     log.info(
