@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-28T13:05:15.552898+00:00",
+  "updated": "2026-05-28T15:03:58.641161+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -261,6 +261,12 @@
         {
           "id": "meta/llama-3.3-70b-instruct",
           "name": "meta/llama-3.3-70b-instruct",
+          "context": null,
+          "limits": "40 req/min"
+        },
+        {
+          "id": "meta/llama-4-maverick-17b-128e-instruct",
+          "name": "meta/llama-4-maverick-17b-128e-instruct",
           "context": null,
           "limits": "40 req/min"
         },
