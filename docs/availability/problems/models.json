@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-28T18:48:27.883295+00:00",
+  "updated": "2026-05-28T19:47:36.669709+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -134,14 +134,14 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model"
         },
         {
-          "id": "openai/gpt-oss-20b",
-          "name": "openai/gpt-oss-20b",
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
@@ -152,19 +152,8 @@
           ]
         },
         {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
-          ]
-        },
-        {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
+          "id": "openai/gpt-oss-20b",
+          "name": "openai/gpt-oss-20b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
@@ -187,8 +176,19 @@
           ]
         },
         {
-          "id": "llama-3.3-70b-versatile",
-          "name": "llama-3.3-70b-versatile",
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "llama-3.1-8b-instant",
+          "name": "llama-3.1-8b-instant",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
@@ -197,8 +197,8 @@
           ]
         },
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model"
         },
@@ -209,8 +209,8 @@
           "limits": "varies per model"
         },
         {
-          "id": "llama-3.1-8b-instant",
-          "name": "llama-3.1-8b-instant",
+          "id": "llama-3.3-70b-versatile",
+          "name": "llama-3.3-70b-versatile",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
@@ -226,17 +226,6 @@
       "url": "https://cloud.cerebras.ai",
       "models": [
         {
-          "id": "zai-glm-4.7",
-          "name": "zai-glm-4.7",
-          "context": 128000,
-          "limits": "1M tokens/day",
-          "capabilities": [
-            "function_calling",
-            "tool_choice",
-            "reasoning"
-          ]
-        },
-        {
           "id": "gpt-oss-120b",
           "name": "gpt-oss-120b",
           "context": 131072,
@@ -245,6 +234,17 @@
             "function_calling",
             "tool_choice",
             "response_schema",
+            "reasoning"
+          ]
+        },
+        {
+          "id": "zai-glm-4.7",
+          "name": "zai-glm-4.7",
+          "context": 128000,
+          "limits": "1M tokens/day",
+          "capabilities": [
+            "function_calling",
+            "tool_choice",
             "reasoning"
           ]
         }
@@ -491,6 +491,18 @@
         {
           "id": "deepseek-ai/deepseek-v4-pro",
           "name": "deepseek-ai/deepseek-v4-pro",
+          "context": null,
+          "limits": "40 req/min"
+        },
+        {
+          "id": "google/gemma-3-12b-it",
+          "name": "google/gemma-3-12b-it",
+          "context": null,
+          "limits": "40 req/min"
+        },
+        {
+          "id": "google/gemma-3-4b-it",
+          "name": "google/gemma-3-4b-it",
           "context": null,
           "limits": "40 req/min"
         },
