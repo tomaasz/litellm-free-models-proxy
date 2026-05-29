@@ -48,9 +48,30 @@ CHEAHJS_README_URL = (
 _HEADERS = {"User-Agent": "litellm-free-models-proxy/1.0"}
 
 
+class SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new_req = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new_req is not None:
+            old_host = req.host
+            new_host = new_req.host
+            if old_host != new_host:
+                for header in ["Authorization", "x-goog-api-key"]:
+                    if header.title() in new_req.unredirected_hdrs:
+                        del new_req.unredirected_hdrs[header.title()]
+                    if header in new_req.unredirected_hdrs:
+                        del new_req.unredirected_hdrs[header]
+                    for k in list(new_req.headers.keys()):
+                        if k.lower() == header.lower():
+                            del new_req.headers[k]
+        return new_req
+
+
+_opener = urllib.request.build_opener(SafeRedirectHandler())
+
+
 def _http_get(url, headers=None, timeout=20):
     req = urllib.request.Request(url, headers={**_HEADERS, **(headers or {})})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    with _opener.open(req, timeout=timeout) as r:
         return r.read().decode()
 
 
@@ -72,7 +93,7 @@ def _post_litellm(path, payload):
     max_retries = 4
     for attempt in range(max_retries):
         try:
-            with urllib.request.urlopen(req, timeout=15) as r:
+            with _opener.open(req, timeout=15) as r:
                 return json.loads(r.read().decode())
         except Exception as e:
             if attempt == max_retries - 1:

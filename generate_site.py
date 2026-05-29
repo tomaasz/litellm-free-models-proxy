@@ -52,10 +52,31 @@ def parse_params_b(model_id, name=""):
 _HEADERS = {"User-Agent": "litellm-free-models-proxy/1.0"}
 
 
+class SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new_req = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new_req is not None:
+            old_host = req.host
+            new_host = new_req.host
+            if old_host != new_host:
+                for header in ["Authorization", "x-goog-api-key"]:
+                    if header.title() in new_req.unredirected_hdrs:
+                        del new_req.unredirected_hdrs[header.title()]
+                    if header in new_req.unredirected_hdrs:
+                        del new_req.unredirected_hdrs[header]
+                    for k in list(new_req.headers.keys()):
+                        if k.lower() == header.lower():
+                            del new_req.headers[k]
+        return new_req
+
+
+_opener = urllib.request.build_opener(SafeRedirectHandler())
+
+
 def _get(url, headers=None, timeout=20):
     req = urllib.request.Request(url, headers={**_HEADERS, **(headers or {})})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with _opener.open(req, timeout=timeout) as r:
             body = r.read().decode()
             ct = r.headers.get_content_type() or ""
             return json.loads(body) if "json" in ct or body.lstrip().startswith("{") or body.lstrip().startswith("[") else body
