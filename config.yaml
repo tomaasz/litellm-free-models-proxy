@@ -1,7 +1,7 @@
 model_list:
 - model_name: smart
   litellm_params:
-    model: cerebras/qwen-3-235b-a22b-instruct-2507
+    model: cerebras/zai-glm-4.7
     api_key: os.environ/CEREBRAS_API_KEY
     rpm: 30
 - model_name: smart
@@ -76,7 +76,7 @@ model_list:
     rpm: 20
 - model_name: fast
   litellm_params:
-    model: cerebras/llama3.1-8b
+    model: cerebras/gpt-oss-120b
     api_key: os.environ/CEREBRAS_API_KEY
     rpm: 30
 - model_name: fast
@@ -116,7 +116,7 @@ model_list:
     rpm: 20
 - model_name: reasoning
   litellm_params:
-    model: cerebras/qwen-3-235b-a22b-instruct-2507
+    model: cerebras/zai-glm-4.7
     api_key: os.environ/CEREBRAS_API_KEY
     rpm: 30
 - model_name: reasoning
@@ -176,7 +176,7 @@ model_list:
     rpm: 30
 - model_name: coder
   litellm_params:
-    model: cerebras/qwen-3-235b-a22b-instruct-2507
+    model: cerebras/zai-glm-4.7
     api_key: os.environ/CEREBRAS_API_KEY
     rpm: 30
 - model_name: coder
@@ -281,7 +281,7 @@ model_list:
     rpm: 20
 - model_name: cerebras/qwen-235b
   litellm_params:
-    model: cerebras/qwen-3-235b-a22b-instruct-2507
+    model: cerebras/zai-glm-4.7
     api_key: os.environ/CEREBRAS_API_KEY
 - model_name: groq/llama-3.3-70b
   litellm_params:
