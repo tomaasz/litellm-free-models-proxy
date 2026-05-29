@@ -24,6 +24,25 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+class SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new_req = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new_req is not None:
+            old_host = req.host
+            new_host = new_req.host
+            if old_host != new_host:
+                for header in ["Authorization", "x-goog-api-key"]:
+                    if header.title() in new_req.unredirected_hdrs:
+                        del new_req.unredirected_hdrs[header.title()]
+                    if header in new_req.unredirected_hdrs:
+                        del new_req.unredirected_hdrs[header]
+                    for k in list(new_req.headers.keys()):
+                        if k.lower() == header.lower():
+                            del new_req.headers[k]
+        return new_req
+
+_opener = urllib.request.build_opener(SafeRedirectHandler())
+
 ROOT = Path(__file__).parent
 DOCS = ROOT / "docs"
 MODELS_JSON   = DOCS / "models.json"
@@ -242,7 +261,7 @@ def do_probe(url, headers, body_bytes):
     t0 = time.monotonic()
     try:
         req = urllib.request.Request(url, data=body_bytes, headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=PROBE_TIMEOUT) as r:
+        with _opener.open(req, timeout=PROBE_TIMEOUT) as r:
             body = r.read().decode(errors="replace")
             return r.status, body, None, int((time.monotonic() - t0) * 1000)
     except urllib.error.HTTPError as e:
