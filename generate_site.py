@@ -22,6 +22,36 @@ CHEAHJS_URL = (
 )
 
 
+# ── Model metadata ──────────────────────────────────────────────────────────
+
+_MOE_RE = re.compile(r"(\d+)\s*x\s*(\d+(?:\.\d+)?)\s*b\b")
+_PARAMS_RE = re.compile(r"(?<![\d.\w])(\d+(?:\.\d+)?)\s*b\b")
+
+
+def parse_params_b(model_id, name=""):
+    """Best-effort parameter count in billions, parsed from the model id/name.
+
+    Heuristic — there is no params field in any provider API, so we read it
+    from the name (e.g. ``llama-3.3-70b`` → 70, ``gpt-oss-120b`` → 120). For
+    MoE names we take the largest number-of-billions present: ``8x7b`` → 56
+    (total), ``qwen3-235b-a22b`` → 235 (total), ``30b-a3b`` → 30 (total).
+    Returns ``None`` when the name carries no size (e.g. ``gemini-flash``,
+    ``zai-glm-4.7``) — honest "unknown" rather than a guess.
+
+    Consumers use this only as a rough strength proxy for ordering fallback
+    chains "strongest-first"; it is intentionally not authoritative.
+    """
+    text = f"{model_id} {name}".lower()
+    best = None
+    for m in _MOE_RE.finditer(text):
+        best = max(best or 0.0, int(m.group(1)) * float(m.group(2)))
+    for m in _PARAMS_RE.finditer(text):
+        val = float(m.group(1))
+        if 0.3 <= val <= 2000:  # ignore version-ish noise / absurd values
+            best = max(best or 0.0, val)
+    return best
+
+
 # ── HTTP ──────────────────────────────────────────────────────────────────────
 
 _HEADERS = {"User-Agent": "litellm-free-models-proxy/1.0"}
@@ -1576,6 +1606,14 @@ def main():
             "models": results[p["key"]],
             "error": str(errors[p["key"]]) if p["key"] in errors else None,
         }
+
+    # Enrich every model with a best-effort parameter count (billions) parsed
+    # from its name — a rough strength signal so consumers can order fallback
+    # chains strongest-first. Flows into models.json + the stable/problems
+    # variants (which keep the model dicts intact). None when unknown.
+    for pdata in json_out["providers"].values():
+        for m in pdata["models"]:
+            m["params_b"] = parse_params_b(m.get("id", ""), m.get("name", ""))
 
     old_models_path.write_text(json.dumps(json_out, indent=2, ensure_ascii=False))
     print("Written docs/models.json")
