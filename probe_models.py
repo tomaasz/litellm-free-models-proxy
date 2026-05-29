@@ -194,8 +194,8 @@ def build_request(provider, cfg, model_id, nonce):
 
 
 def classify(http_status, body_text, exc):
-    """Return one of: ok, rate_limited, auth_error, not_found, server_error,
-    timeout, bad_response, network_error."""
+    """Return one of: ok, rate_limited, quota_exhausted, auth_error, not_found,
+    server_error, timeout, bad_response, network_error."""
     if exc is not None:
         msg = str(exc).lower()
         if "timed out" in msg or "timeout" in msg:
@@ -205,6 +205,11 @@ def classify(http_status, body_text, exc):
         return "network_error"
     if http_status == 429:
         return "rate_limited"
+    if http_status == 402:
+        # Payment Required — free credits/tokens exhausted (e.g. HuggingFace,
+        # Together free tier). Distinct from auth_error: the key is valid, the
+        # balance is not. Actionable as "top up / wait for reset", not "fix key".
+        return "quota_exhausted"
     if http_status in (401, 403):
         return "auth_error"
     if http_status == 404:
@@ -323,6 +328,7 @@ def aggregate(probes_path):
         "samples_30d": 0, "ok_30d": 0,
         "latencies": [],
         "hourly": [[0, 0] for _ in range(24)],
+        "reasons_7d": defaultdict(int),  # non-ok status → count (7d)
         "last_ts": None, "last_status": None,
     })
 
@@ -361,6 +367,8 @@ def aggregate(probes_path):
                         b["latencies"].append(row["latency_ms"])
                 if status == "rate_limited":
                     b["rl_7d"] += 1
+                if status and status != "ok":
+                    b["reasons_7d"][status] += 1
                 hour = ts.hour
                 b["hourly"][hour][1] += 1
                 if status == "ok":
@@ -378,10 +386,18 @@ def aggregate(probes_path):
         hourly = []
         for ok_n, tot in b["hourly"]:
             hourly.append({"ok": ok_n, "total": tot})
+        # Dominant failure cause in the 7d window — lets consumers tell apart
+        # "wrong API key" (auth_error, fixable) from "model retired" (not_found,
+        # prunable) from "credits exhausted" (quota_exhausted) from transient
+        # downtime. None when the model had no non-ok probe in 7d.
+        down_reason_7d = (
+            max(b["reasons_7d"], key=b["reasons_7d"].get) if b["reasons_7d"] else None
+        )
         out[provider][model] = {
             "uptime_7d": round(uptime_7d, 4) if uptime_7d is not None else None,
             "uptime_30d": round(uptime_30d, 4) if uptime_30d is not None else None,
             "rate_limited_7d": b["rl_7d"],
+            "down_reason_7d": down_reason_7d,
             "samples_7d": b["samples_7d"],
             "samples_30d": b["samples_30d"],
             "p50_latency_ms": percentile(b["latencies"], 50),
