@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-30T15:24:20.393001+00:00",
+  "updated": "2026-05-30T16:19:33.328065+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -125,16 +125,28 @@
           "params_b": 7.0
         },
         {
-          "id": "qwen/qwen3-32b",
-          "name": "qwen/qwen3-32b",
+          "id": "llama-3.3-70b-versatile",
+          "name": "llama-3.3-70b-versatile",
+          "context": 131072,
+          "limits": "varies per model",
+          "capabilities": [
+            "function_calling",
+            "tool_choice"
+          ],
+          "params_b": 70.0
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "openai/gpt-oss-120b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
+            "response_schema",
             "reasoning"
           ],
-          "params_b": 32.0
+          "params_b": 120.0
         },
         {
           "id": "llama-3.1-8b-instant",
@@ -174,28 +186,16 @@
           "params_b": 17.0
         },
         {
-          "id": "openai/gpt-oss-120b",
-          "name": "openai/gpt-oss-120b",
+          "id": "qwen/qwen3-32b",
+          "name": "qwen/qwen3-32b",
           "context": 131072,
           "limits": "varies per model",
           "capabilities": [
             "function_calling",
             "tool_choice",
-            "response_schema",
             "reasoning"
           ],
-          "params_b": 120.0
-        },
-        {
-          "id": "llama-3.3-70b-versatile",
-          "name": "llama-3.3-70b-versatile",
-          "context": 131072,
-          "limits": "varies per model",
-          "capabilities": [
-            "function_calling",
-            "tool_choice"
-          ],
-          "params_b": 70.0
+          "params_b": 32.0
         }
       ],
       "error": null
