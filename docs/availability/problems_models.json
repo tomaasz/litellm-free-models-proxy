@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-31T00:25:55.207415+00:00",
+  "updated": "2026-05-31T07:13:10.465035+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -16,13 +16,6 @@
           "id": "moonshotai/kimi-k2.6:free",
           "name": "MoonshotAI: Kimi K2.6 (free)",
           "context": 262144,
-          "limits": "20 req/min · 50 req/day",
-          "params_b": null
-        },
-        {
-          "id": "minimax/minimax-m2.5:free",
-          "name": "MiniMax: MiniMax M2.5 (free)",
-          "context": 204800,
           "limits": "20 req/min · 50 req/day",
           "params_b": null
         },
@@ -377,6 +370,13 @@
           "params_b": null
         },
         {
+          "id": "nvidia/llama-3.1-nemotron-nano-8b-v1",
+          "name": "nvidia/llama-3.1-nemotron-nano-8b-v1",
+          "context": null,
+          "limits": "40 req/min",
+          "params_b": 8.0
+        },
+        {
           "id": "nvidia/llama-3.3-nemotron-super-49b-v1",
           "name": "nvidia/llama-3.3-nemotron-super-49b-v1",
           "context": null,
@@ -465,6 +465,13 @@
       "name": "Pollinations",
       "url": "https://pollinations.ai",
       "models": [
+        {
+          "id": "deepseek-pro",
+          "name": "deepseek-pro",
+          "context": 1048576,
+          "limits": "free tier — token from enter.pollinations.ai",
+          "params_b": null
+        },
         {
           "id": "grok-4.3",
           "name": "grok-4.3",
