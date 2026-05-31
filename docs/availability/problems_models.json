@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-30T23:19:18.866854+00:00",
+  "updated": "2026-05-31T00:25:55.207415+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -48,15 +48,15 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model",
           "params_b": null
         },
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model",
           "params_b": null
@@ -223,6 +223,13 @@
           "context": 131072,
           "limits": "free tier",
           "params_b": 12.0
+        },
+        {
+          "id": "gemma-4-31B-it",
+          "name": "gemma-4-31B-it",
+          "context": 131072,
+          "limits": "free tier",
+          "params_b": 31.0
         },
         {
           "id": "gpt-oss-120b",
