@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-31T19:28:06.918106+00:00",
+  "updated": "2026-05-31T20:22:22.450663+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -430,6 +430,27 @@
           "name": "z-ai/glm-5.1",
           "context": null,
           "limits": "40 req/min",
+          "params_b": null
+        }
+      ],
+      "error": null
+    },
+    "mistral": {
+      "name": "Mistral",
+      "url": "https://console.mistral.ai",
+      "models": [
+        {
+          "id": "voxtral-mini-latest",
+          "name": "voxtral-mini-2602",
+          "context": null,
+          "limits": "1 req/s · 1B tok/month",
+          "params_b": null
+        },
+        {
+          "id": "voxtral-mini-latest",
+          "name": "voxtral-mini-2602",
+          "context": null,
+          "limits": "1 req/s · 1B tok/month",
           "params_b": null
         }
       ],
