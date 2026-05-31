@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-31T08:59:18.681766+00:00",
+  "updated": "2026-05-31T09:57:37.016017+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -41,15 +41,15 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model",
           "params_b": null
         },
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model",
           "params_b": null
@@ -506,13 +506,6 @@
           "context": 240000,
           "limits": "anonymous · 30 req/min with token",
           "params_b": null
-        },
-        {
-          "id": "gpt-oss-20b",
-          "name": "gpt-oss-20b",
-          "context": null,
-          "limits": "anonymous · 30 req/min with token",
-          "params_b": 20.0
         },
         {
           "id": "codestral-latest",
