@@ -218,7 +218,7 @@ def fetch_community_free_models():
 # ── Provider fetchers ──────────────────────────────────────────────────────────
 
 
-def fetch_openrouter(api_key):
+def fetch_openrouter(api_key, community_ids=None):
     """Free models: pricing.prompt == '0' AND pricing.completion == '0'."""
     try:
         data = _json_get(
@@ -231,10 +231,17 @@ def fetch_openrouter(api_key):
             if str(m.get("pricing", {}).get("prompt", "1")) == "0"
             and str(m.get("pricing", {}).get("completion", "1")) == "0"
         ]
+        if community_ids:
+            free = list(set(free) | set(community_ids))
         log.info(f"[OpenRouter] {len(free)} free models from API")
         return free
     except Exception as e:
         log.error(f"[OpenRouter] {e}")
+        if community_ids:
+            log.info(
+                f"[OpenRouter] Falling back to community list ({len(community_ids)} models)"
+            )
+            return list(community_ids)
         return None
 
 
@@ -598,7 +605,7 @@ PROVIDERS = [
     {
         "name": "OpenRouter",
         "env_key": "OPENROUTER_API_KEY",
-        "fetch": fetch_openrouter,
+        "fetch": None,  # handled specially with community data
         "litellm_fmt": lambda mid: f"openrouter/{mid}",
         "name_fmt": lambda mid: f"or/{slug(mid)}",
         "rpm": 20,
@@ -768,6 +775,8 @@ def sync():
 
         if provider["name"] == "Cohere":
             models = fetch_cohere(api_key, community.get("cohere"))
+        elif provider["name"] == "OpenRouter":
+            models = fetch_openrouter(api_key, community.get("openrouter"))
         else:
             models = provider["fetch"](api_key)
 
