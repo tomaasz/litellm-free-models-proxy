@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-01T00:26:22.661573+00:00",
+  "updated": "2026-06-01T01:43:20.924803+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -34,15 +34,15 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model",
           "params_b": null
         },
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model",
           "params_b": null
@@ -431,6 +431,20 @@
           "context": null,
           "limits": "40 req/min",
           "params_b": null
+        }
+      ],
+      "error": null
+    },
+    "huggingface": {
+      "name": "HuggingFace",
+      "url": "https://huggingface.co",
+      "models": [
+        {
+          "id": "Qwen/Qwen3-235B-A22B-Thinking-2507",
+          "name": "Qwen/Qwen3-235B-A22B-Thinking-2507",
+          "context": null,
+          "limits": "free credits/month",
+          "params_b": 235.0
         }
       ],
       "error": null
