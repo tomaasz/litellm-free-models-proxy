@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-01T05:33:46.217153+00:00",
+  "updated": "2026-06-01T07:37:32.806697+00:00",
   "providers": {
     "openrouter": {
       "name": "OpenRouter",
@@ -34,15 +34,15 @@
       "url": "https://console.groq.com",
       "models": [
         {
-          "id": "groq/compound",
-          "name": "groq/compound",
+          "id": "groq/compound-mini",
+          "name": "groq/compound-mini",
           "context": 131072,
           "limits": "varies per model",
           "params_b": null
         },
         {
-          "id": "groq/compound-mini",
-          "name": "groq/compound-mini",
+          "id": "groq/compound",
+          "name": "groq/compound",
           "context": 131072,
           "limits": "varies per model",
           "params_b": null
@@ -279,6 +279,13 @@
           "params_b": 70.0
         },
         {
+          "id": "meta/llama-3.2-11b-vision-instruct",
+          "name": "meta/llama-3.2-11b-vision-instruct",
+          "context": null,
+          "limits": "40 req/min",
+          "params_b": 11.0
+        },
+        {
           "id": "meta/llama-3.2-1b-instruct",
           "name": "meta/llama-3.2-1b-instruct",
           "context": null,
@@ -469,7 +476,7 @@
       "models": [
         {
           "id": "voxtral-mini-latest",
-          "name": "voxtral-mini-2602",
+          "name": "voxtral-mini-transcribe-2602",
           "context": null,
           "limits": "1 req/s · 1B tok/month",
           "params_b": null
